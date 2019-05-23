@@ -95,14 +95,24 @@ class InlineButtonMenu(ButtonMenu):
         assert update.callback_query.data
         data = json.loads(update.callback_query.data)
 
+        # TODO
 
     # end def
-
 # end class
-
 
 
 class SendButtonMenu(ButtonMenu):
+    """
+    Send button menu is like a InlineButtonMenu, but replaces the user keyboard with buttons.
+    This means the user could still enter his own value if he so desire.
+
+    If a text doesn't match the provided buttons a custom `parse_text` function is called to get the result.
+     """
     type = KeyboardButton
     buttons: List[MenuButton]
+
+    def parse_text(self, text):
+        raise NotImplementedError('Subclass must implement this.')
+    # end def
 # end class
+
