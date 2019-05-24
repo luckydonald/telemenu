@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
+from abc import ABC, ABCMeta
 from typing import Type, List, Union
 
 from luckydonaldUtils.logger import logging
 from pytgbot import Bot
 from pytgbot.api_types.receivable.updates import Update
-from pytgbot.api_types.sendable.reply_markup import Button, KeyboardButton, InlineKeyboardButton, ReplyMarkup
+from pytgbot.api_types.sendable.reply_markup import Button, KeyboardButton, InlineKeyboardButton
+from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardMarkup
 from teleflask.server.base import TeleflaskMixinBase
 from teleflask.server.mixins import StartupMixin
 
@@ -39,11 +41,11 @@ class Menu(StartupMixin, TeleflaskMixinBase):
     title: str  # bold
     description: str  # html
 
-    def output_current_menu(self):
+    def output_current_menu(self) -> List[List[Button]]:
         raise NotImplementedError('Subclassses should implement this')
     # end def
 
-    def format_text(self):
+    def format_text(self) -> str:
         return (
             f"<b>{self.title}</b>\n"  # TODO: escape, check if callable
             f"{self.description}"
@@ -61,14 +63,13 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 # end class
 
 
-
-class ButtonMenu(Menu):
+class ButtonMenu(Menu, ABC):
     type: Union[Type[Button], Type[KeyboardButton], Type[InlineKeyboardButton]]
     buttons: List[MenuButton]
 # end class
 
 
-class InlineButtonMenu(ButtonMenu):
+class InlineButtonMenu(ButtonMenu, ABC):
     """
     Text message directly has some buttons attached.
     """
@@ -84,8 +85,9 @@ class InlineButtonMenu(ButtonMenu):
             parse_mode="html",
             disable_web_page_preview=True,
             disable_notification=False,
-            reply_markup=ReplyMarkup(self.buttons())
+            reply_markup=InlineKeyboardMarkup(self.buttons())
         )
+    # end def
 
     def process_update(self, update: Update):
         if not (update and update.callback_query and update.callback_query.data):
@@ -108,6 +110,16 @@ class SendButtonMenu(ButtonMenu):
 
     If a text doesn't match the provided buttons a custom `parse_text` function is called to get the result.
      """
+
+    def output_current_menu(self) -> List[List[Button]]:
+        pass
+
+    def process_update(self, update):
+        pass
+
+    def do_startup(self):
+        pass
+
     type = KeyboardButton
     buttons: List[MenuButton]
 
