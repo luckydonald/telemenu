@@ -33,7 +33,7 @@ class MenuMachine(object):
 
 
 T = TypeVar('T')  # Any type.
-ClassValueOrCallable = ClassVar[Union[T, Callable[[TeleState], T]]]
+ClassValueOrCallable = ClassVar[Union[T, Callable[[TeleState, Update], T]]]
 
 
 class Menu(StartupMixin, TeleflaskMixinBase):
@@ -89,8 +89,20 @@ class Menu(StartupMixin, TeleflaskMixinBase):
     """
     state: TeleState
     # state: Union[TeleState, Callable[[TeleState], TeleState]]
+
     title: ClassValueOrCallable[str]  # will be bold
+    title: str
+    @classmethod
+    def title(cls, state: TeleState, update: Update) -> str:
+        raise NotImplementedError('Subclass must implement this.')
+    # end def
+
     description: ClassValueOrCallable[str]  # html
+    description: str  # html
+    @classmethod
+    def description(cls, state: TeleState, update: Update) -> str:
+        raise NotImplementedError('Subclass must implement this.')
+    # end def
 
     def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
         return {
@@ -133,8 +145,6 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 
 
 class AnswerMenu(Menu):
-    answer_parser: ClassVar[Union[None, Callable]]
-
     def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
         data = super().prepare_meta(state)
         return data
@@ -158,6 +168,10 @@ class AnswerMenu(Menu):
 
     def process_update(self, update):
         pass
+    # end def
+
+    def answer_parser(self, state: TeleState, text: str) -> Any:
+        raise NotImplementedError('Subclass must implement this.')
     # end def
 # end class
 
@@ -221,9 +235,7 @@ class SendButtonMenu(ButtonMenu):
     This means the user could still enter his own value if he so desire.
 
     If a text doesn't match the provided buttons a custom `parse_text` function is called to get the result.
-     """
-
-    answer_parser: ClassVar[Union[None, Callable[[TeleState, str], Any]]]
+    """
 
     def output_current_menu(self, meta_data: Dict[str, JSONType]) -> SendableMessageBase:
         """
@@ -253,7 +265,13 @@ class SendButtonMenu(ButtonMenu):
     type = KeyboardButton
     buttons: List[GotoMenuButton]
 
-    def parse_text(self, text):
+    def answer_parser(self, state: TeleState, text: str) -> Any:
+        """
+        Function being called if no of the existing buttons matched.
+        :param state:
+        :param text:
+        :return:
+        """
         raise NotImplementedError('Subclass must implement this.')
     # end def
 # end class
