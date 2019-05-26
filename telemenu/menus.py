@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 import json
 from abc import ABC, ABCMeta
-from collections import Callable
-from typing import Type, List, Union, Dict
+from typing import Type, List, Union, Dict, Callable, ClassVar, TypeVar, Generic, Any
 
 from luckydonaldUtils.logger import logging
 from luckydonaldUtils.typing import JSONType
-from paramiko.py3compat import is_callable
 from pytgbot import Bot
 from pytgbot.api_types.receivable.updates import Update
-from pytgbot.api_types.sendable.reply_markup import Button, KeyboardButton, InlineKeyboardButton
+from pytgbot.api_types.sendable.reply_markup import Button, KeyboardButton, InlineKeyboardButton, ForceReply, \
+    ReplyKeyboardMarkup
 from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardMarkup
+from teleflask.new_messages import TextMessage, SendableMessageBase
 from teleflask.server.base import TeleflaskMixinBase
 from teleflask.server.mixins import StartupMixin
 
 from telestate import TeleState, TeleMachine
-from .buttons import MenuButton
+from .buttons import GotoMenuButton, ToggleButton, GotoStateButton
 
 __author__ = 'luckydonald'
 
@@ -30,6 +30,10 @@ class MenuMachine(object):
         pass
     # end def
 # end class
+
+
+T = TypeVar('T')  # Any type.
+ClassValueOrCallable = ClassVar[Union[T, Callable[[TeleState], T]]]
 
 
 class Menu(StartupMixin, TeleflaskMixinBase):
@@ -80,12 +84,13 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - Remove Buttons
                 - Edit text to include chosen answer
                 - or maybe: Delete completely
-            - Update state to the one of the new Menu.
+            - Update state to the one of the next Menu.
 
     """
     state: TeleState
-    title: str  # bold
-    description: str  # html
+    # state: Union[TeleState, Callable[[TeleState], TeleState]]
+    title: ClassValueOrCallable[str]  # will be bold
+    description: ClassValueOrCallable[str]  # html
 
     def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
         return {
@@ -102,7 +107,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
         # end if
     # end def
 
-    def output_current_menu(self) -> List[List[Button]]:
+    def output_current_menu(self, meta_data: Dict[str, JSONType]):
         raise NotImplementedError('Subclasses should implement this')
     # end def
 
@@ -110,10 +115,10 @@ class Menu(StartupMixin, TeleflaskMixinBase):
         data = self.prepare_meta(state)
     # end def
 
-    def format_text(self) -> str:
+    def format_text(self, title: str, description: str) -> str:
         return (
-            f"<b>{self.title}</b>\n"  # TODO: escape, check if callable
-            f"{self.description}"
+            f"<b>{title}</b>\n"  # TODO: escape, check if callable
+            f"{description}"
         )
     # end def
 
@@ -122,26 +127,52 @@ class Menu(StartupMixin, TeleflaskMixinBase):
     # end def
 
     def do_startup(self):
-        raise NotImplementedError('Subclasses should implement this')
+        super().do_startup()
+    # end def
+# end class
+
+
+class AnswerMenu(Menu):
+    answer_parser: ClassVar[Union[None, Callable]]
+
+    def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
+        data = super().prepare_meta(state)
+        return data
+    # end def
+
+    def output_current_menu(self, meta_data: Dict[str, JSONType]) -> SendableMessageBase:
+        """
+        Sends a text message where a user will answer to.
+
+        :param meta_data:  Result of `self.prepare_meta(state=state)`.
+        :return: Message to send.
+        """
+        return TextMessage(
+            text=self.format_text(meta_data['title'], meta_data['description']),
+            parse_mode="html",
+            disable_web_page_preview=True,
+            disable_notification=False,
+            reply_markup=ForceReply(selective=True),
+        )
+    # end def
+
+    def process_update(self, update):
+        pass
     # end def
 # end class
 
 
 class ButtonMenu(Menu, ABC):
     type: Union[Type[Button], Type[KeyboardButton], Type[InlineKeyboardButton]]
-    buttons: List[MenuButton]
+    buttons: ClassValueOrCallable[List[Union[GotoMenuButton, GotoStateButton, ToggleButton]]]
 
     def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
         data = super().prepare_meta(state)
         return {
             **data,
             "type": self.type.__name__,
-            "buttons": self.buttons if not isinstance(self.buttons, Callable) else self.buttons(state),
+            "buttons": self.buttons(state) if callable(self.buttons) else self.buttons,
         }
-    # end def
-
-    def do_startup(self):
-        super().do_startup()
     # end def
 # end class
 
@@ -151,19 +182,22 @@ class InlineButtonMenu(ButtonMenu, ABC):
     Text message directly has some buttons attached.
     """
     type: Type = InlineKeyboardButton
-    buttons: List[MenuButton]
-    _data: Dict[str, JSONType]
 
-    def output_current_menu(self):
-        bot: Bot
-        bot.send_message(
-            chat_id=123,
-            reply_to_message_id=123,
-            text=self.format_text(),
+    def output_current_menu(self, meta_data: Dict[str, JSONType]) -> SendableMessageBase:
+        """
+        Sends a text message with the menu.
+
+        :param meta_data:  Result of `self.prepare_meta(state=state)`.
+        :return: Message to send
+        """
+        return TextMessage(
+            text=self.format_text(meta_data['title'], meta_data['description']),
             parse_mode="html",
             disable_web_page_preview=True,
             disable_notification=False,
-            reply_markup=InlineKeyboardMarkup(self.buttons())
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=meta_data['buttons'],
+            ),
         )
     # end def
 
@@ -189,17 +223,35 @@ class SendButtonMenu(ButtonMenu):
     If a text doesn't match the provided buttons a custom `parse_text` function is called to get the result.
      """
 
-    def output_current_menu(self) -> List[List[Button]]:
-        pass
+    answer_parser: ClassVar[Union[None, Callable[[TeleState, str], Any]]]
+
+    def output_current_menu(self, meta_data: Dict[str, JSONType]) -> SendableMessageBase:
+        """
+        Sends a text message with the menu.
+
+        :param meta_data:  Result of `self.prepare_meta(state=state)`.
+        :return: Message to send
+        """
+        return TextMessage(
+            text=self.format_text(meta_data['title'], meta_data['description']),
+            parse_mode="html",
+            disable_web_page_preview=True,
+            disable_notification=False,
+            reply_markup=ReplyKeyboardMarkup(
+                keyboard=meta_data['buttons'],
+                resize_keyboard=True,  # make smaller if not needed
+                one_time_keyboard=True,  # remove after click
+                selective=True,  # only the user
+            ),
+        )
+    # end def
 
     def process_update(self, update):
-        pass
-
-    def do_startup(self):
-        pass
+        return super().process_update(update)
+    # end def
 
     type = KeyboardButton
-    buttons: List[MenuButton]
+    buttons: List[GotoMenuButton]
 
     def parse_text(self, text):
         raise NotImplementedError('Subclass must implement this.')
