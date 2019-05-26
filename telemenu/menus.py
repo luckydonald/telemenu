@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 from abc import ABC, ABCMeta
-from typing import Type, List, Union
+from collections import Callable
+from typing import Type, List, Union, Dict
 
 from luckydonaldUtils.logger import logging
+from luckydonaldUtils.typing import JSONType
+from paramiko.py3compat import is_callable
 from pytgbot import Bot
 from pytgbot.api_types.receivable.updates import Update
 from pytgbot.api_types.sendable.reply_markup import Button, KeyboardButton, InlineKeyboardButton
@@ -11,7 +14,7 @@ from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardM
 from teleflask.server.base import TeleflaskMixinBase
 from teleflask.server.mixins import StartupMixin
 
-from telestate import TeleState
+from telestate import TeleState, TeleMachine
 from .buttons import MenuButton
 
 __author__ = 'luckydonald'
@@ -36,13 +39,75 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 
     It will load/save the state before/after processing the updates via the functions `load_state_for_chat_user` and `save_state_for_chat_user`.
     Those functions must be implemented via an extending subclass, so you can use different storage backends.
+
+    There are the following steps:
+
+    - Create new menu
+        - Use cases:
+            - Menu should be displayed (i.e. we are executing /open_menu)
+        - Steps:
+            - Generate      title, body, buttons  (`prepare_meta`)
+            - Store         title, body, buttons
+            - Send Message  title, body, buttons  (`output_current_menu`)
+            - Store Message ID (or via update?)
+            - Update State to the Menu's state, listening for updates.
+    - Edit existing menu
+        - Use cases:
+            - Uer toggles checkbox
+            - User clicks pagination
+        - Steps:
+            - Listen for events
+            - On event (e.g. inline button):
+            - Load existing menu from state:  title, body, buttons
+                - Find current menu
+                - Create object from existing data (`self(**data)`)
+            - Transform changes
+                - Pagination
+                - Checkbox
+            - Store updated data
+            - Edit Message  title, body, buttons  (`output_current_menu`)
+    - Leave menu
+        - Use cases:
+            - /cancel
+            - Navigation to a different menu
+        - Steps
+            - Listen for events
+            - On event (e.g. inline button):
+            - Load existing menu from state:  title, body, buttons
+                - Find current menu
+                - Create object from existing data (`self(**data)`)
+            - Close Menu
+                - Remove Buttons
+                - Edit text to include chosen answer
+                - or maybe: Delete completely
+            - Update state to the one of the new Menu.
+
     """
     state: TeleState
     title: str  # bold
     description: str  # html
 
+    def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
+        return {
+            "title": self.title(state) if callable(self.title) else self.title,
+            "description": self.description(state) if callable(self.description) else self.description,
+        }
+    # end def
+
+    def __init__(self, telemachine: TeleMachine):
+        if self.state is None:
+            name = "__TELEMENU_" + self.__class__.__name__
+            self.state = TeleState(name)
+            telemachine.register_state(name, self.state)
+        # end if
+    # end def
+
     def output_current_menu(self) -> List[List[Button]]:
-        raise NotImplementedError('Subclassses should implement this')
+        raise NotImplementedError('Subclasses should implement this')
+    # end def
+
+    def create_for_state(self, state: TeleState):
+        data = self.prepare_meta(state)
     # end def
 
     def format_text(self) -> str:
@@ -59,13 +124,25 @@ class Menu(StartupMixin, TeleflaskMixinBase):
     def do_startup(self):
         raise NotImplementedError('Subclasses should implement this')
     # end def
-
 # end class
 
 
 class ButtonMenu(Menu, ABC):
     type: Union[Type[Button], Type[KeyboardButton], Type[InlineKeyboardButton]]
     buttons: List[MenuButton]
+
+    def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
+        data = super().prepare_meta(state)
+        return {
+            **data,
+            "type": self.type.__name__,
+            "buttons": self.buttons if not isinstance(self.buttons, Callable) else self.buttons(state),
+        }
+    # end def
+
+    def do_startup(self):
+        super().do_startup()
+    # end def
 # end class
 
 
@@ -73,8 +150,9 @@ class InlineButtonMenu(ButtonMenu, ABC):
     """
     Text message directly has some buttons attached.
     """
-    type = InlineKeyboardButton
+    type: Type = InlineKeyboardButton
     buttons: List[MenuButton]
+    _data: Dict[str, JSONType]
 
     def output_current_menu(self):
         bot: Bot
