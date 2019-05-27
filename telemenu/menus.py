@@ -33,7 +33,7 @@ class MenuMachine(object):
 
 
 T = TypeVar('T')  # Any type.
-ClassValueOrCallable = ClassVar[Union[T, Callable[[TeleState, Update], T]]]
+ClassValueOrCallable = ClassVar[Union[T, Callable[[Update], T]]]
 
 
 class Menu(StartupMixin, TeleflaskMixinBase):
@@ -90,48 +90,85 @@ class Menu(StartupMixin, TeleflaskMixinBase):
     state: TeleState
     # state: Union[TeleState, Callable[[TeleState], TeleState]]
 
-    title: ClassValueOrCallable[str]  # will be bold
+    title: ClassValueOrCallable[str]
     title: str
     @classmethod
-    def title(cls, state: TeleState, update: Update) -> str:
+    def title(cls, update: Update) -> str:
+        """
+        Function returning the title to use.
+        You can also set the title directly to a string, `title = 'foobar', instead of a `def title(self, update)` returning a string.
+
+        The title is made bold, by wrapping the text into `<b>` and `</b>`.
+        Note: You need to make sure the html is escaped where needed.
+
+        The update is provided via parameter, also the function has access to the curret state (`self.state`).
+
+        :param update: The telegram update which causes this menu to be rendered (e.g. a command, a click on the previous menu, etc.)
+        :return:
+        """
         raise NotImplementedError('Subclass must implement this.')
     # end def
 
     description: ClassValueOrCallable[str]  # html
     description: str  # html
-    @classmethod
-    def description(cls, state: TeleState, update: Update) -> str:
+    def description(cls, update: Update) -> str:
+        """
+        Function returning the description to use.
+        You can also set the description directly to a string, `description = 'foobar', instead of a `def description(self, update)` returning a string.
+
+        Note: You need to make sure the html is escaped where needed.
+
+        The update is provided via parameter, also the function has access to the curret state (`self.state`).
+
+        :param update: The telegram update which causes this menu to be rendered (e.g. a command, a click on the previous menu, etc.)
+        :return:
+        """
         raise NotImplementedError('Subclass must implement this.')
     # end def
 
-    def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
-        return {
-            "title": self.title(state) if callable(self.title) else self.title,
-            "description": self.description(state) if callable(self.description) else self.description,
-        }
-    # end def
-
     def __init__(self, telemachine: TeleMachine):
+        super().__init__()
         if self.state is None:
-            name = "__TELEMENU_" + self.__class__.__name__
+            name = self.create_state_name(self.__class__.__name__)
+            logger.debug(f'creating state for menu {self.__class__.__name__}: {name}')
             self.state = TeleState(name)
             telemachine.register_state(name, self.state)
         # end if
     # end def
 
-    def output_current_menu(self, meta_data: Dict[str, JSONType]):
+    def prepare_meta(self, update: Update) -> Dict[str, JSONType]:
+        """
+        Prepares the data for usage in `output_current_menu`.
+
+        :return: The dict with the prepared texts.
+        """
+        return {
+            "title": self.title(update) if callable(self.title) else self.title,
+            "description": self.description(update) if callable(self.description) else self.description,
+        }
+    # end def
+
+    def output_current_menu(self, meta_data: Dict[str, JSONType]) -> SendableMessageBase:
+        """
+        Generates a message for this menu.
+
+        :param meta_data:  Result of `self.prepare_meta(update=update)`.
+        :return: Message to send
+        """
         raise NotImplementedError('Subclasses should implement this')
     # end def
 
-    def create_for_state(self, state: TeleState):
-        data = self.prepare_meta(state)
-    # end def
-
+    # noinspection PyMethodMayBeStatic
     def format_text(self, title: str, description: str) -> str:
         return (
-            f"<b>{title}</b>\n"  # TODO: escape, check if callable
+            f"<b>{title}</b>\n"
             f"{description}"
         )
+    # end def
+
+    @staticmethod
+    def create_state_name(cls_name):
+        return f'__TELEMENU__{cls_name.upper()}'
     # end def
 
     def process_update(self, update):
@@ -145,6 +182,14 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 
 
 class AnswerMenu(Menu):
+    def title(self, update: Update) -> str:
+        return super().title(update)
+    # end def
+
+    def description(self, update: Update) -> str:
+        return super().description(update)
+    # end def
+
     def prepare_meta(self, state: TeleState) -> Dict[str, JSONType]:
         data = super().prepare_meta(state)
         return data
@@ -154,7 +199,7 @@ class AnswerMenu(Menu):
         """
         Sends a text message where a user will answer to.
 
-        :param meta_data:  Result of `self.prepare_meta(state=state)`.
+        :param meta_data:  Result of `self.prepare_meta(update=update)`.
         :return: Message to send.
         """
         return TextMessage(
@@ -170,7 +215,14 @@ class AnswerMenu(Menu):
         pass
     # end def
 
-    def answer_parser(self, state: TeleState, text: str) -> Any:
+    def answer_parser(self, update: Update, text: str) -> Any:
+        """
+        Function being called to parse the text the user sent us in response.
+
+        :param update: The answering update (text message, button press, etc.)
+        :param text:   The extracted text.
+        :return: A parsed value of the required format.
+        """
         raise NotImplementedError('Subclass must implement this.')
     # end def
 # end class
@@ -201,7 +253,7 @@ class InlineButtonMenu(ButtonMenu, ABC):
         """
         Sends a text message with the menu.
 
-        :param meta_data:  Result of `self.prepare_meta(state=state)`.
+        :param meta_data:  Result of `self.prepare_meta(update=update)`.
         :return: Message to send
         """
         return TextMessage(
@@ -241,7 +293,7 @@ class SendButtonMenu(ButtonMenu):
         """
         Sends a text message with the menu.
 
-        :param meta_data:  Result of `self.prepare_meta(state=state)`.
+        :param meta_data:  Result of `self.prepare_meta(update=update)`.
         :return: Message to send
         """
         return TextMessage(
@@ -265,12 +317,13 @@ class SendButtonMenu(ButtonMenu):
     type = KeyboardButton
     buttons: List[GotoMenuButton]
 
-    def answer_parser(self, state: TeleState, text: str) -> Any:
+    def answer_parser(self, update: Update, text: str) -> Any:
         """
         Function being called if no of the existing buttons matched.
-        :param state:
-        :param text:
-        :return:
+
+        :param update: The answering update (text message, button press, etc.)
+        :param text:   The extracted text.
+        :return: A parsed value of the required format.
         """
         raise NotImplementedError('Subclass must implement this.')
     # end def
