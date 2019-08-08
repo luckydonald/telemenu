@@ -51,9 +51,9 @@ class Menu(StartupMixin, TeleflaskMixinBase):
             - Menu should be displayed (i.e. we are executing /open_menu)
         - Steps:
             - Generate      title, body, buttons  (`prepare_meta`)
-            - Store         title, body, buttons
+            - Store         title, body, buttons, so actions can work later
             - Send Message  title, body, buttons  (`output_current_menu`)
-            - Store Message ID (or via update?)
+            - Store Message ID (or full update?)
             - Update State to the Menu's state, listening for updates.
     - Edit existing menu
         - Use cases:
@@ -84,7 +84,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - Remove Buttons
                 - Edit text to include chosen answer
                 - or maybe: Delete completely
-            - Update state to the one of the next Menu.
+            - Update state to the one of the next Menus, or a specific state (/cancel: state DEFAULT).
 
     """
     state: TeleState
@@ -160,6 +160,12 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 
     # noinspection PyMethodMayBeStatic
     def format_text(self, title: str, description: str) -> str:
+        """
+        Formats a text containing tile and description in html.
+        :param title:
+        :param description:
+        :return:
+        """
         return (
             f"<b>{title}</b>\n"
             f"{description}"
@@ -168,6 +174,12 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 
     @staticmethod
     def create_state_name(cls_name):
+        """
+        Generates a name for the state to use, based on the class's name.
+
+        :param cls_name:
+        :return:
+        """
         return f'__TELEMENU__{cls_name.upper()}'
     # end def
 
