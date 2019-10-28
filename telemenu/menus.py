@@ -109,6 +109,12 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - "Back to last menu" button: ⏏️, 🆙, 🛑, 🔙, ⃠, 🤚, 🚫 or simply Back
                     - edits menu in place (if possible)
                     - pops last entry from history-hierarchy.
+                - "Done" button:  🆗, ↩️, 🔚, ✔️, 🏁
+                    - allows to jump to a different menu
+                    - all but the GotoMenu? No. All. It is optional anyway.
+                    - how should that be reflected in the "back" button history?
+                        - a) you can indeed go back every menu
+                        - b) you go back to the menu before all the `done` clicks.
                 - Automated data storage?
                     - checkboxes, text fields, dates, ... get variable names (to write to state.name) assigned
                         - a bit like argparse
@@ -118,7 +124,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - based on the current state and the button action/value
                         - that means state name? function or blueprint name?
             - Types:
-                - Menu
+                - Goto Menu
                     - switch to another menu
                         - append to history-hierarchy.
                     - basically edits the current message (if possible) to display a different menu
@@ -128,6 +134,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - ID: the current menu and the index of the button.
                         - possibly user specified "<menu>_<user specified id>"
                 - Radio Buttons (Only one can be on) 🔘/⚪️ — Aka. Dropdown
+                    - checks the `selected` attribute to only be `True` on zero or one item.
                     - ID: based on the current menu and the index of the button.
                         - possibly user specified "<menu>_<user specified id>"
                 - Text input
