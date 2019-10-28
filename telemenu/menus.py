@@ -114,14 +114,22 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                         - a bit like argparse
                         - support multiple levels like state.dict.dict2.foo.bar
                     - what about files? base64?
+                - the ID of buttons (button's callback data) gets assigned automatically
+                    - based on the current state and the button action/value
+                        - that means state name? function or blueprint name?
             - Types:
                 - Menu
                     - switch to another menu
                         - append to history-hierarchy.
                     - basically edits the current message (if possible) to display a different menu
+                    - ID: the current menu and the one switching to.
                 - Checkboxes (Toggle on/off) ❌/✅ — Aka. Multi-select
                     - Nullable Checkboxes (Toggle null/on/off) ❔/❌/✅ (Or maybe one of 🆓, 0️⃣, ➖ or ␀ ?)
+                    - ID: the current menu and the index of the button.
+                        - possibly user specified "<menu>_<user specified id>"
                 - Radio Buttons (Only one can be on) 🔘/⚪️ — Aka. Dropdown
+                    - ID: based on the current menu and the index of the button.
+                        - possibly user specified "<menu>_<user specified id>"
                 - Text input
                     - Predefined parsers (see html <input type="..."/>)
                         - text: unmodified
@@ -138,13 +146,17 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                         - time: see 'Datepicker' below
                         - url: valid looking URL, maybe optionally http(s) only?
                         - week: see 'Datepicker' below
+                    - ID: no id needed for text
                 - File Upload:
-                    - html <input type="..."/> like :
-                        - file
-                    - optional list of accepted mimetype
+                    - html <input type="file" /> like.
+                    - optional list of accepted mimetypes
                         - maybe tuples ('application', 'pdf'), ('text', None)
                         - or glob like  'application/pdf'  and  'text/*'
                         - regex maybe?  'application/pdf'  and  'text/[\\w-]+'
+                    - optional list of accepted file suffixes
+                        - no advanced regex or glob capabilities
+                    - optional allow non-raw telegram types (photo, gif, video, ...)
+                    - ID: no id needed for file upload
                 - Datepicker: make a calender grid with the buttons, also allow text input.
                     - html <input type="..."/> like :
                         - date: year, month, day, no time(zone)
@@ -162,8 +174,20 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                         - hour (buttons + num text)
                         - minute (buttons + num text)
                         - second (buttons + num text)
-                        - timezone (buttons + num text)
+                        - timezone
+                            - buttons and num text (+0200, -2, GTM)
+                            - inline search button (GTM, Washington DC, Berlin, Paris, ...)
+                    - combo components:
+                        - automatically chains single components together to select a datetime thing.
+                            - maybe via boolean flags?
+                    - ID: based on the current menu
+                        - in case of combo components also the type (yeah,hour,...)
+                        - for timezone inline search the menu + the hour offset?
                 - Search: Use inline search?
+                    - ID: selected element based on the current menu + query + index ?
+                        - maybe that must be given by the user?
+                            - so "<menu>_<user specified id>"
+
 
 
     """
