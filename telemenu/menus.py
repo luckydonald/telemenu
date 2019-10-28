@@ -57,7 +57,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
             - Update State to the Menu's state, listening for updates.
     - Edit existing menu
         - Use cases:
-            - Uer toggles checkbox
+            - User toggles checkbox
             - User clicks pagination
         - Steps:
             - Listen for events
