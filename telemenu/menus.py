@@ -44,6 +44,15 @@ class Menu(StartupMixin, TeleflaskMixinBase):
     It will load/save the state before/after processing the updates via the functions `load_state_for_chat_user` and `save_state_for_chat_user`.
     Those functions must be implemented via an extending subclass, so you can use different storage backends.
 
+    Variables:
+    - state.*
+    - <placeholder for selected answer>
+        - selected choice (especially as we remove the buttons if done)
+        - multiple choices (if multiple checkboxes)
+        - text (not as important, as your message is there)
+    - Metadata: (user_link, chat, time)
+        - same as t.me/RulesRulesBot
+
     There are the following steps:
 
     - Create new menu
@@ -85,6 +94,77 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - Edit text to include chosen answer
                 - or maybe: Delete completely
             - Update state to the one of the next Menus, or a specific state (/cancel: state DEFAULT).
+
+    Approaches:
+        - Mix and match button types
+            - probably a bad idea because it's very complex.
+            - also storage of multiple different types per page would be aweful.
+        - Fixed Menu types
+            - Features:
+                - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
+                    - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
+                    - space for numbered pagination?
+                        - e.g. [⋘|≪|2|3|4|≫|⋙]
+                            - No emoji versions of numbers, they would go only up to 10: 2️⃣|3️⃣|4️⃣|...|9️⃣|🔟
+                - "Back to last menu" button: ⏏️, 🆙, 🛑, 🔙, ⃠, 🤚, 🚫 or simply Back
+                    - edits menu in place (if possible)
+                    - pops last entry from history-hierarchy.
+                - Automated data storage?
+                    - checkboxes, text fields, dates, ... get variable names (to write to state.name) assigned
+                        - a bit like argparse
+                        - support multiple levels like state.dict.dict2.foo.bar
+                    - what about files? base64?
+            - Types:
+                - Menu
+                    - switch to another menu
+                        - append to history-hierarchy.
+                    - basically edits the current message (if possible) to display a different menu
+                - Checkboxes (Toggle on/off) ❌/✅ — Aka. Multi-select
+                    - Nullable Checkboxes (Toggle null/on/off) ❔/❌/✅ (Or maybe one of 🆓, 0️⃣, ➖ or ␀ ?)
+                - Radio Buttons (Only one can be on) 🔘/⚪️ — Aka. Dropdown
+                - Text input
+                    - Predefined parsers (see html <input type="..."/>)
+                        - text: unmodified
+                        - number: int()
+                        - float: float()
+                        - password: attempt to delete the user's message and edit in a ••••• version into the answer.
+                        - email: text with abc@uvw.xyz
+                        - date: see 'Datepicker' below.
+                        - month: see 'Datepicker' below.
+                        - radio: see 'Radio Buttons' above.
+                        - checkbox: see 'Checkboxes' above.
+                        - search: see 'text', maybe inline
+                        - tel: something in some number format.
+                        - time: see 'Datepicker' below
+                        - url: valid looking URL, maybe optionally http(s) only?
+                        - week: see 'Datepicker' below
+                - File Upload:
+                    - html <input type="..."/> like :
+                        - file
+                    - optional list of accepted mimetype
+                        - maybe tuples ('application', 'pdf'), ('text', None)
+                        - or glob like  'application/pdf'  and  'text/*'
+                        - regex maybe?  'application/pdf'  and  'text/[\\w-]+'
+                - Datepicker: make a calender grid with the buttons, also allow text input.
+                    - html <input type="..."/> like :
+                        - date: year, month, day, no time(zone)
+                            - format settable
+                            - US, DE, ...
+                            - own format string
+                        - month:  month and year control, no time(zone)
+                        - week:  week and year, no time(zone)
+                        - time:  hours and minute, no timezone
+                    - single components:
+                        - year (buttons + num text)
+                        - month (buttons + text (num or string))
+                        - day (buttons + num text)
+                        - weekday (buttons + text string)
+                        - hour (buttons + num text)
+                        - minute (buttons + num text)
+                        - second (buttons + num text)
+                        - timezone (buttons + num text)
+                - Search: Use inline search?
+
 
     """
     state: TeleState
