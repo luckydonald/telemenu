@@ -14,9 +14,9 @@ if __name__ == '__main__':
 # end if
 
 T = TypeVar('T')  # Any type.
-ClassValueOrCallable = ClassVar[Union[T, Callable[[Any], T]]]
+ClassValueOrCallable = Union[T, Callable[[Any], T]]
 
-OptionalClassValueOrCallable = Union[ClassValueOrCallable, None]
+OptionalClassValueOrCallable = Union[ClassValueOrCallable, type(None)]
 ClassValueOrCallableList = List[ClassValueOrCallable]
 
 
@@ -74,7 +74,7 @@ class RadioButton(Button):
 # end class
 
 
-class TextMenuMetaclass(object):
+class TextMenuMetaclass(type):
     @staticmethod
     def _get_mixins_(bases):
         """Returns the type for creating enum members, and the first inherited
@@ -87,6 +87,10 @@ class TextMenuMetaclass(object):
             return object, TextMenu
 
         def _find_data_type(bases):
+            if not issubclass(first_enum, TextMenu):
+                raise TypeError("new enumerations should be created as "
+                                "`TextMenu([mixin_type, ...] [data_type,] textmenu_type)`")
+
             for chain in bases:
                 for base in chain.__mro__:
                     if base is object:
@@ -99,9 +103,6 @@ class TextMenuMetaclass(object):
         # ensure final parent class is an Enum derivative, find any concrete
         # data type, and check that Enum has no members
         first_enum = bases[-1]
-        if not issubclass(first_enum, TextMenu):
-            raise TypeError("new enumerations should be created as "
-                            "`TextMenu([mixin_type, ...] [data_type,] textmenu_type)`")
         member_type = _find_data_type(bases) or object
         return member_type, first_enum
 
@@ -116,8 +117,39 @@ class TextMenuMetaclass(object):
     # end def
 # end class
 
+metadic={}
 
-class TextMenu(Menu, superclass=TextMenuMetaclass):
+
+def _generatemetaclass(bases,metas,priority):
+    trivial=lambda m: sum([issubclass(M,m) for M in metas],m is type)
+    # hackish!! m is trivial if it is 'type' or, in the case explicit
+    # metaclasses are given, if it is a superclass of at least one of them
+    metabs=tuple([mb for mb in map(type,bases) if not trivial(mb)])
+    metabases=(metabs+metas, metas+metabs)[priority]
+    if metabases in metadic: # already generated metaclass
+        return metadic[metabases]
+    elif not metabases: # trivial metabase
+        meta=type
+    elif len(metabases)==1: # single metabase
+        meta=metabases[0]
+    else: # multiple metabases
+        metaname="_"+''.join([m.__name__ for m in metabases])
+        meta=makecls()(metaname,metabases,{})
+    return metadic.setdefault(metabases,meta)
+
+def makecls(*metas,**options):
+    """Class factory avoiding metatype conflicts. The invocation syntax is
+    makecls(M1,M2,..,priority=1)(name,bases,dic). If the base classes have
+    metaclasses conflicting within themselves or with the given metaclasses,
+    it automatically generates a compatible metaclass and instantiate it.
+    If priority is True, the given metaclasses have priority over the
+    bases' metaclasses"""
+
+    priority=options.get('priority',False) # default, no priority
+    return lambda n,b,d: _generatemetaclass(b,metas,priority)(n,b,d)
+
+
+class TextMenu(metaclass=TextMenuMetaclass):
     def _parse(self, text: str) -> Any:
         raise NotImplementedError('Subclasses must implement that.')
     # end def
