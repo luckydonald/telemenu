@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import re
 from dataclasses import dataclass, field as dataclass_field
-from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern
+from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
 
 from luckydonaldUtils.logger import logging
 
@@ -29,8 +29,8 @@ class Menu(object):
 
 @dataclass
 class Button(object):
-    label: str
-    id: Union[str, None]  # None means automatic
+    label: ClassVar[str]
+    id: ClassVar[Union[str, None]]  # None means automatic
 # end class
 
 
@@ -47,7 +47,8 @@ class GotoButton(Button):
 
 
 class DoneButton(GotoButton):
-    pass
+    label: str = "Done"  # todo: multi-language
+    id: Union[str, None] = None
 # end class
 
 
@@ -74,117 +75,42 @@ class RadioButton(Button):
 # end class
 
 
-class TextMenuMetaclass(type):
-    @staticmethod
-    def _get_mixins_(bases):
-        """Returns the type for creating enum members, and the first inherited
-        enum class.
-
-        bases: the tuple of bases that was given to __new__
-
-        """
-        if not bases:
-            return object, TextMenu
-
-        def _find_data_type(bases):
-            if not issubclass(first_enum, TextMenu):
-                raise TypeError("new enumerations should be created as "
-                                "`TextMenu([mixin_type, ...] [data_type,] textmenu_type)`")
-
-            for chain in bases:
-                for base in chain.__mro__:
-                    if base is object:
-                        continue
-                    elif '__new__' in base.__dict__:
-                        if issubclass(base, TextMenu):
-                            continue
-                        return base
-
-        # ensure final parent class is an Enum derivative, find any concrete
-        # data type, and check that Enum has no members
-        first_enum = bases[-1]
-        member_type = _find_data_type(bases) or object
-        return member_type, first_enum
-
-    def __new__(metacls, cls, bases, classdict):
-        # an Enum class is final once enumeration items have been defined; it
-        # cannot be mixed with other types (int, float, etc.) if it has an
-        # inherited __new__ unless a new __new__ is defined (or the resulting
-        # class will fail).
-        parser_type, first_enum = metacls._get_mixins_(bases)
-        textmenu_class = super().__new__(metacls, cls, bases, classdict)
-        textmenu_class._parser_type_ = parser_type
-    # end def
-# end class
-
-metadic={}
-
-
-def _generatemetaclass(bases,metas,priority):
-    trivial=lambda m: sum([issubclass(M,m) for M in metas],m is type)
-    # hackish!! m is trivial if it is 'type' or, in the case explicit
-    # metaclasses are given, if it is a superclass of at least one of them
-    metabs=tuple([mb for mb in map(type,bases) if not trivial(mb)])
-    metabases=(metabs+metas, metas+metabs)[priority]
-    if metabases in metadic: # already generated metaclass
-        return metadic[metabases]
-    elif not metabases: # trivial metabase
-        meta=type
-    elif len(metabases)==1: # single metabase
-        meta=metabases[0]
-    else: # multiple metabases
-        metaname="_"+''.join([m.__name__ for m in metabases])
-        meta=makecls()(metaname,metabases,{})
-    return metadic.setdefault(metabases,meta)
-
-def makecls(*metas,**options):
-    """Class factory avoiding metatype conflicts. The invocation syntax is
-    makecls(M1,M2,..,priority=1)(name,bases,dic). If the base classes have
-    metaclasses conflicting within themselves or with the given metaclasses,
-    it automatically generates a compatible metaclass and instantiate it.
-    If priority is True, the given metaclasses have priority over the
-    bases' metaclasses"""
-
-    priority=options.get('priority',False) # default, no priority
-    return lambda n,b,d: _generatemetaclass(b,metas,priority)(n,b,d)
-
-
-class TextMenu(metaclass=TextMenuMetaclass):
+class TextMenu(Menu):
     def _parse(self, text: str) -> Any:
         raise NotImplementedError('Subclasses must implement that.')
     # end def
 # end class
 
 
-class TextStrMenu(str, TextMenu):
+class TextStrMenu(TextMenu):
     def _parse(self, text: str) -> str:
         return text
     # end def
 # end class
 
 
-class TextIntMenu(int, TextMenu):
+class TextIntMenu(TextMenu):
     def _parse(self, text: str) -> int:
         return int(text)
     # end def
 # end class
 
 
-class TextFloatMenu(float, TextMenu):
+class TextFloatMenu(TextMenu):
     def _parse(self, text: str) -> float:
         return float(text)
     # end def
 # end class
 
 
-class TextPasswordMenu(str, TextMenu):
+class TextPasswordMenu(TextMenu):
     def _parse(self, text: str) -> str:
         return text
     # end def
 # end class
 
 
-class TextEmailMenu(TextMenu[str]):
+class TextEmailMenu(TextMenu):
     def _parse(self, text: str) -> str:
         if "@" not in text or "." not in text:  # TODO: improve validation.
             raise ValueError('No good email.')
@@ -193,7 +119,7 @@ class TextEmailMenu(TextMenu[str]):
 # end class
 
 
-class TextTelMenu(str, TextMenu):
+class TextTelMenu(TextMenu):
     def _parse(self, text: str) -> str:
         # TODO: add validation.
         return text
@@ -202,7 +128,7 @@ class TextTelMenu(str, TextMenu):
 
 
 @dataclass
-class TextUrlMenu(str, TextMenu):
+class TextUrlMenu(TextMenu):
     allowed_protocols: List[str] = dataclass_field(default_factory=lambda: ['http', 'https'])
 
     def _parse(self, text: str) -> str:
@@ -344,3 +270,6 @@ class TestUploadMenu(UploadMenu):
     done = DoneButton(menu=TestTextPasswordMenu)
 # end class
 
+
+
+s = TestMainMenu(menus=Tex)
