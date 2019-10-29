@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 import re
 import inspect_mate
-from dataclasses import dataclass, field as dataclass_field
+from html import escape
 from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
-
+from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.logger import logging
+from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton
 
 __author__ = 'luckydonald'
 
@@ -59,8 +60,22 @@ class Menu(object):
     description: OptionalClassValueOrCallable[str]
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
 
+    def get_text(self):
+        text = ""
+        title = self.get_value('title')
+        if title:
+            text += f"<b>{escape(title)}</b>\n"
+        # end if
+        description = self.get_value('description')
+        if description:
+            text += f"{escape(description)}\n"
+        # end if
+        # text += f"<i>Selected: {escape(description)}</i>\n"
+        return text
+    # end def
+
     @classmethod
-    def _get_value(cls, key):
+    def get_value(cls, key):
         value = getattr(cls, key, Fuuu)
         if value == Fuuu:
             raise KeyError(f'Key {key!r} not found.')
@@ -105,6 +120,19 @@ class Button(object):
 @dataclass(init=False)
 class GotoMenu(Menu):
     menus: ClassValueOrCallableList['GotoButton']
+
+    def get_keyboard(self) -> InlineKeyboardMarkup:
+        menus: List[GotoButton] = self.get_value('menus')
+        return InlineKeyboardMarkup(
+            inline_keyboard=[
+                InlineKeyboardButton(
+                    text=button.label,
+                    callback_data=f"{self.__class__.__name__}__goto__{button.get_id()}",
+                )
+                for i, button in enumerate(menus)
+            ]
+        )
+    # end def
 # end class
 
 
@@ -113,6 +141,10 @@ class GotoButton(Button):
     menu: ClassValueOrCallable[Menu]
     label: ClassValueOrCallable[str]
     id: Union[str, None] = None
+
+    def get_id(self) -> str:
+        return self.id if self.id else 'menu@' + self.menu.__name__
+    # end def
 # end class
 
 
