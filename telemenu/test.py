@@ -23,13 +23,13 @@ ClassValueOrCallableList = List[ClassValueOrCallable]
 class Menu(object):
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
-    done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]  # it is possible to
+    done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
 # end class
 
 
 class Button(object):
-    label: ClassVar[str]
-    id: ClassVar[Union[str, None]]  # None means automatic
+    label: ClassValueOrCallable[str]
+    id: Union[str, None] = None  # None means automatic
 # end class
 
 
@@ -42,12 +42,14 @@ class GotoMenu(Menu):
 @dataclass
 class GotoButton(Button):
     menu: ClassValueOrCallable[Menu]
+    label: ClassValueOrCallable[str]
+    id: Union[str, None] = None
 # end class
 
 
 @dataclass
 class DoneButton(GotoButton):
-    label: str = "Done"  # todo: multi-language
+    label: ClassValueOrCallable[str] = "Done"  # todo: multi-language
     id: Union[str, None] = None
 # end class
 
@@ -70,8 +72,11 @@ class RadioMenu(Menu):
 # end class
 
 
+@dataclass
 class RadioButton(Button):
-    pass
+    label: ClassValueOrCallable[str]
+    selected: ClassValueOrCallable[bool] = False
+    id: Union[str, None] = None  # None means automatic
 # end class
 
 
