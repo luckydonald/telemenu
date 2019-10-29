@@ -62,6 +62,8 @@ class CheckboxMenu(Menu):
 
 @dataclass
 class CheckboxButton(Button):
+    label: ClassValueOrCallable[str]
+    id: Union[str, None] = None  # None means automatic
     selected: ClassValueOrCallable[bool] = False
 # end class
 
@@ -75,8 +77,8 @@ class RadioMenu(Menu):
 @dataclass
 class RadioButton(Button):
     label: ClassValueOrCallable[str]
-    selected: ClassValueOrCallable[bool] = False
     id: Union[str, None] = None  # None means automatic
+    selected: ClassValueOrCallable[bool] = False
 # end class
 
 
