@@ -27,14 +27,13 @@ class Menu(object):
 # end class
 
 
-@dataclass
 class Button(object):
     label: ClassVar[str]
     id: ClassVar[Union[str, None]]  # None means automatic
 # end class
 
 
-@dataclass
+@dataclass(init=False)
 class GotoMenu(Menu):
     menus: ClassValueOrCallableList['GotoButton']
 # end class
@@ -46,13 +45,14 @@ class GotoButton(Button):
 # end class
 
 
+@dataclass
 class DoneButton(GotoButton):
     label: str = "Done"  # todo: multi-language
     id: Union[str, None] = None
 # end class
 
 
-@dataclass
+@dataclass(init=False)
 class CheckboxMenu(Menu):
     checkboxes: ClassValueOrCallable['CheckboxButton']
 # end class
@@ -64,7 +64,7 @@ class CheckboxButton(Button):
 # end class
 
 
-@dataclass
+@dataclass(init=False)
 class RadioMenu(Menu):
     radiobuttons: ClassValueOrCallable['RadioButton']    # TODO: check that max one has selected=True
 # end class
@@ -75,6 +75,7 @@ class RadioButton(Button):
 # end class
 
 
+@dataclass(init=False)
 class TextMenu(Menu):
     def _parse(self, text: str) -> Any:
         raise NotImplementedError('Subclasses must implement that.')
@@ -127,7 +128,7 @@ class TextTelMenu(TextMenu):
 # end class
 
 
-@dataclass
+@dataclass(init=False)
 class TextUrlMenu(TextMenu):
     allowed_protocols: List[str] = dataclass_field(default_factory=lambda: ['http', 'https'])
 
@@ -141,6 +142,7 @@ class TextUrlMenu(TextMenu):
 # end class
 
 
+@dataclass(init=False)
 class UploadMenu(Menu):
     allowed_mime_types: Union[List[Union[str, Pattern]], None] = None
     allowed_extensions: Union[List[str], None] = None
@@ -269,7 +271,3 @@ class TestUploadMenu(UploadMenu):
 
     done = DoneButton(menu=TestTextPasswordMenu)
 # end class
-
-
-
-s = TestMainMenu(menus=Tex)
