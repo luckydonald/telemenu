@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import re
+import inspect_mate
 from dataclasses import dataclass, field as dataclass_field
+from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
 
 from luckydonaldUtils.logger import logging
@@ -20,10 +22,77 @@ OptionalClassValueOrCallable = Union[ClassValueOrCallable, type(None)]
 ClassValueOrCallableList = List[ClassValueOrCallable]
 
 
+class Example(object):
+    def var0(self, a):
+        return "0" + a
+    # end def
+
+    var1 = "1"
+
+    var2 = lambda a: "2" + a
+
+    @classmethod
+    def var3(cls, a):
+        return "3" + a
+    # end def
+
+    var4: str
+
+    @staticmethod
+    def var5(a):
+        return "5" + a
+    # end def
+
+    @property
+    def var6(self, a):
+        return "6" + a
+    # end def
+
+    var7 = "test".format
+# end class
+
+Fuuu = object()
+
+
 class Menu(object):
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
+
+    @classmethod
+    def _get_value(cls, key):
+        value = getattr(cls, key, Fuuu)
+        if value == Fuuu:
+            raise KeyError(f'Key {key!r} not found.')
+        # end if
+
+        params = dict(state=None, user=None, chat=None)
+        if isinstance(value, str):
+            return value.format(**params)
+        # end if
+        if isinstance(value, BuiltinFunctionType):
+            # let's assume you wrote `some_var = "...".format`
+            return value(**params)
+        # end if
+        if inspect_mate.is_class_method(cls, key):
+            return value(cls, **params)
+        # end if
+        if inspect_mate.is_regular_method(cls, key):
+            return value(None, **params)
+        # end if
+        if inspect_mate.is_static_method(cls, key):
+            return value(**params)
+        # end if
+        if inspect_mate.is_property_method(cls, key):
+            return value.fget(None, **params)
+        # end if
+        if isinstance(value, LambdaType):
+            return value(**params)
+        # end if
+
+        # if all that didn't work, just return it.
+        return value
+    # end def
 # end class
 
 
