@@ -106,6 +106,8 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - space for numbered pagination?
                         - e.g. [⋘|≪|2|3|4|≫|⋙]
                             - No emoji versions of numbers, they would go only up to 10: 2️⃣|3️⃣|4️⃣|...|9️⃣|🔟
+                    - must be aware that the button list is dynamically generated
+                        - if you are on page 10, and only 2 buttons are generated the next time, we need to jump back to page 1.
                 - "Back to last menu" button: ⏏️, 🆙, 🛑, 🔙, ⃠, 🤚, 🚫 or simply Back
                     - edits menu in place (if possible)
                     - pops last entry from history-hierarchy.
@@ -115,6 +117,11 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - how should that be reflected in the "back" button history?
                         - a) you can indeed go back every menu
                         - b) you go back to the menu before all the `done` clicks.
+                    - For example under a checkbox list, to store the changes.
+                        - Shouldn't they be stored on every toggle, in fact we need those for the toggle to work.
+                - "Cancel" button
+                    - Basically "Done" but without saving the data.
+                        - For example under a checkbox list
                 - Automated data storage?
                     - checkboxes, text fields, dates, ... get variable names (to write to state.name) assigned
                         - a bit like argparse
@@ -123,6 +130,14 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - the ID of buttons (button's callback data) gets assigned automatically
                     - based on the current state and the button action/value
                         - that means state name? function or blueprint name?
+            - State data:
+                - current state
+                - message id of last menu
+                - page of pagination, default is 0.
+                - history stack
+                    - does this means we need to keep old states as well?
+                        - don't think so. I go into the name change menu, change the name and go back.
+                        - is no cancel button.
             - Types:
                 - Goto Menu
                     - switch to another menu

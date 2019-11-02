@@ -7,6 +7,7 @@ from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.logger import logging
+from pytgbot import Bot
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton
 
 __author__ = 'luckydonald'
@@ -52,10 +53,21 @@ class Example(object):
     var7 = "test".format
 # end class
 
+_button_id = "CURRENT_STATE.action.<action-type>.<index>;<payload>"  # normal action state
+_button_id = "CURRENT_STATE.action.goto.1;"  # normal action state
+_button_id = "CURRENT_STATE.page.2"  # pagination
+
 Fuuu = object()
 
 
-class Menu(object):
+class Component(object):
+    def get_id(self) -> str:
+        return self.__class__.__name__
+    # end def
+# end class
+
+
+class Menu(Component):
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
@@ -73,6 +85,22 @@ class Menu(object):
         # text += f"<i>Selected: {escape(description)}</i>\n"
         return text
     # end def
+
+    def get_done_button(self):
+        done: Union[DoneButton, Menu] = self.get_value('done')
+        if isinstance(done, DoneButton):
+            return InlineKeyboardButton(
+                text=done.label,
+                callback_data=f"{self.__class__.__name__}__done__{done.get_id()}",
+            )
+        elif isinstance(done, Menu):
+            return InlineKeyboardButton(
+                text=done.title,
+                callback_data=f"{self.__class__.__name__}__done__{done.get_id()}",
+            )
+        # end if
+    # end def
+
 
     @classmethod
     def get_value(cls, key):
@@ -108,12 +136,20 @@ class Menu(object):
         # if all that didn't work, just return it.
         return value
     # end def
+
+    def get_id(self) -> str:
+        return "menu@id:" + self.id if hasattr(self, 'id') and self.id else "menu@class:" + self.__class__.__name__
+    # end def
 # end class
 
 
-class Button(object):
+class Button(Component):
     label: ClassValueOrCallable[str]
     id: Union[str, None] = None  # None means automatic
+
+    def get_id(self) -> str:
+        return "button@id:" + self.id if hasattr(self, 'id') and self.id else "button@class:" + self.__class__.__name__
+    # end def
 # end class
 
 
@@ -133,6 +169,10 @@ class GotoMenu(Menu):
             ]
         )
     # end def
+
+    def send_message(self, chat_id):
+        bot = Bot()
+        bot.send_message(chat_id=chat_id, text=f"<b>{self.title}</b>\n{self.description}")
 # end class
 
 
@@ -143,7 +183,7 @@ class GotoButton(Button):
     id: Union[str, None] = None
 
     def get_id(self) -> str:
-        return self.id if self.id else 'menu@' + self.menu.__name__
+        return self.id if self.id else 'button@menu:' + self.menu.get_id()+";"+self.label
     # end def
 # end class
 
