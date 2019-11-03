@@ -104,10 +104,14 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
                     - space for numbered pagination?
-                        - e.g. [⋘|≪|2|3|4|≫|⋙]
+                        - e.g. [⋘|≪|2|3|4|≫|⋙] ＜＞ ⫷⫸ ⋖⋗ ≪≫ <>
+                            - maybe 'show all' expand button for < 100 buttons?
                             - No emoji versions of numbers, they would go only up to 10: 2️⃣|3️⃣|4️⃣|...|9️⃣|🔟
                     - must be aware that the button list is dynamically generated
                         - if you are on page 10, and only 2 buttons are generated the next time, we need to jump back to page 1.
+                    - max 100 Buttons Total
+                    - max 8 buttons per row.
+                    - probably best to do like 5 rows 2 columns max
                 - "Back to last menu" button: ⏏️, 🆙, 🛑, 🔙, ⃠, 🤚, 🚫 or simply Back
                     - edits menu in place (if possible)
                     - pops last entry from history-hierarchy.
