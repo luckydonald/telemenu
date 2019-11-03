@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import json
 import re
 import inspect_mate
+from abc import abstractmethod
 from html import escape
 from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
-from dataclasses import dataclass, field as dataclass_field
-from luckydonaldUtils.logger import logging
 from pytgbot import Bot
+from dataclasses import dataclass, field as dataclass_field
+from luckydonaldUtils.typing import JSONType
+from luckydonaldUtils.logger import logging
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton
 
 __author__ = 'luckydonald'
@@ -53,11 +56,41 @@ class Example(object):
     var7 = "test".format
 # end class
 
+
 _button_id = "CURRENT_STATE.action.<action-type>.<index>;<payload>"  # normal action state
 _button_id = "CURRENT_STATE.action.goto.1;"  # normal action state
 _button_id = "CURRENT_STATE.page.2"  # pagination
 
-Fuuu = object()
+DEFAULT_PLACEHOLDER = object()
+
+
+class Data(object):
+    button_page: int
+
+    def __init__(self):
+        self.button_page = 0
+    # end def
+# end class
+
+
+class CallbackData(object):
+    type: str
+    value: JSONType
+
+    def __init__(self, type: str, value: JSONType = None) -> str:
+        self.type = type
+        self.value = value
+    # end def
+
+    def to_json_str(self):
+        return json.dumps({'type': self.type, 'value': self.value})
+    # end def
+
+    @classmethod
+    def from_json_str(cls, string):
+        return cls(**json.loads(string))
+    # end def
+# end class
 
 
 class Menu(object):
@@ -91,6 +124,65 @@ class Menu(object):
     # end def
 
     @classmethod
+    @abstractmethod
+    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        pass
+    # end def
+
+    @classmethod
+    def get_keyboard(cls, data: Data) -> InlineKeyboardMarkup:
+        buttons = cls.get_buttons(data)
+
+        pages = len(buttons) // 10
+        if data.button_page >= pages:
+            data.button_page = pages - 1
+        # end def
+        if data.button_page < 0:
+            data.button_page = 0
+        # end def
+
+        offset = data.button_page * 10
+        selected_buttons = buttons[offset: offset + 10]
+
+        keyboard = []
+        for i in range(len(selected_buttons)):
+            # we iterate through the buttons and split them into left and right.
+            if i % 2 == 0:  # left button, and first of row
+                keyboard.append([])
+            # end if
+            keyboard[-1].append(selected_buttons[i])
+        # end if
+
+        pagination_buttons = []
+        if data.button_page > 0:
+            pagination_buttons.append(InlineKeyboardButton(
+                text="<",
+                callback_data=CallbackData(type='pagination', value=data.button_page - 1).to_json_str()
+            ))
+        # end if
+        for i in range(max(data.button_page - 2, 0), data.button_page):
+            pagination_buttons.append(InlineKeyboardButton(
+                text=str(i),
+                callback_data=CallbackData(type='pagination', value=i).to_json_str()
+            ))
+        # end def
+        for i in range(data.button_page + 1, min(data.button_page + 3, pages)):
+            pagination_buttons.append(InlineKeyboardButton(
+                text=str(i),
+                callback_data=CallbackData(type='pagination', value=i).to_json_str()
+            ))
+        # end def
+        if data.button_page < pages - 1:
+            pagination_buttons.append(InlineKeyboardButton(
+                text=">",
+                callback_data=CallbackData(type='pagination', value=data.button_page - 1).to_json_str()
+            ))
+        # end if
+
+        return InlineKeyboardMarkup(inline_keyboard=selected_buttons + pagination_buttons)
+    # end def
+
+    @classmethod
     def get_done_button(cls):
         done: Union[DoneButton, Menu] = cls.get_value('done')
         if isinstance(done, DoneButton):
@@ -113,8 +205,8 @@ class Menu(object):
 
     @classmethod
     def get_value(cls, key):
-        value = getattr(cls, key, Fuuu)
-        if value == Fuuu:
+        value = getattr(cls, key, DEFAULT_PLACEHOLDER)
+        if value == DEFAULT_PLACEHOLDER:
             raise KeyError(f'Key {key!r} not found.')
         # end if
 
@@ -173,22 +265,37 @@ class Button(object):
 class GotoMenu(Menu):
     menus: ClassValueOrCallableList['GotoButton']
 
-    def get_keyboard(self) -> InlineKeyboardMarkup:
-        menus: List[GotoButton] = self.get_value('menus')
+    @classmethod
+    def get_keyboard(cls) -> InlineKeyboardMarkup:
+        menus: List[GotoButton] = cls.get_value('menus')
         return InlineKeyboardMarkup(
             inline_keyboard=[
                 InlineKeyboardButton(
                     text=button.label,
-                    callback_data=f"{self.__class__.__name__}__goto__{button.get_id()}",
+                    callback_data=f"{cls.__class__.__name__}__goto__{button.get_id()}",
                 )
                 for i, button in enumerate(menus)
             ]
         )
     # end def
 
-    def send_message(self, chat_id):
-        bot = Bot()
-        bot.send_message(chat_id=chat_id, text=f"<b>{self.title}</b>\n{self.description}")
+    @classmethod
+    def get_text(cls):
+        return f"<b>{cls.title}</b>\n{cls.description}"
+    # end def
+
+    @classmethod
+    def send_message(cls, bot: Bot, chat_id):
+        bot.send_message(
+            chat_id=chat_id,
+            text=cls.get_text(),
+            parse_mode='html',
+            disable_web_page_preview=True,
+            disable_notification=False,
+            reply_to_message_id=None,
+            reply_markup=cls.get_keyboard(),
+        )
+    # end def
 # end class
 
 
