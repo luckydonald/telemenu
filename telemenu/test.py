@@ -28,32 +28,87 @@ ClassValueOrCallableList = List[ClassValueOrCallable]
 
 
 class Example(object):
-    def var0(self, a):
-        return "0" + a
+    """
+    Example for the different types of value retrieval we support for stuff like `title` etc.
+    """
+
+    # noinspection PyMethodMayBeStatic
+    def var0(self, data: 'Data') -> str:
+        return f"(0 normal def)\nPage {data.button_page}"
     # end def
 
-    var1 = "1"
+    var1 = "(1 normal str)\nPage {data.button_page}"
 
-    var2 = lambda a: "2" + a
+    var2 = lambda data: "(2 lambda)\nPage " + str(data.button_page)
 
     @classmethod
-    def var3(cls, a):
-        return "3" + a
+    def var3(cls, data: 'Data') -> str:
+        return "(3 classmethod)\nPage " + str(data.button_page)
     # end def
 
     var4: str
 
     @staticmethod
-    def var5(a):
-        return "5" + a
+    def var5(data: 'Data') -> str:
+        return "(5 classmethod)\nPage {page}".format(page=data.button_page)
     # end def
 
+    # noinspection PyPropertyDefinition
     @property
-    def var6(self, a):
-        return "6" + a
+    def var6(self, data: 'Data') -> str:
+        return "(6 property)\nPage " + str(data.button_page)
     # end def
 
-    var7 = "test".format
+    var7 = "(7 str dot format)\nPage {data.button_page}".format
+
+    @staticmethod
+    def var8(data):
+        return "(8 staticmethod)\nPage " + str(data.button_page)
+    # end def
+
+    def get_value(cls, key):
+        return Menu.get_value(cls, key)
+    # end def
+
+    def assertEqual(self, a, b):
+        assert a == b
+    # end def
+
+    def test_var0(self):
+        data = Data()
+        data.button_page = 123
+        self.assertEqual(self.get_value('var0'), "(0 normal def)\nPage 123")
+    # end def
+
+    def test_var1(self):
+        data = Data()
+        data.button_page = 123
+        self.assertEqual(self.get_value('var1'), "(1 normal str)\nPage 123")
+    # end def
+
+    def test_var2(self):
+        data = Data()
+        data.button_page = 123
+        self.assertEqual(self.get_value('var2'), "(2 lambda)\nPage 123")
+    # end def
+
+    def test_var3(self):
+        data = Data()
+        data.button_page = 123
+        self.assertEqual(self.get_value('var3'), "(3 classmethod)\nPage 123")
+    # end def
+
+    def test_var5(self):
+        data = Data()
+        data.button_page = 123
+        self.assertEqual(self.get_value('var5'), "(5 classmethod)\nPage 123")
+    # end def
+
+    def test_var6(self):
+        data = Data()
+        data.button_page = 123
+        self.assertEqual(self.get_value('var6'), "(6 property)\nPage 123")
+    # end def
 # end class
 
 
