@@ -60,25 +60,29 @@ _button_id = "CURRENT_STATE.page.2"  # pagination
 Fuuu = object()
 
 
-class Component(object):
-    def get_id(self) -> str:
-        return self.__class__.__name__
-    # end def
-# end class
+class Menu(object):
+    """
+    A menu is a static construct holding all the information.
+    It is static, so any method should work without having any instance.
 
-
-class Menu(Component):
+    That is because you create a subclass for every menu you need,
+    and overwrite functions and or class variables.
+    That way there will only ever one 'instance' needed per class,
+    and everything could be handled as singleton, which a static class already is.
+    (Not doing the same mistake some other libs here (Looking angrily at you, Codeigniter))
+    """
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
 
-    def get_text(self):
+    @classmethod
+    def get_text(cls):
         text = ""
-        title = self.get_value('title')
+        title = cls.get_value('title')
         if title:
             text += f"<b>{escape(title)}</b>\n"
         # end if
-        description = self.get_value('description')
+        description = cls.get_value('description')
         if description:
             text += f"{escape(description)}\n"
         # end if
@@ -86,21 +90,26 @@ class Menu(Component):
         return text
     # end def
 
-    def get_done_button(self):
-        done: Union[DoneButton, Menu] = self.get_value('done')
+    @classmethod
+    def get_done_button(cls):
+        done: Union[DoneButton, Menu] = cls.get_value('done')
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
-                callback_data=f"{self.__class__.__name__}__done__{done.get_id()}",
+                callback_data=f"{cls.__class__.__name__}__done__{done.get_id()}",
             )
         elif isinstance(done, Menu):
             return InlineKeyboardButton(
                 text=done.title,
-                callback_data=f"{self.__class__.__name__}__done__{done.get_id()}",
+                callback_data=f"{cls.__class__.__name__}__done__{done.get_id()}",
             )
         # end if
     # end def
 
+    @classmethod
+    def get_own_buttons(cls) -> List[InlineKeyboardButton]:
+        return []
+    # end def
 
     @classmethod
     def get_value(cls, key):
@@ -137,13 +146,20 @@ class Menu(Component):
         return value
     # end def
 
-    def get_id(self) -> str:
-        return "menu@id:" + self.id if hasattr(self, 'id') and self.id else "menu@class:" + self.__class__.__name__
+    @classmethod
+    def get_id(cls) -> str:
+        return "menu@id:" + cls.id if hasattr(cls, 'id') and cls.id else "menu@class:" + cls.__name__
     # end def
 # end class
 
 
-class Button(Component):
+class Button(object):
+    """
+    Other than the menus, buttons actually are instances as you can have multiple buttons in the same menu.
+    Subclassing it would be way to much work, and providing values via constructor is everything we need really.
+
+    Therefore here any function must be working with the current instance of the button.
+    """
     label: ClassValueOrCallable[str]
     id: Union[str, None] = None  # None means automatic
 
