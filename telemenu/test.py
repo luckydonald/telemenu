@@ -119,6 +119,19 @@ _button_id = "CURRENT_STATE.page.2"  # pagination
 DEFAULT_PLACEHOLDER = object()
 
 
+class TeleMenuMachine(object):
+    instances: List[type]
+
+    def __init__(self):
+        self.instances = []
+    # end def
+
+    def register(self, other_cls):
+        self.instances.append(other_cls)
+    # end def
+# end def
+
+
 class Data(object):
     button_page: int
 
@@ -517,6 +530,16 @@ class UploadMenu(Menu):
 # end def
 
 
+# ------------------------------
+# TEST CLASSES
+# here the stuff is implemented
+# ------------------------------
+
+
+telemenu = TeleMenuMachine()
+
+
+@telemenu.register
 class TestMainMenu(GotoMenu):
     # noinspection PyMethodMayBeStatic
     def title(self):
@@ -544,6 +567,7 @@ class TestMainMenu(GotoMenu):
 # end class
 
 
+@telemenu.register
 class TestCheckboxMenu(CheckboxMenu):
     title = "Shopping list"
     description = "The shopping list for {now.format('dd.mm.yyyy')!s}"
@@ -560,6 +584,7 @@ class TestCheckboxMenu(CheckboxMenu):
 # end class
 
 
+@telemenu.register
 class TestRadioMenu(RadioMenu):
     title = "Best Pony?"
     description = None
@@ -578,6 +603,7 @@ class TestRadioMenu(RadioMenu):
 # end class
 
 
+@telemenu.register
 class TestTextStrMenu(TextStrMenu):
     title = None
     description = "Tell me your name, please."
@@ -586,6 +612,7 @@ class TestTextStrMenu(TextStrMenu):
 # end class
 
 
+@telemenu.register
 class TestTextIntMenu(TextIntMenu):
     title = "Age"
     description = lambda self: "Tell me your age, please."
@@ -596,6 +623,7 @@ class TestTextIntMenu(TextIntMenu):
 # end class
 
 
+@telemenu.register
 class TestTextFloatMenu(TextFloatMenu):
     title = lambda self: "Height"
     description = "Please tell me your body height in centimeters"
@@ -604,6 +632,7 @@ class TestTextFloatMenu(TextFloatMenu):
 # end class
 
 
+@telemenu.register
 class TestTextPasswordMenu(TextPasswordMenu):
     title = "Password"
     description = "Set a password please."
@@ -612,6 +641,7 @@ class TestTextPasswordMenu(TextPasswordMenu):
 # end class
 
 
+@telemenu.register
 class TestTextEmailMenu(TextEmailMenu):
     title = "Email"
     description = "Set a email please."
@@ -620,18 +650,21 @@ class TestTextEmailMenu(TextEmailMenu):
 # end class
 
 
+@telemenu.register
 class TestTextTelMenu(TextTelMenu):
     title = "Email"
     description = "Set a email please."
 # end class
 
 
+@telemenu.register
 class TestTextUrlMenu(TextUrlMenu):
     title = "URL"
     description = "What's your website?"
 # end class
 
 
+@telemenu.register
 class TestUploadMenu(UploadMenu):
     title = "File"
     description = "Please upload an image."
