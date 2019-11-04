@@ -391,16 +391,38 @@ class DoneButton(GotoButton):
 
 
 @dataclass(init=False, eq=False, repr=True)
+class SelectableButton(Button):
+    STATE_EMOJIS = {True: '1️⃣', False: '🅾️'}
+    title: str
+    value: JSONType
+    selected: bool
+
+    def __init__(
+        self,
+        title,
+        value: JSONType,
+        selected: bool = False
+    ):
+        self.title = title
+        self.value = value
+        self.selected = selected
+    # end def
+
+    def get_label(self):
+        return self.STATE_EMOJIS[self.selected] + " " + self.title
+    # end def
+# end def
+
+
+@dataclass(init=False, eq=False, repr=True)
 class CheckboxMenu(Menu):
     checkboxes: ClassValueOrCallable['CheckboxButton']
 # end class
 
 
 @dataclass
-class CheckboxButton(Button):
-    label: ClassValueOrCallable[str]
-    id: Union[str, None] = None  # None means automatic
-    selected: ClassValueOrCallable[bool] = False
+class CheckboxButton(SelectableButton):
+    STATE_EMOJIS = {True: "✅", False: "❌"}
 # end class
 
 
@@ -410,11 +432,8 @@ class RadioMenu(Menu):
 # end class
 
 
-@dataclass
-class RadioButton(Button):
-    label: ClassValueOrCallable[str]
-    id: Union[str, None] = None  # None means automatic
-    selected: ClassValueOrCallable[bool] = False
+class RadioButton(SelectableButton):
+    STATE_EMOJIS = {True: "🔘", False: "⚫️"}
 # end class
 
 
