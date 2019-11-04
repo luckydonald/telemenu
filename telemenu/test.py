@@ -239,17 +239,17 @@ class Menu(object):
     # end def
 
     @classmethod
-    def get_done_button(cls, data: Data):
+    def get_done_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
         done: Union[DoneButton, Menu] = cls.get_value('done')
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
-                callback_data=f"{cls.__class__.__name__}__done__{done.get_id()}",
+                callback_data=CallbackData(type='done', value=None).to_json_str(),
             )
         elif isinstance(done, Menu):
             return InlineKeyboardButton(
                 text=done.title,
-                callback_data=f"{cls.__class__.__name__}__done__{done.get_id()}",
+                callback_data=CallbackData(type='done', value=None).to_json_str(),
             )
         # end if
     # end def
