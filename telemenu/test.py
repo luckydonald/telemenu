@@ -421,7 +421,7 @@ class SelectableButton(Button):
         self.selected = selected
     # end def
 
-    def get_label(self):
+    def get_label(self, data: Data):
         return self.STATE_EMOJIS[self.selected] + " " + self.title
     # end def
 # end def
@@ -489,7 +489,6 @@ class CheckboxMenu(SelectableMenu):
 # end class
 
 
-@dataclass
 class CheckboxButton(SelectableButton):
     STATE_EMOJIS = {True: "✅", False: "❌"}
 # end class
@@ -636,10 +635,10 @@ class TestCheckboxMenu(CheckboxMenu):
     # noinspection PyMethodMayBeStatic
     def checkboxes(self) -> List[CheckboxButton]:
         return [
-            CheckboxButton(label='Eggs', selected=True, id='eggs'),
-            CheckboxButton(label='Milk', selected=False, id='eggs'),
-            CheckboxButton(label='Flux compensator', selected=False, id='flux'),
-            CheckboxButton(label='LOVE', selected=False, id=None),
+            CheckboxButton(title='Eggs', selected=True, value='eggs'),
+            CheckboxButton(title='Milk', selected=False, value='milk'),
+            CheckboxButton(title='Flux compensator', selected=False, value='flux'),
+            CheckboxButton(title='LOVE', selected=False, value=None),
         ]
     # end def
 # end class
