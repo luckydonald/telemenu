@@ -569,6 +569,13 @@ class TextMenu(Menu):
     def _parse(cls, data: Data, text: str) -> JSONType:
         raise NotImplementedError('Subclasses must implement that.')
     # end def
+
+    @classmethod
+    def on_update(cls, update, message):
+        text = message
+        pass
+    # end def
+
 # end class
 
 
