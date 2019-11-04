@@ -559,7 +559,14 @@ class RadioButton(SelectableButton):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextMenu(Menu):
-    def _parse(self, text: str) -> Any:
+    """
+    Simple reply text to this menu.
+    Uses force reply.
+    """
+
+    @classmethod
+    @abstractmethod
+    def _parse(cls, data: Data, text: str) -> JSONType:
         raise NotImplementedError('Subclasses must implement that.')
     # end def
 # end class
