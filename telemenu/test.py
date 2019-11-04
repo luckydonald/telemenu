@@ -255,6 +255,12 @@ class Menu(object):
     # end def
 
     @classmethod
+    def get_back_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
+        # TODO implement
+        return None
+    # end def
+
+    @classmethod
     def get_own_buttons(cls) -> List[InlineKeyboardButton]:
         return []
     # end def
