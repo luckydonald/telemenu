@@ -157,7 +157,23 @@ class TeleMenuMachine(object):
         self.instances[name] = TeleMenuInstancesItem(state=new_state, menu=other_cls)
         return other_cls
     # end def
-# end def
+
+    def get_current_menu(self):
+        """
+        Get the current menu.
+        Return `None` if is the `DEFAULT` state, or does not exist in the menu.
+        :return:
+        """
+        state = self.states.CURRENT
+        if state == self.states.DEFAULT:
+            return None
+        # end if
+        if state.name not in self.instances:
+            return None
+        # end if
+        return self.instances[state.name]
+    # end def
+# end class
 
 
 class Data(object):
