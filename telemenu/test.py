@@ -21,7 +21,7 @@ if __name__ == '__main__':
 # end if
 
 T = TypeVar('T')  # Any type.
-ClassValueOrCallable = Union[T, Callable[[Any], T]]
+ClassValueOrCallable = Union[T, Callable[['Data'], T]]
 
 OptionalClassValueOrCallable = Union[ClassValueOrCallable[T], type(None)]
 ClassValueOrCallableList = List[ClassValueOrCallable[T]]
@@ -164,7 +164,7 @@ class Menu(object):
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
 
     @classmethod
-    def get_text(cls):
+    def get_text(cls, data: Data) -> str:
         text = ""
         title = cls.get_value('title')
         if title:
@@ -238,7 +238,7 @@ class Menu(object):
     # end def
 
     @classmethod
-    def get_done_button(cls):
+    def get_done_button(cls, data: Data):
         done: Union[DoneButton, Menu] = cls.get_value('done')
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
@@ -259,13 +259,14 @@ class Menu(object):
     # end def
 
     @classmethod
-    def get_value(cls, key):
+    def get_value(cls, key, data: Data):
         value = getattr(cls, key, DEFAULT_PLACEHOLDER)
         if value == DEFAULT_PLACEHOLDER:
             raise KeyError(f'Key {key!r} not found.')
         # end if
 
-        params = dict(state=None, user=None, chat=None)
+        # params = dict(state=None, user=None, chat=None)
+        params = dict(data=data)
         if isinstance(value, str):
             return value.format(**params)
         # end if
@@ -321,7 +322,7 @@ class GotoMenu(Menu):
     menus: ClassValueOrCallableList['GotoButton']
 
     @classmethod
-    def get_keyboard(cls) -> InlineKeyboardMarkup:
+    def get_keyboard(cls, data: Data) -> InlineKeyboardMarkup:
         menus: List[GotoButton] = cls.get_value('menus')
         return InlineKeyboardMarkup(
             inline_keyboard=[
