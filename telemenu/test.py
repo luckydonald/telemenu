@@ -148,6 +148,7 @@ class CallbackData(object):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class Menu(object):
     """
     A menu is a static construct holding all the information.
@@ -317,7 +318,7 @@ class Button(object):
 # end class
 
 
-@dataclass(init=False)
+@dataclass(init=False, eq=False, repr=True)
 class GotoMenu(Menu):
     menus: ClassValueOrCallableList['GotoButton']
 
@@ -379,7 +380,7 @@ class DoneButton(GotoButton):
 # end class
 
 
-@dataclass(init=False)
+@dataclass(init=False, eq=False, repr=True)
 class CheckboxMenu(Menu):
     checkboxes: ClassValueOrCallable['CheckboxButton']
 # end class
@@ -393,7 +394,7 @@ class CheckboxButton(Button):
 # end class
 
 
-@dataclass(init=False)
+@dataclass(init=False, eq=False, repr=True)
 class RadioMenu(Menu):
     radiobuttons: ClassValueOrCallable['RadioButton']    # TODO: check that max one has selected=True
 # end class
@@ -407,7 +408,7 @@ class RadioButton(Button):
 # end class
 
 
-@dataclass(init=False)
+@dataclass(init=False, eq=False, repr=True)
 class TextMenu(Menu):
     def _parse(self, text: str) -> Any:
         raise NotImplementedError('Subclasses must implement that.')
@@ -415,6 +416,7 @@ class TextMenu(Menu):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class TextStrMenu(TextMenu):
     def _parse(self, text: str) -> str:
         return text
@@ -422,6 +424,7 @@ class TextStrMenu(TextMenu):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class TextIntMenu(TextMenu):
     def _parse(self, text: str) -> int:
         return int(text)
@@ -429,6 +432,7 @@ class TextIntMenu(TextMenu):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class TextFloatMenu(TextMenu):
     def _parse(self, text: str) -> float:
         return float(text)
@@ -436,6 +440,7 @@ class TextFloatMenu(TextMenu):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class TextPasswordMenu(TextMenu):
     def _parse(self, text: str) -> str:
         return text
@@ -443,6 +448,7 @@ class TextPasswordMenu(TextMenu):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class TextEmailMenu(TextMenu):
     def _parse(self, text: str) -> str:
         if "@" not in text or "." not in text:  # TODO: improve validation.
@@ -452,6 +458,7 @@ class TextEmailMenu(TextMenu):
 # end class
 
 
+@dataclass(init=False, eq=False, repr=True)
 class TextTelMenu(TextMenu):
     def _parse(self, text: str) -> str:
         # TODO: add validation.
@@ -460,7 +467,7 @@ class TextTelMenu(TextMenu):
 # end class
 
 
-@dataclass(init=False)
+@dataclass(init=False, eq=False, repr=True)
 class TextUrlMenu(TextMenu):
     allowed_protocols: List[str] = dataclass_field(default_factory=lambda: ['http', 'https'])
 
@@ -474,7 +481,7 @@ class TextUrlMenu(TextMenu):
 # end class
 
 
-@dataclass(init=False)
+@dataclass(init=False, eq=False, repr=True)
 class UploadMenu(Menu):
     allowed_mime_types: Union[List[Union[str, Pattern]], None] = None
     allowed_extensions: Union[List[str], None] = None
