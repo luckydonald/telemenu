@@ -309,8 +309,12 @@ class Button(object):
 
     Therefore here any function must be working with the current instance of the button.
     """
-    label: ClassValueOrCallable[str]
     id: Union[str, None] = None  # None means automatic
+
+    @abstractmethod
+    def get_label(self):
+        pass
+    # end def
 
     def get_id(self) -> str:
         return "button@id:" + self.id if hasattr(self, 'id') and self.id else "button@class:" + self.__class__.__name__
