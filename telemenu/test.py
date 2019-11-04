@@ -119,15 +119,42 @@ _button_id = "CURRENT_STATE.page.2"  # pagination
 DEFAULT_PLACEHOLDER = object()
 
 
+class TeleMenuInstancesItem(object):
+    state: TeleState
+    menu: 'Menu'
+
+    def __init__(self, state, menu):
+        self.state = state
+        self.menu = menu
+    # end def
+# end def
+
+
 class TeleMenuMachine(object):
-    instances: List[type]
+    instances: Dict[str, TeleMenuInstancesItem]
+    states: TeleMachine
 
     def __init__(self):
-        self.instances = []
+        self.instances = {}
+        self.states = TeleMachine(__name__)
     # end def
 
-    def register(self, other_cls):
-        self.instances.append(other_cls)
+    def register(self, other_cls: Type) -> Type:
+        """
+        Creates a TeleState for the class and registers the overall menu loading structure..
+        :param other_cls:
+        :return:
+        """
+        name = other_cls.__name__
+        if name in self.instances:
+            raise ValueError(f'A class with name {name!r} is already registered.')
+        # end if
+        new_state = TeleState(name=name)
+        if hasattr(other_cls, 'on_message'):
+
+        self.states.register_state(name, state=new_state)
+        self.instances[name] = TeleMenuInstancesItem(state=new_state, menu=other_cls)
+        return other_cls
     # end def
 # end def
 
