@@ -98,10 +98,13 @@ class Menu(StartupMixin, TeleflaskMixinBase):
             - Update state to the one of the next Menus, or a specific state (/cancel: state DEFAULT).
 
     Approaches:
-        - Mix and match button types
+        - a) Mix and match button types
             - probably a bad idea because it's very complex.
             - also storage of multiple different types per page would be aweful.
-        - Fixed Menu types
+        - b) Fixed Menu types
+            - i.e. only one kind of buttons can be used per menu
+                - maybe we can add sub-menu kind of thing at a later point.
+                - Like left side vs right side?
             - Features:
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
@@ -159,6 +162,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - ID: based on the current menu and the index of the button.
                         - possibly user specified "<menu>_<user specified id>"
                 - Text input
+                    - Force Reply
                     - Predefined parsers (see html <input type="..."/>)
                         - text: unmodified
                         - number: int()
