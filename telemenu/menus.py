@@ -105,6 +105,9 @@ class Menu(StartupMixin, TeleflaskMixinBase):
             - i.e. only one kind of buttons can be used per menu
                 - maybe we can add sub-menu kind of thing at a later point.
                 - Like left side vs right side?
+            - Questions:
+                - is this limited to a single user?
+                - can multiple user get access on a menu, say all admins in a group chat?
             - Features:
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
