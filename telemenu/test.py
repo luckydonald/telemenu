@@ -428,8 +428,64 @@ class SelectableButton(Button):
 
 
 @dataclass(init=False, eq=False, repr=True)
-class CheckboxMenu(Menu):
+class SelectableMenu(Menu):
+    title: str
+    value: JSONType
+    selected: bool
+
+    def __init__(
+        self,
+        title,
+        value: JSONType,
+        selected: bool = False
+    ):
+        self.title = title
+        self.value = value
+        self.selected = selected
+    # end def
+
+    # noinspection PyShadowingBuiltins
+    @classmethod
+    def get_our_buttons(cls, data: Data, key='selectable_buttons', type='selectable_button') -> List[InlineKeyboardButton]:
+        """
+        Generate InlineKeyboardButton from the buttons.
+
+        Yay, D.R.Y. code.
+
+        :param data: The data, just in case.
+        :param key: the name of the class variable containing the list of selectable buttons.
+        :param type: the type for the callback data.
+        :return: list of inline buttons
+        """
+        selectable_buttons: List[Union[SelectableButton, CheckboxButton, RadioButton]] = cls.get_value(key, data)
+
+        buttons: List[InlineKeyboardButton] = []
+        for selectable_button in selectable_buttons:
+            box = InlineKeyboardButton(
+                text=selectable_button.get_label(data=data),
+                callback_data=CallbackData(type=type, value=selectable_button.value).to_json_str()
+            )
+            buttons.append(box)
+        # end for
+        return buttons
+    # end def
+
+    @classmethod
+    @abstractmethod
+    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        pass
+    # end def
+# end def
+
+
+@dataclass(init=False, eq=False, repr=True)
+class CheckboxMenu(SelectableMenu):
     checkboxes: ClassValueOrCallable['CheckboxButton']
+
+    @classmethod
+    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        return cls.get_our_buttons(data, 'checkboxes', 'checkbox')
+    # end def
 # end class
 
 
@@ -440,8 +496,13 @@ class CheckboxButton(SelectableButton):
 
 
 @dataclass(init=False, eq=False, repr=True)
-class RadioMenu(Menu):
-    radiobuttons: ClassValueOrCallable['RadioButton']    # TODO: check that max one has selected=True
+class RadioMenu(SelectableMenu):
+    radiobuttons: ClassValueOrCallable['RadioButton']
+
+    @classmethod
+    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        return cls.get_our_buttons(data, 'radiobuttons', 'radiobutton')
+    # end def
 # end class
 
 
