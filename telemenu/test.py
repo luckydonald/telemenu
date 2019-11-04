@@ -23,8 +23,8 @@ if __name__ == '__main__':
 T = TypeVar('T')  # Any type.
 ClassValueOrCallable = Union[T, Callable[[Any], T]]
 
-OptionalClassValueOrCallable = Union[ClassValueOrCallable, type(None)]
-ClassValueOrCallableList = List[ClassValueOrCallable]
+OptionalClassValueOrCallable = Union[ClassValueOrCallable[T], type(None)]
+ClassValueOrCallableList = List[ClassValueOrCallable[T]]
 
 
 class Example(object):
