@@ -8,6 +8,7 @@ from html import escape
 from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
 from pytgbot import Bot
+from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
