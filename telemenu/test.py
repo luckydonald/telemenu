@@ -336,8 +336,13 @@ class GotoMenu(Menu):
     # end def
 
     @classmethod
-    def get_text(cls):
-        return f"<b>{cls.title}</b>\n{cls.description}"
+    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        return [
+            InlineKeyboardButton(
+                text=menu.label, callback_data=CallbackData(type="gotomenu", value=menu.menu.get_value('id')).to_json_str()
+            )
+            for menu in cls.get_value('menus') if isinstance(menu, GotoButton)
+        ]
     # end def
 
     @classmethod
