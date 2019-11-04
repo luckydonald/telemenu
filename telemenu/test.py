@@ -144,14 +144,17 @@ class Data(object):
 class CallbackData(object):
     type: str
     value: JSONType
+    id: JSONType
 
-    def __init__(self, type: str, value: JSONType = None) -> str:
+    # noinspection PyShadowingBuiltins
+    def __init__(self, type: str, id: JSONType = None, value: JSONType = None):
         self.type = type
+        self.id = id
         self.value = value
     # end def
 
     def to_json_str(self):
-        return json.dumps({'type': self.type, 'value': self.value})
+        return json.dumps({'type': self.type, 'id': self.id, 'value': self.value})
     # end def
 
     @classmethod
