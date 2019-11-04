@@ -378,7 +378,7 @@ class Button(object):
     id: Union[str, None] = None  # None means automatic
 
     @abstractmethod
-    def get_label(self):
+    def get_label(self, data: Data):
         pass
     # end def
 
@@ -567,7 +567,8 @@ class TextMenu(Menu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextStrMenu(TextMenu):
-    def _parse(self, text: str) -> str:
+    @classmethod
+    def _parse(cls, data: Data, text: str) -> JSONType:
         return text
     # end def
 # end class
@@ -575,7 +576,8 @@ class TextStrMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextIntMenu(TextMenu):
-    def _parse(self, text: str) -> int:
+    @classmethod
+    def _parse(cls, data: Data, text: str) -> JSONType:
         return int(text)
     # end def
 # end class
