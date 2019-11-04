@@ -46,12 +46,14 @@ class Menu(StartupMixin, TeleflaskMixinBase):
 
     Variables:
     - state.*
-    - <placeholder for selected answer>
+    - menu data
+        - <placeholder for selected answer>
         - selected choice (especially as we remove the buttons if done)
         - multiple choices (if multiple checkboxes)
         - text (not as important, as your message is there)
-    - Metadata: (user_link, chat, time)
+    - metadata: (user_link, chat, time)
         - same as t.me/RulesRulesBot
+    - history?
 
     There are the following steps:
 
