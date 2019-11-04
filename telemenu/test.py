@@ -567,12 +567,12 @@ class TestRadioMenu(RadioMenu):
     # noinspection PyMethodMayBeStatic
     def radiobuttons(self) -> List[RadioButton]:
         return [
-            RadioButton(label="Applejack", selected=False, id='aj'),
-            RadioButton(label="Fluttershy", selected=False, id='fs'),
-            RadioButton(label="Rarity", selected=False),
-            RadioButton(label="Twilight", selected=False, id='ts'),
-            RadioButton(label="Rainbow Dash", selected=False),
-            RadioButton(label="Littlepip", selected=True, id='waifu'),
+            RadioButton(title="Applejack", selected=False, value='aj'),
+            RadioButton(title="Fluttershy", selected=False, value='fs'),
+            RadioButton(title="Rarity", selected=False, value='rara'),
+            RadioButton(title="Twilight", selected=False, value='ts'),
+            RadioButton(title="Rainbow Dash", selected=False, value='rd'),
+            RadioButton(title="Littlepip", selected=True, value='waifu'),
         ]
     # end def
 # end class
