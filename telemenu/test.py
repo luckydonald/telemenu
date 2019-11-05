@@ -246,11 +246,26 @@ class Menu(object):
     @classmethod
     @abstractmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        """
+        Retrieval of menu specific buttons.
+        This is just a single list of buttons, which will be formatted later.
+        Also pagination and back/cancel stuff will be added later as well.
+
+        :param data:
+        :return:
+        """
         pass
     # end def
 
     @classmethod
-    def get_keyboard(cls, data: Data) -> InlineKeyboardMarkup:
+    def get_keyboard(cls, data: Data) -> Union[InlineKeyboardMarkup, ReplyMarkup, None]:
+        """
+        This is the method which is responsible for returning a ReplyMarkup (e.g. InlineKeyboardMarkup) or None.
+        Basically we need to return something which can be used in the `bot.send_message(..., reply_markup=...)` parameter.
+
+        :param data:
+        :return:
+        """
         buttons = cls.get_buttons(data)
 
         pages = len(buttons) // 10
