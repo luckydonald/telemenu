@@ -108,6 +108,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
             - Questions:
                 - is this limited to a single user?
                 - can multiple user get access on a menu, say all admins in a group chat?
+                - do we need some l18n? Probably the user can do that.
             - Features:
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
@@ -166,6 +167,12 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                         - possibly user specified "<menu>_<user specified id>"
                 - Text input
                     - Force Reply
+                        - This means no buttons :(
+                            - maybe /cancel, /back and /done
+                                - /done makes no sense, as that would just be the submit.
+                            - just /cancel and /back then.
+                                - should that be automatically included in the text messages?
+                                    - "You can click /back to go back to the last menu or /cancel to abort the current process.
                     - Predefined parsers (see html <input type="..."/>)
                         - text: unmodified
                         - number: int()
