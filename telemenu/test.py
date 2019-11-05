@@ -432,20 +432,6 @@ class GotoMenu(Menu):
     menus: ClassValueOrCallableList['GotoButton']
 
     @classmethod
-    def get_keyboard(cls, data: Data) -> InlineKeyboardMarkup:
-        menus: List[GotoButton] = cls.get_value('menus')
-        return InlineKeyboardMarkup(
-            inline_keyboard=[
-                InlineKeyboardButton(
-                    text=button.label,
-                    callback_data=f"{cls.__class__.__name__}__goto__{button.get_id()}",
-                )
-                for i, button in enumerate(menus)
-            ]
-        )
-    # end def
-
-    @classmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
         return [
             InlineKeyboardButton(
