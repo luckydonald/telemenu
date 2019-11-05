@@ -172,7 +172,9 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                                 - /done makes no sense, as that would just be the submit.
                             - just /cancel and /back then.
                                 - should that be automatically included in the text messages?
-                                    - "You can click /back to go back to the last menu or /cancel to abort the current process.
+                                - "You can click /back to go back to the last menu or /cancel to abort the current process."
+                                - Here we actually need to think about l18n... :(
+                            - Register the /cancel, and /back commands which should behave like normal buttons.
                     - Predefined parsers (see html <input type="..."/>)
                         - text: unmodified
                         - number: int()
