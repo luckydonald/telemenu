@@ -220,6 +220,10 @@ class Menu(object):
     and everything could be handled as singleton, which a static class already is.
     (Not doing the same mistake some other libs here (Looking angrily at you, Codeigniter))
     """
+    MENU_TYPE = 'menu'  # used for CallbackData.type
+    CALLBACK_DONE_BUTTON_TYPE = 'done'
+    CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
+
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
@@ -273,25 +277,37 @@ class Menu(object):
         if data.button_page > 0:
             pagination_buttons.append(InlineKeyboardButton(
                 text="<",
-                callback_data=CallbackData(type='pagination', value=data.button_page - 1).to_json_str()
+                callback_data=CallbackData(
+                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    value=data.button_page - 1,
+                ).to_json_str()
             ))
         # end if
         for i in range(max(data.button_page - 2, 0), data.button_page):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
-                callback_data=CallbackData(type='pagination', value=i).to_json_str()
+                callback_data=CallbackData(
+                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    value=i,
+                ).to_json_str()
             ))
         # end def
         for i in range(data.button_page + 1, min(data.button_page + 3, pages)):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
-                callback_data=CallbackData(type='pagination', value=i).to_json_str()
+                callback_data=CallbackData(
+                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    value=i,
+                ).to_json_str()
             ))
         # end def
         if data.button_page < pages - 1:
             pagination_buttons.append(InlineKeyboardButton(
                 text=">",
-                callback_data=CallbackData(type='pagination', value=data.button_page - 1).to_json_str()
+                callback_data=CallbackData(
+                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    value=data.button_page - 1,
+                ).to_json_str()
             ))
         # end if
 
@@ -304,12 +320,18 @@ class Menu(object):
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
-                callback_data=CallbackData(type='done', value=None).to_json_str(),
+                callback_data=CallbackData(
+                    type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                    value=None,
+                ).to_json_str(),
             )
         elif isinstance(done, Menu):
             return InlineKeyboardButton(
                 text=done.title,
-                callback_data=CallbackData(type='done', value=None).to_json_str(),
+                callback_data=CallbackData(
+                    type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                    value=None,
+                ).to_json_str(),
             )
         # end if
     # end def
