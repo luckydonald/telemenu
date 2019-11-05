@@ -412,6 +412,8 @@ class Button(object):
 
 @dataclass(init=False, eq=False, repr=True)
 class GotoMenu(Menu):
+    MENU_TYPE = 'gotomenu'  # used for CallbackData.type
+
     menus: ClassValueOrCallableList['GotoButton']
 
     @classmethod
@@ -432,9 +434,12 @@ class GotoMenu(Menu):
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
         return [
             InlineKeyboardButton(
-                text=menu.label, callback_data=CallbackData(type="gotomenu", value=menu.menu.get_value('id')).to_json_str()
+                text=menu.label, callback_data=CallbackData(
+                    type=cls.MENU_TYPE,
+                    value=menu.menu.get_value('id'),
+                ).to_json_str()
             )
-            for menu in cls.get_value('menus') if isinstance(menu, GotoButton)
+            for menu in cls.get_value('menus')
         ]
     # end def
 
@@ -498,6 +503,8 @@ class SelectableButton(Button):
 
 @dataclass(init=False, eq=False, repr=True)
 class SelectableMenu(Menu):
+    MENU_TYPE = 'selectable_menu'  # used for CallbackData.type
+
     title: str
     value: JSONType
     selected: bool
@@ -515,7 +522,7 @@ class SelectableMenu(Menu):
 
     # noinspection PyShadowingBuiltins
     @classmethod
-    def get_our_buttons(cls, data: Data, key='selectable_buttons', type='selectable_button') -> List[InlineKeyboardButton]:
+    def get_our_buttons(cls, data: Data, key='selectable_buttons') -> List[InlineKeyboardButton]:
         """
         Generate InlineKeyboardButton from the buttons.
 
@@ -523,7 +530,6 @@ class SelectableMenu(Menu):
 
         :param data: The data, just in case.
         :param key: the name of the class variable containing the list of selectable buttons.
-        :param type: the type for the callback data.
         :return: list of inline buttons
         """
         selectable_buttons: List[Union[SelectableButton, CheckboxButton, RadioButton]] = cls.get_value(key, data)
@@ -532,7 +538,10 @@ class SelectableMenu(Menu):
         for selectable_button in selectable_buttons:
             box = InlineKeyboardButton(
                 text=selectable_button.get_label(data=data),
-                callback_data=CallbackData(type=type, value=selectable_button.value).to_json_str()
+                callback_data=CallbackData(
+                    type=cls.MENU_TYPE,
+                    value=selectable_button.value,
+                ).to_json_str()
             )
             buttons.append(box)
         # end for
@@ -549,11 +558,13 @@ class SelectableMenu(Menu):
 
 @dataclass(init=False, eq=False, repr=True)
 class CheckboxMenu(SelectableMenu):
+    MENU_TYPE = 'checkbox'  # used for CallbackData.type
+
     checkboxes: ClassValueOrCallable['CheckboxButton']
 
     @classmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
-        return cls.get_our_buttons(data, 'checkboxes', 'checkbox')
+        return cls.get_our_buttons(data, 'checkboxes')
     # end def
 # end class
 
@@ -565,11 +576,13 @@ class CheckboxButton(SelectableButton):
 
 @dataclass(init=False, eq=False, repr=True)
 class RadioMenu(SelectableMenu):
+    MENU_TYPE = 'radiobutton'  # used for CallbackData.type
+
     radiobuttons: ClassValueOrCallable['RadioButton']
 
     @classmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
-        return cls.get_our_buttons(data, 'radiobuttons', 'radiobutton')
+        return cls.get_our_buttons(data, 'radiobuttons')
     # end def
 # end class
 
@@ -585,6 +598,8 @@ class TextMenu(Menu):
     Simple reply text to this menu.
     Uses force reply.
     """
+    MENU_TYPE = 'text'  # used for CallbackData.type
+
 
     @classmethod
     @abstractmethod
@@ -603,6 +618,11 @@ class TextMenu(Menu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextStrMenu(TextMenu):
+    """
+    A force reply text string.
+    """
+    MENU_TYPE = 'text_str'  # used for CallbackData.type
+
     @classmethod
     def _parse(cls, data: Data, text: str) -> JSONType:
         return text
@@ -612,6 +632,11 @@ class TextStrMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextIntMenu(TextMenu):
+    """
+    A force reply text string parsed as integer.
+    """
+    MENU_TYPE = 'text_int'  # used for CallbackData.type
+
     @classmethod
     def _parse(cls, data: Data, text: str) -> JSONType:
         return int(text)
@@ -621,7 +646,12 @@ class TextIntMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextFloatMenu(TextMenu):
-    def _parse(self, text: str) -> float:
+    """
+    A force reply text string parsed as float.
+    """
+    MENU_TYPE = 'text_float'  # used for CallbackData.type
+
+    def _parse(self, data: Data, text: str) -> float:
         return float(text)
     # end def
 # end class
@@ -629,7 +659,11 @@ class TextFloatMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextPasswordMenu(TextMenu):
-    def _parse(self, text: str) -> str:
+    """
+    A force reply text string which deletes your answer again.
+    """
+    MENU_TYPE = 'text_password'  # used for CallbackData.type
+    def _parse(self, data: Data, text: str) -> str:
         return text
     # end def
 # end class
@@ -637,7 +671,12 @@ class TextPasswordMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextEmailMenu(TextMenu):
-    def _parse(self, text: str) -> str:
+    """
+    A force reply text string which is validated as valid email.
+    """
+    MENU_TYPE = 'text_email'  # used for CallbackData.type
+
+    def _parse(self, data: Data, text: str) -> str:
         if "@" not in text or "." not in text:  # TODO: improve validation.
             raise ValueError('No good email.')
         return text
@@ -647,6 +686,11 @@ class TextEmailMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextTelMenu(TextMenu):
+    """
+    A force reply text string which is validated as valid telephone number.
+    """
+    MENU_TYPE = 'text_tel'  # used for CallbackData.type
+
     def _parse(self, text: str) -> str:
         # TODO: add validation.
         return text
@@ -656,6 +700,11 @@ class TextTelMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class TextUrlMenu(TextMenu):
+    """
+    A force reply text string which is validated as valid url.
+    """
+    MENU_TYPE = 'text_url'  # used for CallbackData.type
+
     allowed_protocols: List[str] = dataclass_field(default_factory=lambda: ['http', 'https'])
 
     def _parse(self, text: str) -> str:
@@ -670,6 +719,11 @@ class TextUrlMenu(TextMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class UploadMenu(Menu):
+    """
+    A force reply file upload.
+    """
+    MENU_TYPE = 'text_upload'  # used for CallbackData.type
+
     allowed_mime_types: Union[List[Union[str, Pattern]], None] = None
     allowed_extensions: Union[List[str], None] = None
 # end def
