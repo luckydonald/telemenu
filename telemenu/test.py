@@ -12,7 +12,7 @@ from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
-from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton
+from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 
 __author__ = 'luckydonald'
 
@@ -593,7 +593,31 @@ class RadioButton(SelectableButton):
 
 
 @dataclass(init=False, eq=False, repr=True)
-class TextMenu(Menu):
+class SendMenu(Menu):
+    """
+    Superclass for all things which don't really have buttons, but instead needs something sent.
+    """
+    MENU_TYPE = 'send'
+
+    @classmethod
+    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+        return []
+    # end def
+
+    @classmethod
+    def get_keyboard(cls, data: Data) -> ForceReply:
+        """
+        We always return a force reply, as we don't do menu now, but just wanna have text/files/media/...
+        :param data:
+        :return:
+        """
+        return ForceReply(selective=True)
+    # end def
+# end def
+
+
+@dataclass(init=False, eq=False, repr=True)
+class TextMenu(SendMenu):
     """
     Simple reply text to this menu.
     Uses force reply.
@@ -718,7 +742,7 @@ class TextUrlMenu(TextMenu):
 
 
 @dataclass(init=False, eq=False, repr=True)
-class UploadMenu(Menu):
+class UploadMenu(SendMenu):
     """
     A force reply file upload.
     """
