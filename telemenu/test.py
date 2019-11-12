@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import inspect_mate
 import json
 import re
-import inspect_mate
 from abc import abstractmethod
 from html import escape
 from types import LambdaType, BuiltinFunctionType
@@ -13,6 +13,7 @@ from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
+from .tools import convert_to_underscore
 
 __author__ = 'luckydonald'
 
