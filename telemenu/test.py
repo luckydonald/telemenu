@@ -197,12 +197,28 @@ class TeleMenuMachine(object):
 # end class
 
 
-class Data(object):
-    button_page: int
+class MenuData(object):
+    message_id: int
+    page: int
+    data: JSONType
 
-    def __init__(self):
-        self.button_page = 0
+    # todo __init__
+    # todo to_json
+    # todo from_json
+# end class
+
+
+class Data(object):
+    menus: Dict[str, MenuData]  # keys are IDs.
+    history: List[str]  # stack of IDs.
+
+    def __init__(self, menus=None, history=None):
+        self.menus = {} if menus is None else menus
+        self.history = [] if history is None else history
     # end def
+
+    # todo to_json
+    # todo from_json
 # end class
 
 
