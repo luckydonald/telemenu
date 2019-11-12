@@ -130,6 +130,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - Also registers /back
                     - edits menu in place (if possible)
                     - pops last entry from history-hierarchy.
+                    - you can overwrite the menu to jump to, instead of returning to the last one.
                 - "Done" button:  🆗, ↩️, 🔚, ✔️, 🏁
                     - Also registers /done
                     - allows to jump to a different menu
@@ -139,10 +140,13 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                         - b) you go back to the menu before all the `done` clicks.
                     - For example under a checkbox list, to store the changes.
                         - Shouldn't they be stored on every toggle, in fact we need those for the toggle to work.
+                    - you can overwrite the menu to jump to, instead of returning to the last one.
                 - "Cancel" button
                     - Alias to /cancel
                     - Basically "Done" but without saving the data.
                         - For example under a checkbox list
+                    - you can specify a menu to jump to
+                    - you can overwrite the menu/state to jump to, instead of setting the state to DEFAULT
                 - register /back, /done, /cancel
                     - command representation of the "Back", "Done" and "Cancel" buttons
                     - if not needed, i.e register with a fallback responding like "There's no going back now, sorry"

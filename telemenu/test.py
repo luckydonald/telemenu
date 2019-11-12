@@ -308,9 +308,9 @@ class Menu(object):
 
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
-    done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
-    back: OptionalClassValueOrCallable[Union['BackButton', 'Menu']]
-    cancel: OptionalClassValueOrCallable[Union['CancelButton', 'Menu']]
+    done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu', 'GotoButton']]
+    back: OptionalClassValueOrCallable[Union['BackButton', 'Menu', 'GotoButton']]
+    cancel: OptionalClassValueOrCallable[Union['CancelButton', 'Menu', 'GotoButton']]
 
     @classmethod
     @abstractmethod
