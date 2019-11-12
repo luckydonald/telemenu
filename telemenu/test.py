@@ -121,6 +121,9 @@ DEFAULT_PLACEHOLDER = object()
 
 
 class TeleMenuInstancesItem(object):
+    """
+    This holds a menu and a telestate to register functions to.
+    """
     state: TeleState
     menu: 'Menu'
 
@@ -140,22 +143,37 @@ class TeleMenuMachine(object):
         self.states = TeleMachine(__name__)
     # end def
 
-    def register(self, other_cls: Type) -> Type:
+    def register(self, menu_to_register: Type['Menu']) -> Type['Menu']:
         """
         Creates a TeleState for the class and registers the overall menu loading structure..
-        :param other_cls:
-        :return:
+        Note that the `_id` attribute can be used to overwrite the custom name, that is
+        :param menu_to_register: The menu to register
+        :return: the class again, unchanged.
         """
-        name = other_cls.__name__
+        if not issubclass(menu_to_register, Menu):
+            raise TypeError(
+                f"the parameter menu_to_register should be subclass of {Menu!r}, "
+                f"but is type {type(menu_to_register)}: {menu_to_register!r}"
+            )
+        # end if
+
+        name = menu_to_register.__name__
+        try:
+            # if menu._id exists, use that.
+            # parameter data = old name (aka. class name)
+            name = menu_to_register.get_value("_id", data=name)
+        except KeyError:
+            pass
+        # end def
         if name in self.instances:
             raise ValueError(f'A class with name {name!r} is already registered.')
         # end if
         new_state = TeleState(name=name)
-        if hasattr(other_cls, 'on_message'):
+        if hasattr(menu_to_register, 'on_message'):
 
         self.states.register_state(name, state=new_state)
-        self.instances[name] = TeleMenuInstancesItem(state=new_state, menu=other_cls)
-        return other_cls
+        self.instances[name] = TeleMenuInstancesItem(state=new_state, menu=menu_to_register)
+        return menu_to_register
     # end def
 
     def get_current_menu(self):
