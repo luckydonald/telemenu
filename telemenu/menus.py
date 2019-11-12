@@ -159,8 +159,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - '<ID_OF_MENU>': basically an archived version of "current" for each menu
                         - # "id": so we can identify the menu  -  this is the key already.
                         - "message_id": message id of last menu
-                        - "pagination":  pagination data, object in case we need more stuff later
-                            - "page": page of pagination, default is 0.
+                        - "page": page of pagination, default is 0.
                         - "data": this is a place for menu specific values and basically json.
                 - "history" stack:
                     - list of visited menus
