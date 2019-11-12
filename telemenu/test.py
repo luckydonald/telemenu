@@ -345,6 +345,16 @@ class Menu(object):
 
     @classmethod
     def get_value(cls, key, data: Data):
+        """
+        This function is able to grab any value from a menu class by property name,
+        no matter if it is a string or (class-/instance-/lambda-/...) function.
+        Also it will provide the `data` to that function as well.
+        In case of native strings, str.format(data=data) is called as well.
+
+        :param key:
+        :param data:
+        :return:
+        """
         value = getattr(cls, key, DEFAULT_PLACEHOLDER)
         if value == DEFAULT_PLACEHOLDER:
             raise KeyError(f'Key {key!r} not found.')
