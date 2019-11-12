@@ -101,14 +101,19 @@ class Menu(StartupMixin, TeleflaskMixinBase):
         - a) Mix and match button types
             - probably a bad idea because it's very complex.
             - also storage of multiple different types per page would be aweful.
+            - not gonna do that.
         - b) Fixed Menu types
             - i.e. only one kind of buttons can be used per menu
                 - maybe we can add sub-menu kind of thing at a later point.
                 - Like left side vs right side?
+                - if we ever gonna do that, it will be at a much later point in time.
             - Questions:
                 - is this limited to a single user?
-                - can multiple user get access on a menu, say all admins in a group chat?
-                - do we need some l18n? Probably the user can do that.
+                    - can multiple user get access on a menu, say all admins in a group chat?
+                    - we need a programmatic setting/method for that, how would that look like?
+                - do we need some l18n?
+                    - the library user can do that.
+                - is state handled by the current menu or the actual state name?
             - Features:
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
