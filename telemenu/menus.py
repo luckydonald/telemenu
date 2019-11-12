@@ -165,6 +165,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - checks the `selected` attribute to only be `True` on zero or one item.
                     - ID: based on the current menu and the index of the button.
                         - possibly user specified "<menu>_<user specified id>"
+                        - better: have a value="1231" attribute, just like the HTML.
                 - Text input
                     - Force Reply
                         - This means no buttons :(
