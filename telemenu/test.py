@@ -202,9 +202,28 @@ class MenuData(object):
     page: int
     data: JSONType
 
-    # todo __init__
-    # todo to_json
-    # todo from_json
+    def __init__(self, message_id: int, page: int = 0, data: JSONType = None):
+        self.message_id = message_id
+        self.page = page
+        self.data = data
+    # end def
+
+    def to_json(self):
+        return {
+            "message_id": self.message_id,
+            "page": self.page,
+            "data": self.data,
+        }
+    # end def
+
+    @classmethod
+    def from_json(cls, data):
+        return cls(
+            message_id=data['message_id'],
+            page=data['page'],
+            data=data['data'],
+        )
+    # end def
 # end class
 
 
@@ -217,8 +236,20 @@ class Data(object):
         self.history = [] if history is None else history
     # end def
 
-    # todo to_json
-    # todo from_json
+    def to_json(self):
+        return {
+            "menus": self.menus,
+            "history": self.history,
+        }
+        # end def
+
+    @classmethod
+    def from_json(cls, data):
+        return cls(
+            menus={k: MenuData.from_json(v) for k, v in data['menus'].items()},
+            history=data['history'],
+        )
+    # end def
 # end class
 
 
