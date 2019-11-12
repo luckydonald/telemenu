@@ -160,13 +160,9 @@ class TeleMenuMachine(object):
             )
         # end if
 
-        name = convert_to_underscore(menu_to_register.__name__).upper()
-        try:
-            # if menu._id exists, use that.
-            name = menu_to_register.get_value("_id", data=name)  # parameter data = old name (uppersnake class name)
-        except KeyError:
-            pass
-        # end def
+        # if menu._id should exist but can be overridden/overwritten by the subclass.
+        name = menu_to_register.get_value("_id", data=None)  # parameter data = old name (uppersnake class name)
+
         if name in self.instances:
             raise ValueError(f'A class with name {name!r} is already registered.')
         # end if
@@ -246,6 +242,19 @@ class Menu(object):
     MENU_TYPE = 'menu'  # used for CallbackData.type
     CALLBACK_DONE_BUTTON_TYPE = 'done'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
+
+    _id: OptionalClassValueOrCallable[str]
+
+    @classmethod
+    def _id(cls, data: None):
+        """
+        Returns a unique name for this menu.
+        Name must be capslock and otherwise only contain numbers and the underscore.
+
+        :return: the name to use
+        """
+        return convert_to_underscore(cls.__name__).upper()
+    # end def
 
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
