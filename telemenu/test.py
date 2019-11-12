@@ -158,11 +158,10 @@ class TeleMenuMachine(object):
             )
         # end if
 
-        name = menu_to_register.__name__
+        name = convert_to_underscore(menu_to_register.__name__).upper()
         try:
             # if menu._id exists, use that.
-            # parameter data = old name (aka. class name)
-            name = menu_to_register.get_value("_id", data=name)
+            name = menu_to_register.get_value("_id", data=name)  # parameter data = old name (uppersnake class name)
         except KeyError:
             pass
         # end def
@@ -171,7 +170,8 @@ class TeleMenuMachine(object):
         # end if
         new_state = TeleState(name=name)
         if hasattr(menu_to_register, 'on_message'):
-
+            pass
+        # end if
         self.states.register_state(name, state=new_state)
         self.instances[name] = TeleMenuInstancesItem(state=new_state, menu=menu_to_register)
         return menu_to_register
