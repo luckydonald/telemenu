@@ -52,7 +52,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
         - multiple choices (if multiple checkboxes)
         - text (not as important, as your message is there)
     - metadata: (user_link, chat, time)
-        - same as t.me/RulesRulesBot
+        - same as RulesRulesBot uses
     - history?
 
     There are the following steps:
