@@ -639,6 +639,10 @@ class SendMenu(Menu):
     Superclass for all things which don't really have buttons, but instead needs something sent.
     """
     MENU_TYPE = 'send'
+    TEXTUAL_BUTTON_TEXT_ALTERNATIVE = {  # True: has back button.
+        True: "You can click /back to go back to the last menu or press /cancel to abort the whole process.",
+        False: "You can press /cancel to abort the whole process."
+    }
 
     @classmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
@@ -653,6 +657,20 @@ class SendMenu(Menu):
         :return:
         """
         return ForceReply(selective=True)
+    # end def
+
+    @classmethod
+    def get_text(cls, data: Data) -> str:
+        """
+        This is lacking translations, so you might have to overwrite it with your own texts...
+        :param data:
+        :return:
+        """
+        text = super().get_text(data)
+        return (
+            text + "\n\n" +
+            cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button(data) is not None]
+        )
     # end def
 # end def
 
