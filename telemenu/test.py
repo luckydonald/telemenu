@@ -510,11 +510,6 @@ class Menu(object):
         # if all that didn't work, just return it.
         return value
     # end def
-
-    @classmethod
-    def get_id(cls) -> str:
-        return "menu@id:" + cls.id if hasattr(cls, 'id') and cls.id else "menu@class:" + cls.__name__
-    # end def
 # end class
 
 
@@ -530,10 +525,6 @@ class Button(object):
     @abstractmethod
     def get_label(self, data: Data):
         pass
-    # end def
-
-    def get_id(self) -> str:
-        return "button@id:" + self.id if hasattr(self, 'id') and self.id else "button@class:" + self.__class__.__name__
     # end def
 # end class
 
@@ -1023,7 +1014,7 @@ class TestTextEmailMenu(TextEmailMenu):
     title = "Email"
     description = "Set a email please."
 
-    done = DoneButton(menu=TestTextPasswordMenu),
+    done = GotoButton(menu=TestTextPasswordMenu, label="Done"),
 # end class
 
 
@@ -1047,5 +1038,7 @@ class TestUploadMenu(UploadMenu):
     description = "Please upload an image."
     allowed_mime_types = [re.compile(r'image/.*')]
 
-    done = DoneButton(menu=TestTextPasswordMenu)
+    done = DoneButton()
 # end class
+
+print('breakpoint')
