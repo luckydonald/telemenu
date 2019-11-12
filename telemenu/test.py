@@ -316,7 +316,7 @@ class Menu(object):
     @abstractmethod
     def get_text(cls, data: Data) -> str:
         text = ""
-        title = cls.get_value('title')
+        title = cls.get_value('title', data=data)
         if title:
             text += f"<b>{escape(title)}</b>\n"
         # end if
@@ -487,7 +487,7 @@ class Menu(object):
             return value(**params)
         # end if
         if inspect_mate.is_class_method(cls, key):
-            return value(cls, **params)
+            return value(**params)
         # end if
         if inspect_mate.is_regular_method(cls, key):
             return value(None, **params)
