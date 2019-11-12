@@ -155,17 +155,16 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - based on the current state and the button action/value
                         - that means state name? function or blueprint name?
             - State data:
-                - "current": current state
-                    - "id": so we can identify the menu
-                    - "message_id": message id of last menu
-                    - "pagination":  pagination data, object in case we need more stuff later
-                        - "page": page of pagination, default is 0.
-                - "state_data": data of states, that's a dict, containing
-                - "data":
-                    - '<id_of_menu>': basically an archived version of "current" for each menu
-                - "history" stack
+                - "menus": data of states, that's a dict, containing all the values
+                    - '<ID_OF_MENU>': basically an archived version of "current" for each menu
+                        - # "id": so we can identify the menu  -  this is the key already.
+                        - "message_id": message id of last menu
+                        - "pagination":  pagination data, object in case we need more stuff later
+                            - "page": page of pagination, default is 0.
+                        - "data": this is a place for menu specific values and basically json.
+                - "history" stack:
                     - list of visited menus
-                    - e.g. ['main_menu', 'firstname']
+                    - e.g. ['MAIN_MENU', 'FIRST_MENU', 'SECOND_MENU']
                     - same id as in the "data" array.
             - Types:
                 - Goto Menu
