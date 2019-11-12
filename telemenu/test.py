@@ -12,6 +12,7 @@ from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
+from luckydonaldUtils.exceptions import assert_type_or_raise
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 from .tools import convert_to_underscore
 
@@ -141,9 +142,14 @@ class TeleMenuMachine(object):
     instances: Dict[str, TeleMenuInstancesItem]
     states: TeleMachine
 
-    def __init__(self):
+    def __init__(self, states: TeleMachine = None):
+        assert_type_or_raise(states, TeleMachine, None, parameter_name='states')
         self.instances = {}
-        self.states = TeleMachine(__name__)
+        self.states = states
+        if not self.states:
+            self.states = TeleMachine(__name__)
+            # TODO register menu onto /start?
+        # end def
     # end def
 
     def register(self, menu_to_register: Type['Menu']) -> Type['Menu']:
