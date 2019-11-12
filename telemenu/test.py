@@ -335,6 +335,70 @@ class Menu(object):
 
     @classmethod
     @abstractmethod
+    def get_reply_markup(cls, data: Data) -> Union[None, ReplyMarkup]:
+        """
+        This funtion is responsible for returning the `reply_markup` parameter,
+        as used in pytgbot.Bot.send_message and other send_* methods.
+        """
+        pass
+    # end def
+
+    @classmethod
+    def get_value(cls, key, data: Data):
+        value = getattr(cls, key, DEFAULT_PLACEHOLDER)
+        if value == DEFAULT_PLACEHOLDER:
+            raise KeyError(f'Key {key!r} not found.')
+        # end if
+
+        # params = dict(state=None, user=None, chat=None)
+        params = dict(data=data)
+        if isinstance(value, str):
+            return value.format(**params)
+        # end if
+        if isinstance(value, BuiltinFunctionType):
+            # let's assume you wrote `some_var = "...".format`
+            return value(**params)
+        # end if
+        if inspect_mate.is_class_method(cls, key):
+            return value(**params)
+        # end if
+        if inspect_mate.is_regular_method(cls, key):
+            return value(None, **params)
+        # end if
+        if inspect_mate.is_static_method(cls, key):
+            return value(**params)
+        # end if
+        if inspect_mate.is_property_method(cls, key):
+            return value.fget(None, **params)
+        # end if
+        if isinstance(value, LambdaType):
+            return value(**params)
+        # end if
+
+        # if all that didn't work, just return it.
+        return value
+    # end def
+# end class
+
+
+@dataclass(init=False, eq=False, repr=True)
+class ButtonMenu(Menu):
+    """
+    Subclass for everything with inline Keyboard
+    """
+    @classmethod
+    def get_reply_markup(cls, data: Data) -> Union[None, ReplyMarkup]:
+        """
+        Generate an inline markup for the message to contain.
+
+        :param data:
+        :return:
+        """
+        return cls.get_keyboard(data)
+    # end def
+
+    @classmethod
+    @abstractmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
         """
         Retrieval of menu specific buttons.
@@ -474,42 +538,6 @@ class Menu(object):
     def get_own_buttons(cls) -> List[InlineKeyboardButton]:
         return []
     # end def
-
-    @classmethod
-    def get_value(cls, key, data: Data):
-        value = getattr(cls, key, DEFAULT_PLACEHOLDER)
-        if value == DEFAULT_PLACEHOLDER:
-            raise KeyError(f'Key {key!r} not found.')
-        # end if
-
-        # params = dict(state=None, user=None, chat=None)
-        params = dict(data=data)
-        if isinstance(value, str):
-            return value.format(**params)
-        # end if
-        if isinstance(value, BuiltinFunctionType):
-            # let's assume you wrote `some_var = "...".format`
-            return value(**params)
-        # end if
-        if inspect_mate.is_class_method(cls, key):
-            return value(**params)
-        # end if
-        if inspect_mate.is_regular_method(cls, key):
-            return value(None, **params)
-        # end if
-        if inspect_mate.is_static_method(cls, key):
-            return value(**params)
-        # end if
-        if inspect_mate.is_property_method(cls, key):
-            return value.fget(None, **params)
-        # end if
-        if isinstance(value, LambdaType):
-            return value(**params)
-        # end if
-
-        # if all that didn't work, just return it.
-        return value
-    # end def
 # end class
 
 
@@ -530,7 +558,7 @@ class Button(object):
 
 
 @dataclass(init=False, eq=False, repr=True)
-class GotoMenu(Menu):
+class GotoMenu(ButtonMenu):
     MENU_TYPE = 'gotomenu'  # used for CallbackData.type
 
     menus: ClassValueOrCallableList['GotoButton']
@@ -629,7 +657,7 @@ class SelectableButton(Button):
 
 
 @dataclass(init=False, eq=False, repr=True)
-class SelectableMenu(Menu):
+class SelectableMenu(ButtonMenu):
     MENU_TYPE = 'selectable_menu'  # used for CallbackData.type
 
     title: str
