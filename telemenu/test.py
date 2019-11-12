@@ -171,9 +171,11 @@ class TeleMenuMachine(object):
             pass
         # end if
         self.states.register_state(name, state=new_state)
-        self.instances[name] = TeleMenuInstancesItem(
+        instance_item = TeleMenuInstancesItem(
             machine=self, state=new_state, menu=menu_to_register
         )
+        self.instances[name] = instance_item
+        menu_to_register._state_instance = instance_item
         return menu_to_register
     # end def
 
@@ -243,6 +245,7 @@ class Menu(object):
     CALLBACK_DONE_BUTTON_TYPE = 'done'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
+    _state_instance: TeleMenuInstancesItem
     _id: OptionalClassValueOrCallable[str]
 
     @classmethod
