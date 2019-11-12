@@ -114,6 +114,9 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                 - do we need some l18n?
                     - the library user can do that.
                 - is state handled by the current menu or the actual state name?
+                    - the current state name is derived from the menu name (or overwritten by ._id)
+                    - also that state name is used to map the menu classes as well.
+                    - this all happens with @telemenu.register
             - Features:
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
