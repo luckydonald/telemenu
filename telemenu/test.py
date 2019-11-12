@@ -227,8 +227,11 @@ class Menu(object):
     title: OptionalClassValueOrCallable[str]
     description: OptionalClassValueOrCallable[str]
     done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu']]
+    back: OptionalClassValueOrCallable[Union['BackButton', 'Menu']]
+    cancel: OptionalClassValueOrCallable[Union['CancelButton', 'Menu']]
 
     @classmethod
+    @abstractmethod
     def get_text(cls, data: Data) -> str:
         text = ""
         title = cls.get_value('title')
@@ -354,7 +357,30 @@ class Menu(object):
     @classmethod
     def get_back_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        return None
+        back: Union[BackButton, Menu] = cls.get_value('back')
+        assert isinstance(back, BackButton)
+        return InlineKeyboardButton(
+            text=back.label,
+            callback_data=CallbackData(
+                type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                value=None,
+            ).to_json_str(),
+        )
+    # end def
+
+    @classmethod
+    def get_cancel_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
+        # TODO implement
+        back: Union[BackButton, Menu] = cls.get_value('back')
+        assert isinstance(back, CancelButton)
+        return InlineKeyboardButton(
+            text=back.label,
+            callback_data=CallbackData(
+                type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                value=None,
+            ).to_json_str(),
+        )
+
     # end def
 
     @classmethod
@@ -474,6 +500,20 @@ class GotoButton(Button):
 @dataclass
 class DoneButton(GotoButton):
     label: ClassValueOrCallable[str] = "Done"  # todo: multi-language
+    id: Union[str, None] = None
+# end class
+
+
+@dataclass
+class BackButton(GotoButton):
+    label: ClassValueOrCallable[str] = "Back"  # todo: multi-language
+    id: Union[str, None] = None
+# end class
+
+
+@dataclass
+class CancelButton(GotoButton):
+    label: ClassValueOrCallable[str] = "Cancel"  # todo: multi-language
     id: Union[str, None] = None
 # end class
 
