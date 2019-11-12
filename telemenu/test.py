@@ -126,9 +126,11 @@ class TeleMenuInstancesItem(object):
     This holds a menu and a telestate to register functions to.
     """
     state: TeleState
+    machine: 'TeleMenuMachine'
     menu: 'Menu'
 
-    def __init__(self, state, menu):
+    def __init__(self, machine, state, menu):
+        self.machine = machine
         self.state = state
         self.menu = menu
     # end def
@@ -173,7 +175,9 @@ class TeleMenuMachine(object):
             pass
         # end if
         self.states.register_state(name, state=new_state)
-        self.instances[name] = TeleMenuInstancesItem(state=new_state, menu=menu_to_register)
+        self.instances[name] = TeleMenuInstancesItem(
+            machine=self, state=new_state, menu=menu_to_register
+        )
         return menu_to_register
     # end def
 
