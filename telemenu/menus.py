@@ -122,9 +122,11 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - max 8 buttons per row.
                     - probably best to do like 5 rows 2 columns max
                 - "Back to last menu" button: ⏏️, 🆙, 🛑, 🔙, ⃠, 🤚, 🚫 or simply Back
+                    - Also registers /back
                     - edits menu in place (if possible)
                     - pops last entry from history-hierarchy.
                 - "Done" button:  🆗, ↩️, 🔚, ✔️, 🏁
+                    - Also registers /done
                     - allows to jump to a different menu
                     - all but the GotoMenu? No. All. It is optional anyway.
                     - how should that be reflected in the "back" button history?
@@ -133,8 +135,12 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - For example under a checkbox list, to store the changes.
                         - Shouldn't they be stored on every toggle, in fact we need those for the toggle to work.
                 - "Cancel" button
+                    - Alias to /cancel
                     - Basically "Done" but without saving the data.
                         - For example under a checkbox list
+                - register /back, /done, /cancel
+                    - command representation of the "Back", "Done" and "Cancel" buttons
+                    - if not needed, i.e register with a fallback responding like "There's no going back now, sorry"
                 - Automated data storage?
                     - checkboxes, text fields, dates, ... get variable names (to write to state.name) assigned
                         - a bit like argparse
