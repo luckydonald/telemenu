@@ -148,7 +148,6 @@ class TeleMenuMachine(object):
         self.states = states
         if not self.states:
             self.states = TeleMachine(__name__)
-            # TODO register menu onto /start?
         # end def
     # end def
 

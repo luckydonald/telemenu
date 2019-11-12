@@ -117,6 +117,8 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - the current state name is derived from the menu name (or overwritten by ._id)
                     - also that state name is used to map the menu classes as well.
                     - this all happens with @telemenu.register
+                - should we register showing a initial menu onto /start if freshly creating a TeleStateMachine?
+                    - no, we don't know the main menu.
             - Features:
                 - Automatic pagination for all of those with too many buttons ≪/≫ (or maybe one of ⋘/⋙, ⏪/⏩, ◀️/▶️ or ⬅️/➡️)
                     - maybe first/last as well? ↖️/↘️, ⏮/⏭, 🔙/🔜, ⋘/⋙
