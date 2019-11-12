@@ -150,13 +150,18 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - based on the current state and the button action/value
                         - that means state name? function or blueprint name?
             - State data:
-                - current state
-                - message id of last menu
-                - page of pagination, default is 0.
-                - history stack
-                    - does this means we need to keep old states as well?
-                        - don't think so. I go into the name change menu, change the name and go back.
-                        - is no cancel button.
+                - "current": current state
+                    - "id": so we can identify the menu
+                    - "message_id": message id of last menu
+                    - "pagination":  pagination data, object in case we need more stuff later
+                        - "page": page of pagination, default is 0.
+                - "state_data": data of states, that's a dict, containing
+                - "data":
+                    - '<id_of_menu>': basically an archived version of "current" for each menu
+                - "history" stack
+                    - list of visited menus
+                    - e.g. ['main_menu', 'firstname']
+                    - same id as in the "data" array.
             - Types:
                 - Goto Menu
                     - switch to another menu
@@ -176,12 +181,23 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                     - Force Reply
                         - This means no buttons :(
                             - maybe /cancel, /back and /done
-                                - /done makes no sense, as that would just be the submit.
+                            - no /done
+                                - makes no sense, as that would just be the submit, i.e. a sent message.
                             - just /cancel and /back then.
+                                - which both abort
                                 - should that be automatically included in the text messages?
                                 - "You can click /back to go back to the last menu or /cancel to abort the current process."
                                 - Here we actually need to think about l18n... :(
                             - Register the /cancel, and /back commands which should behave like normal buttons.
+                    - Do we listen for edit events?
+                        - maybe a /done after all?
+                        - maybe that can retrigger an action
+                        - example: @Botfather
+                            - Searching for free username
+                            - "Oh no that one is already taken"
+                                - can that be a validation
+                            - Sending another text message
+                            - Editing should take
                     - Predefined parsers (see html <input type="..."/>)
                         - text: unmodified
                         - number: int()
