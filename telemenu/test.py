@@ -6,7 +6,7 @@ import re
 from abc import abstractmethod
 from html import escape
 from types import LambdaType, BuiltinFunctionType
-from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional
+from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional, cast
 from pytgbot import Bot
 from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
@@ -126,11 +126,11 @@ class TeleMenuInstancesItem(object):
     """
     This holds a menu and a telestate to register functions to.
     """
-    state: TeleState
     machine: 'TeleMenuMachine'
-    menu: 'Menu'
+    state: TeleState
+    menu: Type['Menu']
 
-    def __init__(self, machine, state, menu):
+    def __init__(self, machine: 'TeleMenuMachine', state: TeleState, menu: Type['Menu']):
         self.machine = machine
         self.state = state
         self.menu = menu
@@ -297,7 +297,7 @@ class Menu(object):
     CALLBACK_DONE_BUTTON_TYPE = 'done'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
-    _state_instance: TeleMenuInstancesItem
+    _state_instance: ClassVar[TeleMenuInstancesItem]
     _id: OptionalClassValueOrCallable[str]
 
     @classmethod
@@ -621,10 +621,16 @@ class GotoButton(Button):
 # end class
 
 
-@dataclass
 class DoneButton(GotoButton):
     label: ClassValueOrCallable[str] = "Done"  # todo: multi-language
     id: Union[str, None] = None
+
+    def __init__(self, menu: Menu, label=None):
+        if label is None:
+            label = self.__class__.label
+        # end if
+        super().__init__(menu, label=label)
+    # end def
 # end class
 
 
