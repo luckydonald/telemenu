@@ -567,14 +567,22 @@ class GotoMenu(Menu):
 # end class
 
 
-@dataclass
 class GotoButton(Button):
     menu: ClassValueOrCallable[Menu]
     label: ClassValueOrCallable[str]
-    id: Union[str, None] = None
+    id: str
 
-    def get_id(self) -> str:
-        return self.id if self.id else 'button@menu:' + self.menu.get_id()+";"+self.label
+    def __init__(self, menu: Menu, label=None):
+        if label is None:
+            label = menu.title
+        # end if
+        self.label = label
+        self.menu = menu
+    # end def
+
+    @property
+    def id(self) -> str:
+        return self.menu.get_value('_id')
     # end def
 # end class
 
