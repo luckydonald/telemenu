@@ -303,12 +303,19 @@ class Menu(object):
 
     # noinspection PyMethodParameters
     @classproperty
-    def data(cls):
+    def data(cls: Type['Menu']):
         if cls.__data is None:
             # TODO: this would never sync, that can't be intended.
             __data = Data.from_json(cls._state_instance.state.data)
         # end if
         return cls.__data
+    # end def
+
+    # noinspection PyMethodParameters
+    @data.setter
+    def set_data(cls: Type['Menu'], data: Data):
+        assert isinstance(data, Data)
+        cls.__data = data
     # end def
 
     @classmethod
