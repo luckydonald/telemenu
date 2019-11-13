@@ -136,7 +136,17 @@ class TeleMenuInstancesItem(object):
         self.state = state
         self.menu = menu
     # end def
-# end def
+
+    @property
+    def global_data(self) -> 'Data':
+        return Data.from_json(self.state.data)
+    # end def
+
+    @property
+    def state_data(self) -> 'MenuData':
+        return self.global_data.menus[self.state.name]
+    # end def
+# end class
 
 
 class TeleMenuMachine(object):
@@ -1009,8 +1019,12 @@ class TestCheckboxMenu(CheckboxMenu):
     title = "Shopping list"
     description = "The shopping list for {now.format('dd.mm.yyyy')!s}"
 
-    # noinspection PyMethodMayBeStatic
-    def checkboxes(self) -> List[CheckboxButton]:
+    @staticmethod
+    def checkboxes(cls: CheckboxMenu, data: Data) -> List[CheckboxButton]:
+        x: TeleMenuInstancesItem = cls._state_instance
+        s: TeleState = x.state.CURRENT
+        n: str = cls.get_value('_id')
+        s.data = Data(menus={n: MenuData(message_id=123, page=0, )})
         return [
             CheckboxButton(title='Eggs', selected=True, value='eggs'),
             CheckboxButton(title='Milk', selected=False, value='milk'),
