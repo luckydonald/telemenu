@@ -602,11 +602,11 @@ class GotoMenu(ButtonMenu):
 
 
 class GotoButton(Button):
-    menu: ClassValueOrCallable[Menu]
+    menu: ClassValueOrCallable[Type[Menu]]
     label: ClassValueOrCallable[str]
     id: str
 
-    def __init__(self, menu: Menu, label=None):
+    def __init__(self, menu: Type[Menu], label=None):
         if label is None:
             label = menu.title
         # end if
@@ -625,7 +625,7 @@ class DoneButton(GotoButton):
     label: ClassValueOrCallable[str] = "Done"  # todo: multi-language
     id: Union[str, None] = None
 
-    def __init__(self, menu: Menu, label=None):
+    def __init__(self, menu: Type[Menu], label=None):
         if label is None:
             label = self.__class__.label
         # end if
@@ -1082,7 +1082,7 @@ class TestUploadMenu(UploadMenu):
     description = "Please upload an image."
     allowed_mime_types = [re.compile(r'image/.*')]
 
-    done = DoneButton()
+    done = DoneButton(TestMainMenu)
 # end class
 
 print('breakpoint')
