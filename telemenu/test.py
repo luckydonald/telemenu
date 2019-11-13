@@ -12,6 +12,7 @@ from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
+from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 from .tools import convert_to_underscore
@@ -281,7 +282,6 @@ class CallbackData(object):
 # end class
 
 
-@dataclass(init=False, eq=False, repr=True)
 class Menu(object):
     """
     A menu is a static construct holding all the information.
@@ -299,6 +299,24 @@ class Menu(object):
 
     _state_instance: ClassVar[TeleMenuInstancesItem]
     _id: OptionalClassValueOrCallable[str]
+    __data: Data = None
+
+    # noinspection PyMethodParameters
+    @classproperty
+    def data(cls):
+        if cls.__data is None:
+            # TODO: this would never sync, that can't be intended.
+            __data = Data.from_json(cls._state_instance.state.data)
+        # end if
+        return cls.__data
+    # end def
+
+    @classmethod
+    def _activate(cls):
+        instance: TeleMenuInstancesItem = cls._state_instance
+        data: JSONType = instance.machine.states.CURRENT.data
+        instance.state.activate(data)
+    # end def
 
     @classmethod
     def _id(cls, data: None):
