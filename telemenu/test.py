@@ -14,6 +14,7 @@ from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
+from pytgbot.api_types.receivable.updates import Update
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 from .tools import convert_to_underscore
 
@@ -191,7 +192,7 @@ class TeleMenuMachine(object):
             machine=self, state=new_state, menu=menu_to_register
         )
         self.instances[name] = instance_item
-        menu_to_register._state_instance = instance_item
+        menu_to_register.register_state_instance(instance_item)
         return menu_to_register
     # end def
 
@@ -423,6 +424,17 @@ class Menu(object):
         # if all that didn't work, just return it.
         return value
     # end def
+
+    @classmethod
+    def register_state_instance(cls, instance_item):
+        """
+        Function to register a state.
+
+        :param instance_item:
+        :return:
+        """
+        cls._state_instance = instance_item
+    # end def
 # end class
 
 
@@ -582,6 +594,29 @@ class ButtonMenu(Menu):
     @classmethod
     def get_own_buttons(cls) -> List[InlineKeyboardButton]:
         return []
+
+    @classmethod
+    def register_state_instance(cls, instance_item: TeleMenuInstancesItem):
+        """
+        Function to register a state.
+
+        :param instance_item:
+        :return:
+        """
+        super().register_state_instance(instance_item)
+
+        cls.on_inline_query = instance_item.state.on_update(cls.on_inline_query, 'inline_query')
+    # end def
+
+    @classmethod
+    def on_inline_query(cls, update: Update):
+        """
+        Processes the inline_query update, to do the button clicky thingy.
+
+        :param update:
+        :return:
+        """
+        pass
     # end def
 # end class
 
@@ -766,11 +801,25 @@ class SelectableMenu(ButtonMenu):
 class CheckboxMenu(SelectableMenu):
     MENU_TYPE = 'checkbox'  # used for CallbackData.type
 
+    data: Dict[str, bool]
+
     checkboxes: ClassValueOrCallable['CheckboxButton']
 
     @classmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
         return cls.get_our_buttons(data, 'checkboxes')
+    # end def
+
+    @classmethod
+    def on_inline_query(cls, update: Update):
+        """
+        Processes the inline_query update, to do the button clicky thingy.
+
+        :param update:
+        :return:
+        """
+        button = update.callback_query.data
+        cls.data[button] = not cls.data[button]  # toggle the button.
     # end def
 # end class
 
@@ -785,10 +834,23 @@ class RadioMenu(SelectableMenu):
     MENU_TYPE = 'radiobutton'  # used for CallbackData.type
 
     radiobuttons: ClassValueOrCallable['RadioButton']
+    data: str
 
     @classmethod
     def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
         return cls.get_our_buttons(data, 'radiobuttons')
+    # end def
+
+    @classmethod
+    def on_inline_query(cls, update: Update):
+        """
+        Processes the inline_query update, to do the button clicky thingy.
+
+        :param update:
+        :return:
+        """
+        button = update.callback_query.data
+        cls.data = button
     # end def
 # end class
 
