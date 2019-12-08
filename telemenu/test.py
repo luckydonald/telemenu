@@ -456,6 +456,7 @@ class Menu(object):
             # some_var = some_function()
             return value()
             # end if
+        params = dict(data=data)
         if inspect_mate.is_regular_method(cls, key):
             return value(None, **params)
         # end if
