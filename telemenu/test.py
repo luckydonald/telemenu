@@ -124,6 +124,7 @@ _button_id = "CURRENT_STATE.page.2"  # pagination
 DEFAULT_PLACEHOLDER = object()
 
 
+@dataclass(init=False, repr=True)
 class TeleMenuInstancesItem(object):
     """
     This holds a menu and a telestate to register functions to.
@@ -150,6 +151,7 @@ class TeleMenuInstancesItem(object):
 # end class
 
 
+@dataclass(init=False, repr=True)
 class TeleMenuMachine(object):
     instances: Dict[str, TeleMenuInstancesItem]
     states: TeleMachine
@@ -631,6 +633,7 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
+    @abstractmethod
     def on_inline_query(cls, update: Update):
         """
         Processes the inline_query update, to do the button clicky thingy.
