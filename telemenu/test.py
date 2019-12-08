@@ -16,7 +16,7 @@ from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from pytgbot.api_types.receivable.updates import Update
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
-from .tools import convert_to_underscore
+from .utils import convert_to_underscore
 
 __author__ = 'luckydonald'
 
