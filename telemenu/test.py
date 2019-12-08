@@ -664,6 +664,30 @@ class ButtonMenu(Menu):
         """
         pass
     # end def
+
+    @classmethod
+    def refresh(cls, done: bool = False):
+        """
+        Edit the posted message to reflect new state, or post a new one if needed.
+        # TODO: If a new message is to be posted, the new message_id must be tracked,
+        # TODO: and maybe also the old keyboard removed.
+
+        :param done: Set to true if this message is not the current any longer.
+                     Used to e.g. include the selection in the message when the new menu is opened below.
+        :return:
+        """
+        bot: Bot = None
+        data: Data = cls._state_instance.state.data
+
+        reply_markup = cls.get_keyboard(data=data) if not done else None
+        bot.edit_message_text(
+            text=cls.get_text(data=data),
+            chat_id=None,
+            message_id=None,
+            parse_mode='html',
+            disable_web_page_preview=True,
+            reply_markup=reply_markup,
+        )
 # end class
 
 
