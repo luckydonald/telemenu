@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import inspect
+import unittest
+
 import inspect_mate
 import json
 import re
