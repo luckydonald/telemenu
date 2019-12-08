@@ -198,20 +198,23 @@ class TeleMenuMachine(object):
         return menu_to_register
     # end def
 
-    def get_current_menu(self):
+    def get_current_menu(self) -> Type[Union[None, 'Menu']]:
         """
         Get the current menu.
         Return `None` if is the `DEFAULT` state, or does not exist in the menu.
-        :return:
+
+        :return: The current menu or None.
         """
         state = self.states.CURRENT
         if state == self.states.DEFAULT:
+            logger.debug('State is default, so not a menu.')
             return None
         # end if
         if state.name not in self.instances:
+            logger.debug('State has no menu registered here.')
             return None
         # end if
-        return self.instances[state.name]
+        return self.instances[state.name].menu
     # end def
 # end class
 
