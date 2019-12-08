@@ -342,6 +342,24 @@ class Menu(object):
     # end def
 
     @classmethod
+    def activate(cls):
+        """
+        Activates the underlaying state of the menu, and copies over the data.
+        :return:
+        """
+        cls._activate()
+    # end def
+
+    @classmethod
+    def show(cls):
+        """
+        Activates the menu, and returns a sendable update.
+        :return:
+        """
+        cls._activate()
+    # end def
+
+    @classmethod
     def _id(cls, data: None):
         """
         Returns a unique name for this menu.
