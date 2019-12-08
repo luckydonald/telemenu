@@ -1263,3 +1263,26 @@ class TestUploadMenu(UploadMenu):
 # end class
 
 print('breakpoint')
+
+
+class BotMock(object):
+    class BotMockFunc(object): pass
+
+    def __getattr__(self, item):
+        def function(*args, **kwargs):
+            logger.debug(f'MOCK: called {item}(*{args}, **{kwargs})')
+            return None
+        # end def
+        return function
+# end class
+
+
+class UnitTests(unittest.TestCase):
+    def test_state_change(self):
+         telemenu.states.CURRENT
+         self.assertEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
+         TestMainMenu.activate()
+         self.assertNotEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should not be default any longer.')
+         self.assertEquals(telemenu.states.CURRENT, TestMainMenu._state_instance, 'current state should be state of activated menu.')
+    # end def
+# end class
