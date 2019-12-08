@@ -397,17 +397,39 @@ class Menu(object):
         # end if
 
         # params = dict(state=None, user=None, chat=None)
-        params = dict(data=data)
         if isinstance(value, str):
-            return value.format(**params)
+            return value.format(data=data)
         # end if
         if isinstance(value, BuiltinFunctionType):
             # let's assume you wrote `some_var = "...".format`
-            return value(**params)
+            sig = inspect.signature(value)
+            if 'data' in sig.parameters:
+                # some_var = some_function(data=None)
+                return value(data=data)
+            elif len(sig.parameters) > 0:
+                # some_var = some_function(data)
+                return value(data)
+            # end if
+            # some_var = some_function()
+            return value()
         # end if
         if inspect_mate.is_class_method(cls, key):
-            return value(**params)
-        # end if
+            # @classmethod
+            # def some_func(cls, data)
+            sig = inspect.signature(value)
+            if 'data' in sig.parameters:
+                # some_var = some_function(data=None)
+                first_param: inspect.Parameter = list(sig.parameters.values())[0]
+                if 'cls' in sig.parameters or issubclass(first_param.annotation, Menu):
+                    return value(data=data)
+                return value(data=data)
+            elif len(sig.parameters) == 1:
+                # some_var = some_function(data)
+                return value(data)
+            # end if
+            # some_var = some_function()
+            return value()
+            # end if
         if inspect_mate.is_regular_method(cls, key):
             return value(None, **params)
         # end if
