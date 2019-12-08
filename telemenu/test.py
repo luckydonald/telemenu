@@ -72,7 +72,7 @@ class Example(object):
     # end def
 
     def get_value(cls, key):
-        return Menu.get_value(cls, key)
+        return Menu.get_value(cls, key, data=None)
     # end def
 
     def assertEqual(self, a, b):
@@ -361,7 +361,7 @@ class Menu(object):
         if title:
             text += f"<b>{escape(title)}</b>\n"
         # end if
-        description = cls.get_value('description')
+        description = cls.get_value('description', data=data)
         if description:
             text += f"{escape(description)}\n"
         # end if
@@ -564,7 +564,7 @@ class ButtonMenu(Menu):
 
     @classmethod
     def get_done_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
-        done: Union[DoneButton, Menu] = cls.get_value('done')
+        done: Union[DoneButton, Menu] = cls.get_value('done', data=data)
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
@@ -587,7 +587,7 @@ class ButtonMenu(Menu):
     @classmethod
     def get_back_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        back: Union[BackButton, Menu] = cls.get_value('back')
+        back: Union[BackButton, Menu] = cls.get_value('back', data=data)
         assert isinstance(back, BackButton)
         return InlineKeyboardButton(
             text=back.label,
@@ -601,7 +601,7 @@ class ButtonMenu(Menu):
     @classmethod
     def get_cancel_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        back: Union[BackButton, Menu] = cls.get_value('back')
+        back: Union[BackButton, Type[Menu]] = cls.get_value('back', data=data)
         assert isinstance(back, CancelButton)
         return InlineKeyboardButton(
             text=back.label,
@@ -671,10 +671,10 @@ class GotoMenu(ButtonMenu):
             InlineKeyboardButton(
                 text=menu.label, callback_data=CallbackData(
                     type=cls.MENU_TYPE,
-                    value=menu.menu.get_value('id'),
+                    value=menu.menu.get_value('id', data=data),
                 ).to_json_str()
             )
-            for menu in cls.get_value('menus')
+            for menu in cls.get_value('menus', data=data)
         ]
     # end def
 
@@ -707,8 +707,8 @@ class GotoButton(Button):
     # end def
 
     @property
-    def id(self) -> str:
-        return self.menu.get_value('_id')
+    def id(self, data: Data) -> str:
+        return self.menu.get_value('_id', data=data)
     # end def
 # end class
 
@@ -795,7 +795,7 @@ class SelectableMenu(ButtonMenu):
         :param key: the name of the class variable containing the list of selectable buttons.
         :return: list of inline buttons
         """
-        selectable_buttons: List[Union[SelectableButton, CheckboxButton, RadioButton]] = cls.get_value(key, data)
+        selectable_buttons: List[Union[SelectableButton, CheckboxButton, RadioButton]] = cls.get_value(key, data=data)
 
         buttons: List[InlineKeyboardButton] = []
         for selectable_button in selectable_buttons:
@@ -1107,7 +1107,7 @@ class TestCheckboxMenu(CheckboxMenu):
     def checkboxes(cls: CheckboxMenu, data: Data) -> List[CheckboxButton]:
         x: TeleMenuInstancesItem = cls._state_instance
         s: TeleState = x.state.CURRENT
-        n: str = cls.get_value('_id')
+        n: str = cls.get_value('_id', data=data)
         s.data = Data(menus={n: MenuData(message_id=123, page=0, )})
         return [
             CheckboxButton(title='Eggs', selected=True, value='eggs'),
