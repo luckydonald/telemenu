@@ -120,10 +120,6 @@ class Example(object):
 # end class
 
 
-_button_id = "CURRENT_STATE.action.<action-type>.<index>;<payload>"  # normal action state
-_button_id = "CURRENT_STATE.action.goto.1;"  # normal action state
-_button_id = "CURRENT_STATE.page.2"  # pagination
-
 DEFAULT_PLACEHOLDER = object()
 
 
@@ -1267,7 +1263,20 @@ class TestUploadMenu(UploadMenu):
 # end class
 
 print('breakpoint')
-
+telemenu.instances['TEST_MAIN_MENU']
+telemenu.instances['TEST_MAIN_MENU'].menu
+telemenu.instances['TEST_MAIN_MENU'].menu.activate()
+assert telemenu.instances[TestMainMenu.id] == telemenu.get_current_menu()
+telemenu.states.CURRENT.data
+telemenu.states.CURRENT
+telemenu.get_current_menu()
+telemenu.get_current_menu()
+telemenu.get_current_menu().get_value('title', None)
+telemenu.get_current_menu().get_value('title', data=Data())
+telemenu.get_current_menu().title
+f = telemenu.get_current_menu().menu.title
+inspect.signature(f)
+# ba = s.bind(telemenu.get_current_menu().menu, "!test")
 
 class BotMock(object):
     class BotMockFunc(object): pass
