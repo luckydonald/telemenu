@@ -75,7 +75,7 @@ class Example(object):
     # end def
 
     def get_value(cls, key):
-        return Menu.get_value(cls, key, data=None)
+        return Menu.get_value(cls, key)
     # end def
 
     def assertEqual(self, a, b):
@@ -179,7 +179,7 @@ class TeleMenuMachine(object):
         # end if
 
         # if menu._id should exist but can be overridden/overwritten by the subclass.
-        name = menu_to_register.get_value("_id", data=None)  # parameter data = old name (uppersnake class name)
+        name = menu_to_register.get_value("_id")  # parameter data = old name (uppersnake class name)
 
         if name in self.instances:
             raise ValueError(f'A class with name {name!r} is already registered.')
@@ -342,7 +342,7 @@ class Menu(object):
     @classmethod
     @property
     def id(cls) -> str:
-        return cls.get_value('_id', data=data)
+        return cls.get_value('_id')
     # end def
 
     @classmethod
@@ -391,11 +391,11 @@ class Menu(object):
     @abstractmethod
     def get_text(cls, data: Data) -> str:
         text = ""
-        title = cls.get_value('title', data=data)
+        title = cls.get_value('title')
         if title:
             text += f"<b>{escape(title)}</b>\n"
         # end if
-        description = cls.get_value('description', data=data)
+        description = cls.get_value('description')
         if description:
             text += f"{escape(description)}\n"
         # end if
@@ -414,7 +414,7 @@ class Menu(object):
     # end def
 
     @classmethod
-    def get_value(cls, key, data: Data):
+    def get_value(cls, key):
         """
         This function is able to grab any value from a menu class by property name,
         no matter if it is a string or (class-/instance-/lambda-/...) function.
@@ -422,7 +422,6 @@ class Menu(object):
         In case of native strings, str.format(data=data) is called as well.
 
         :param key:
-        :param data:
         :return:
         """
         value = getattr(cls, key, DEFAULT_PLACEHOLDER)
@@ -432,17 +431,17 @@ class Menu(object):
 
         # params = dict(state=None, user=None, chat=None)
         if isinstance(value, str):
-            return value.format(data=data)
+            return value.format(data=cls.data)
         # end if
         if isinstance(value, BuiltinFunctionType):
             # let's assume you wrote `some_var = "...".format`
             sig = inspect.signature(value)
             if 'data' in sig.parameters:
-                # some_var = some_function(data=None)
-                return value(data=data)
+                # some_var = some_function()
+                return value(data=cls.data)
             elif len(sig.parameters) > 0:
                 # some_var = some_function(data)
-                return value(data)
+                return value(cls.data)
             # end if
             # some_var = some_function()
             return value()
@@ -455,27 +454,49 @@ class Menu(object):
                 # some_var = some_function(data=None)
                 first_param: inspect.Parameter = list(sig.parameters.values())[0]
                 if 'cls' in sig.parameters or isinstance(first_param.annotation, type) and issubclass(first_param.annotation, Menu):
-                    return value(data=data)
-                return value(data=data)
+                    return value(data=cls.data)  # value already is class.some_function, therefore cls will be filled.
+                return value(data=cls.data)
             elif len(sig.parameters) == 1:
                 # some_var = some_function(data)
-                return value(data)
+                return value(cls.data)
             # end if
             # some_var = some_function()
             return value()
             # end if
-        params = dict(data=data)
         if inspect_mate.is_regular_method(cls, key):
-            return value(None, **params)
+            # def some_func(self, ...)
+            sig = inspect.signature(value)
+            if 'data' in sig.parameters:
+                # def some_func(self, data)
+                return value(data=cls.data)
+                # end if
+            return value()
         # end if
         if inspect_mate.is_static_method(cls, key):
-            return value(**params)
+            # @staticmethod
+            # def some_func(...):
+            sig = inspect.signature(value)
+            if 'data' in sig.parameters:
+                # def some_func(data)
+                return value(data=cls.data)
+            # end if
+            return value()
         # end if
         if inspect_mate.is_property_method(cls, key):
-            return value.fget(None, **params)
+            # @property
+            # def some_func(self):
+            sig = inspect.signature(value)
+            if 'data' in sig.parameters:
+                return value.fget(data=cls.data)
+            # end if
+            return value.fget()
         # end if
         if isinstance(value, LambdaType):
-            return value(**params)
+            sig = inspect.signature(value)
+            if 'data' in sig.parameters:
+                return value(data=cls.data)
+            # end if
+            return value()
         # end if
 
         # if all that didn't work, just return it.
@@ -526,7 +547,7 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
-    def get_keyboard(cls, data: Data) -> Union[InlineKeyboardMarkup, ReplyMarkup, None]:
+    def get_keyboard(cls) -> Union[InlineKeyboardMarkup, ReplyMarkup, None]:
         """
         This is the method which is responsible for returning a ReplyMarkup (e.g. InlineKeyboardMarkup) or None.
         Basically we need to return something which can be used in the `bot.send_message(..., reply_markup=...)` parameter.
@@ -534,17 +555,17 @@ class ButtonMenu(Menu):
         :param data:
         :return:
         """
-        buttons = cls.get_buttons(data)
+        buttons = cls.get_buttons()
 
         pages = len(buttons) // 10
-        if data.button_page >= pages:
-            data.button_page = pages - 1
+        if cls.data.button_page >= pages:
+            cls.data.button_page = pages - 1
         # end def
-        if data.button_page < 0:
-            data.button_page = 0
+        if cls.data.button_page < 0:
+            cls.data.button_page = 0
         # end def
 
-        offset = data.button_page * 10
+        offset = cls.data.button_page * 10
         selected_buttons = buttons[offset: offset + 10]
 
         keyboard = []
@@ -557,16 +578,18 @@ class ButtonMenu(Menu):
         # end if
 
         pagination_buttons = []
-        if data.button_page > 0:
-            pagination_buttons.append(InlineKeyboardButton(
-                text="<",
-                callback_data=CallbackData(
-                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
-                    value=data.button_page - 1,
-                ).to_json_str()
-            ))
+        if cls.data.button_page > 0:
+            pagination_buttons.append(
+                InlineKeyboardButton(
+                    text="<",
+                    callback_data=CallbackData(
+                        type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                        value=cls.data.button_page - 1,
+                    ).to_json_str(),
+                )
+            )
         # end if
-        for i in range(max(data.button_page - 2, 0), data.button_page):
+        for i in range(max(cls.data.button_page - 2, 0), cls.data.button_page):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
                 callback_data=CallbackData(
@@ -575,7 +598,7 @@ class ButtonMenu(Menu):
                 ).to_json_str()
             ))
         # end def
-        for i in range(data.button_page + 1, min(data.button_page + 3, pages)):
+        for i in range(cls.data.button_page + 1, min(cls.data.button_page + 3, pages)):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
                 callback_data=CallbackData(
@@ -598,8 +621,8 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
-    def get_done_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
-        done: Union[DoneButton, Menu] = cls.get_value('done', data=data)
+    def get_done_button(cls) -> Union[InlineKeyboardButton, None]:
+        done: Union[DoneButton, Menu] = cls.get_value('done')
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
@@ -622,7 +645,7 @@ class ButtonMenu(Menu):
     @classmethod
     def get_back_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        back: Union[BackButton, Menu] = cls.get_value('back', data=data)
+        back: Union[BackButton, Menu] = cls.get_value('back')
         assert isinstance(back, BackButton)
         return InlineKeyboardButton(
             text=back.label,
@@ -636,7 +659,7 @@ class ButtonMenu(Menu):
     @classmethod
     def get_cancel_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        back: Union[BackButton, Type[Menu]] = cls.get_value('back', data=data)
+        back: Union[BackButton, Type[Menu]] = cls.get_value('back')
         assert isinstance(back, CancelButton)
         return InlineKeyboardButton(
             text=back.label,
@@ -697,9 +720,9 @@ class ButtonMenu(Menu):
         bot: Bot = None
         data: Data = cls._state_instance.state.data
 
-        reply_markup = cls.get_keyboard(data=data) if not done else None
+        reply_markup = cls.get_keyboard() if not done else None
         bot.edit_message_text(
-            text=cls.get_text(data=data),
+            text=cls.get_text(),
             chat_id=None,
             message_id=None,
             parse_mode='html',
@@ -737,10 +760,10 @@ class GotoMenu(ButtonMenu):
             InlineKeyboardButton(
                 text=menu.label, callback_data=CallbackData(
                     type=cls.MENU_TYPE,
-                    value=menu.menu.get_value('id', data=data),
+                    value=menu.menu.get_value('id'),
                 ).to_json_str()
             )
-            for menu in cls.get_value('menus', data=data)
+            for menu in cls.get_value('menus')
         ]
     # end def
 
@@ -774,7 +797,7 @@ class GotoButton(Button):
 
     @property
     def id(self, data: Data) -> str:
-        return self.menu.get_value('_id', data=data)
+        return self.menu.get_value('_id')
     # end def
 # end class
 
@@ -861,7 +884,13 @@ class SelectableMenu(ButtonMenu):
         :param key: the name of the class variable containing the list of selectable buttons.
         :return: list of inline buttons
         """
-        selectable_buttons: List[Union[SelectableButton, CheckboxButton, RadioButton]] = cls.get_value(key, data=data)
+        selectable_buttons: List[
+            Union[
+                SelectableButton,
+                CheckboxButton,
+                RadioButton
+            ]
+        ] = cls.get_value(key)
 
         buttons: List[InlineKeyboardButton] = []
         for selectable_button in selectable_buttons:
@@ -1173,7 +1202,7 @@ class TestCheckboxMenu(CheckboxMenu):
     def checkboxes(cls: CheckboxMenu, data: Data) -> List[CheckboxButton]:
         x: TeleMenuInstancesItem = cls._state_instance
         s: TeleState = x.state.CURRENT
-        n: str = cls.get_value('_id', data=data)
+        n: str = cls.get_value('_id')
         s.data = Data(menus={n: MenuData(message_id=123, page=0, )})
         return [
             CheckboxButton(title='Eggs', selected=True, value='eggs'),
@@ -1283,8 +1312,8 @@ telemenu.states.CURRENT.data
 telemenu.states.CURRENT
 telemenu.get_current_menu()
 telemenu.get_current_menu()
-telemenu.get_current_menu().get_value('title', None)
-telemenu.get_current_menu().get_value('title', data=Data())
+telemenu.get_current_menu().get_value('title')
+telemenu.get_current_menu().get_value('title')
 telemenu.get_current_menu().title
 f = telemenu.get_current_menu().menu.title
 inspect.signature(f)
