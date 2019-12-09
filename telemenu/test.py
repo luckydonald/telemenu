@@ -1003,7 +1003,11 @@ class SendMenu(Menu):
             cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button() is not None]
         )
     # end def
-# end def
+    @classmethod
+    def get_back_button(cls) -> Union[None, BackButton]:
+        pass
+    # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
