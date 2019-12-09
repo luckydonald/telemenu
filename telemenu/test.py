@@ -9,7 +9,7 @@ import re
 from abc import abstractmethod
 from html import escape
 from types import LambdaType, BuiltinFunctionType
-from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, _tp_cache, Pattern, Optional, cast
+from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, Optional, cast
 from pytgbot import Bot
 from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
@@ -317,13 +317,14 @@ class Menu(object):
 
     # noinspection PyMethodParameters
     @classproperty
-    def data(cls: Type['Menu']):
+    def data(cls: Type['Menu']) -> Data:
         if cls._data is None:
             # TODO: this would never sync, that can't be intended.
             cls._data = Data.from_json(cls._state_instance.state.data)
         # end if
         return cls._data
     # end def
+    data: Data
 
     # noinspection PyMethodParameters
     @data.setter
@@ -383,7 +384,7 @@ class Menu(object):
 
     @classmethod
     @abstractmethod
-    def get_text(cls, data: Data) -> str:
+    def get_text(cls) -> str:
         text = ""
         title = cls.get_value('title')
         if title:
@@ -399,7 +400,7 @@ class Menu(object):
 
     @classmethod
     @abstractmethod
-    def get_reply_markup(cls, data: Data) -> Union[None, ReplyMarkup]:
+    def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
         """
         This funtion is responsible for returning the `reply_markup` parameter,
         as used in pytgbot.Bot.send_message and other send_* methods.
@@ -462,9 +463,9 @@ class Menu(object):
             sig = inspect.signature(value)
             if 'data' in sig.parameters:
                 # def some_func(self, data)
-                return value(data=cls.data)
+                return value(self=cls, data=cls.data)
                 # end if
-            return value()
+            return value(self=cls)
         # end if
         if inspect_mate.is_static_method(cls, key):
             # @staticmethod
@@ -516,25 +517,22 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
     @classmethod
-    def get_reply_markup(cls, data: Data) -> Union[None, ReplyMarkup]:
+    def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
         """
         Generate an inline markup for the message to contain.
-
-        :param data:
         :return:
         """
-        return cls.get_keyboard(data)
+        return cls.get_keyboard()
     # end def
 
     @classmethod
     @abstractmethod
-    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+    def get_buttons(cls) -> List[InlineKeyboardButton]:
         """
         Retrieval of menu specific buttons.
         This is just a single list of buttons, which will be formatted later.
         Also pagination and back/cancel stuff will be added later as well.
 
-        :param data:
         :return:
         """
         pass
@@ -546,7 +544,6 @@ class ButtonMenu(Menu):
         This is the method which is responsible for returning a ReplyMarkup (e.g. InlineKeyboardMarkup) or None.
         Basically we need to return something which can be used in the `bot.send_message(..., reply_markup=...)` parameter.
 
-        :param data:
         :return:
         """
         buttons = cls.get_buttons()
@@ -601,12 +598,12 @@ class ButtonMenu(Menu):
                 ).to_json_str()
             ))
         # end def
-        if data.button_page < pages - 1:
+        if cls.data.button_page < pages - 1:
             pagination_buttons.append(InlineKeyboardButton(
                 text=">",
                 callback_data=CallbackData(
                     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
-                    value=data.button_page - 1,
+                    value=cls.data.button_page - 1,
                 ).to_json_str()
             ))
         # end if
@@ -637,7 +634,7 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
-    def get_back_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
+    def get_back_button(cls) -> Union[InlineKeyboardButton, None]:
         # TODO implement
         back: Union[BackButton, Menu] = cls.get_value('back')
         assert isinstance(back, BackButton)
@@ -651,7 +648,7 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
-    def get_cancel_button(cls, data: Data) -> Union[InlineKeyboardButton, None]:
+    def get_cancel_button(cls) -> Union[InlineKeyboardButton, None]:
         # TODO implement
         back: Union[BackButton, Type[Menu]] = cls.get_value('back')
         assert isinstance(back, CancelButton)
@@ -749,7 +746,7 @@ class GotoMenu(ButtonMenu):
     menus: ClassValueOrCallableList['GotoButton']
 
     @classmethod
-    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+    def get_buttons(cls) -> List[InlineKeyboardButton]:
         return [
             InlineKeyboardButton(
                 text=menu.label, callback_data=CallbackData(
@@ -762,15 +759,15 @@ class GotoMenu(ButtonMenu):
     # end def
 
     @classmethod
-    def send_message(cls, bot: Bot, chat_id: Union[int, str], data: Data):
+    def send_message(cls, bot: Bot, chat_id: Union[int, str]):
         bot.send_message(
             chat_id=chat_id,
-            text=cls.get_text(data=data),
+            text=cls.get_text(),
             parse_mode='html',
             disable_web_page_preview=True,
             disable_notification=False,
-            reply_to_message_id=None,
-            reply_markup=cls.get_keyboard(data=data),
+            # reply_to_message_id=None,
+            reply_markup=cls.get_keyboard(),
         )
     # end def
 # end class
@@ -842,6 +839,7 @@ class SelectableButton(Button):
     # end def
 
     def get_label(self, data: Data):
+        """ returns the text for the button """
         return self.STATE_EMOJIS[self.selected] + " " + self.title
     # end def
 # end def
@@ -868,13 +866,12 @@ class SelectableMenu(ButtonMenu):
 
     # noinspection PyShadowingBuiltins
     @classmethod
-    def get_our_buttons(cls, data: Data, key='selectable_buttons') -> List[InlineKeyboardButton]:
+    def get_our_buttons(cls, key='selectable_buttons') -> List[InlineKeyboardButton]:
         """
         Generate InlineKeyboardButton from the buttons.
 
         Yay, D.R.Y. code.
 
-        :param data: The data, just in case.
         :param key: the name of the class variable containing the list of selectable buttons.
         :return: list of inline buttons
         """
@@ -889,7 +886,7 @@ class SelectableMenu(ButtonMenu):
         buttons: List[InlineKeyboardButton] = []
         for selectable_button in selectable_buttons:
             box = InlineKeyboardButton(
-                text=selectable_button.get_label(data=data),
+                text=selectable_button.get_label(),
                 callback_data=CallbackData(
                     type=cls.MENU_TYPE,
                     value=selectable_button.value,
@@ -902,7 +899,7 @@ class SelectableMenu(ButtonMenu):
 
     @classmethod
     @abstractmethod
-    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+    def get_buttons(cls) -> List[InlineKeyboardButton]:
         pass
     # end def
 # end def
@@ -912,13 +909,11 @@ class SelectableMenu(ButtonMenu):
 class CheckboxMenu(SelectableMenu):
     MENU_TYPE = 'checkbox'  # used for CallbackData.type
 
-    data: Dict[str, bool]
-
     checkboxes: ClassValueOrCallable['CheckboxButton']
 
     @classmethod
-    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
-        return cls.get_our_buttons(data, 'checkboxes')
+    def get_buttons(cls) -> List[InlineKeyboardButton]:
+        return cls.get_our_buttons(key='checkboxes')
     # end def
 
     @classmethod
@@ -930,7 +925,7 @@ class CheckboxMenu(SelectableMenu):
         :return:
         """
         button = update.callback_query.data
-        cls.data[button] = not cls.data[button]  # toggle the button.
+        cls.data.menus[cls.id][button] = not cls.data.menus[cls.id][button]  # toggle the button.
     # end def
 # end class
 
@@ -948,8 +943,8 @@ class RadioMenu(SelectableMenu):
     data: str
 
     @classmethod
-    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
-        return cls.get_our_buttons(data, 'radiobuttons')
+    def get_buttons(cls) -> List[InlineKeyboardButton]:
+        return cls.get_our_buttons(key='radiobuttons')
     # end def
 
     @classmethod
@@ -983,31 +978,29 @@ class SendMenu(Menu):
     }
 
     @classmethod
-    def get_buttons(cls, data: Data) -> List[InlineKeyboardButton]:
+    def get_buttons(cls) -> List[InlineKeyboardButton]:
         return []
     # end def
 
     @classmethod
-    def get_keyboard(cls, data: Data) -> ForceReply:
+    def get_keyboard(cls) -> ForceReply:
         """
         We always return a force reply, as we don't do menu now, but just wanna have text/files/media/...
-        :param data:
         :return:
         """
         return ForceReply(selective=True)
     # end def
 
     @classmethod
-    def get_text(cls, data: Data) -> str:
+    def get_text(cls) -> str:
         """
         This is lacking translations, so you might have to overwrite it with your own texts...
-        :param data:
         :return:
         """
-        text = super().get_text(data)
+        text = super().get_text()
         return (
             text + "\n\n" +
-            cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button(data) is not None]
+            cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button() is not None]
         )
     # end def
 # end def
@@ -1024,7 +1017,7 @@ class TextMenu(SendMenu):
 
     @classmethod
     @abstractmethod
-    def _parse(cls, data: Data, text: str) -> JSONType:
+    def _parse(cls, text: str) -> JSONType:
         raise NotImplementedError('Subclasses must implement that.')
     # end def
 
@@ -1045,7 +1038,7 @@ class TextStrMenu(TextMenu):
     MENU_TYPE = 'text_str'  # used for CallbackData.type
 
     @classmethod
-    def _parse(cls, data: Data, text: str) -> JSONType:
+    def _parse(cls, text: str) -> JSONType:
         return text
     # end def
 # end class
@@ -1059,7 +1052,7 @@ class TextIntMenu(TextMenu):
     MENU_TYPE = 'text_int'  # used for CallbackData.type
 
     @classmethod
-    def _parse(cls, data: Data, text: str) -> JSONType:
+    def _parse(cls, text: str) -> JSONType:
         return int(text)
     # end def
 # end class
@@ -1072,7 +1065,7 @@ class TextFloatMenu(TextMenu):
     """
     MENU_TYPE = 'text_float'  # used for CallbackData.type
 
-    def _parse(self, data: Data, text: str) -> float:
+    def _parse(self, text: str) -> float:
         return float(text)
     # end def
 # end class
@@ -1084,7 +1077,7 @@ class TextPasswordMenu(TextMenu):
     A force reply text string which deletes your answer again.
     """
     MENU_TYPE = 'text_password'  # used for CallbackData.type
-    def _parse(self, data: Data, text: str) -> str:
+    def _parse(self, text: str) -> str:
         return text
     # end def
 # end class
@@ -1097,7 +1090,7 @@ class TextEmailMenu(TextMenu):
     """
     MENU_TYPE = 'text_email'  # used for CallbackData.type
 
-    def _parse(self, data: Data, text: str) -> str:
+    def _parse(self, text: str) -> str:
         if "@" not in text or "." not in text:  # TODO: improve validation.
             raise ValueError('No good email.')
         return text
@@ -1193,7 +1186,7 @@ class TestCheckboxMenu(CheckboxMenu):
     description = "The shopping list for {now.format('dd.mm.yyyy')!s}"
 
     @staticmethod
-    def checkboxes(cls: CheckboxMenu, data: Data) -> List[CheckboxButton]:
+    def checkboxes(cls: CheckboxMenu) -> List[CheckboxButton]:
         x: TeleMenuInstancesItem = cls._state_instance
         s: TeleState = x.state.CURRENT
         n: str = cls.id
