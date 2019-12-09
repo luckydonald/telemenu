@@ -1294,7 +1294,9 @@ print('breakpoint')
 telemenu.instances['TEST_MAIN_MENU']
 telemenu.instances['TEST_MAIN_MENU'].menu
 telemenu.instances['TEST_MAIN_MENU'].menu.activate()
-assert telemenu.instances[TestMainMenu.id] == telemenu.get_current_menu()
+print(telemenu.instances[TestMainMenu.id])
+print(telemenu.get_current_menu())
+assert telemenu.instances[TestMainMenu.id].menu == telemenu.get_current_menu()
 telemenu.states.CURRENT.data
 telemenu.states.CURRENT
 telemenu.get_current_menu()
@@ -1302,7 +1304,7 @@ telemenu.get_current_menu()
 telemenu.get_current_menu().get_value('title')
 telemenu.get_current_menu().get_value('title')
 telemenu.get_current_menu().title
-f = telemenu.get_current_menu().menu.title
+f = telemenu.get_current_menu().title
 inspect.signature(f)
 # ba = s.bind(telemenu.get_current_menu().menu, "!test")
 
