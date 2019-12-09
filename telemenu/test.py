@@ -312,7 +312,7 @@ class Menu(object):
     CALLBACK_DONE_BUTTON_TYPE = 'done'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
-    _state_instance: ClassVar[TeleMenuInstancesItem]
+    _state_instance: Union[ClassVar[TeleMenuInstancesItem], TeleMenuInstancesItem]
     _data: Data = None
 
     # noinspection PyMethodParameters
@@ -734,6 +734,7 @@ class Button(object):
 
     @abstractmethod
     def get_label(self, data: Data):
+        """ returns the text for the button """
         pass
     # end def
 # end class
