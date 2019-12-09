@@ -321,7 +321,7 @@ class Menu(object):
     def data(cls: Type['Menu']):
         if cls.__data is None:
             # TODO: this would never sync, that can't be intended.
-            __data = Data.from_json(cls._state_instance.state.data)
+            cls.__data = Data.from_json(cls._state_instance.state.data)
         # end if
         return cls.__data
     # end def
@@ -454,7 +454,7 @@ class Menu(object):
             if 'data' in sig.parameters:
                 # some_var = some_function(data=None)
                 first_param: inspect.Parameter = list(sig.parameters.values())[0]
-                if 'cls' in sig.parameters or issubclass(first_param.annotation, Menu):
+                if 'cls' in sig.parameters or isinstance(first_param.annotation, type) and issubclass(first_param.annotation, Menu):
                     return value(data=data)
                 return value(data=data)
             elif len(sig.parameters) == 1:
