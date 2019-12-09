@@ -167,7 +167,7 @@ class TeleMenuMachine(object):
     def register(self, menu_to_register: Type['Menu']) -> Type['Menu']:
         """
         Creates a TeleState for the class and registers the overall menu loading structure..
-        Note that the `_id` attribute can be used to overwrite the custom name, that is
+        Note that the `id` attribute can be used to overwrite the custom name with a different function.
         :param menu_to_register: The menu to register
         :return: the class again, unchanged.
         """
@@ -178,8 +178,8 @@ class TeleMenuMachine(object):
             )
         # end if
 
-        # if menu._id should exist but can be overridden/overwritten by the subclass.
-        name = menu_to_register.get_value("_id")  # parameter data = old name (uppersnake class name)
+        # def menu.id can be overridden by the subclass.
+        name = menu_to_register.id  # parameter data = old name (uppersnake class name)
 
         if name in self.instances:
             raise ValueError(f'A class with name {name!r} is already registered.')
@@ -313,17 +313,16 @@ class Menu(object):
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
     _state_instance: ClassVar[TeleMenuInstancesItem]
-    _id: OptionalClassValueOrCallable[str]
-    __data: Data = None
+    _data: Data = None
 
     # noinspection PyMethodParameters
     @classproperty
     def data(cls: Type['Menu']):
-        if cls.__data is None:
+        if cls._data is None:
             # TODO: this would never sync, that can't be intended.
-            cls.__data = Data.from_json(cls._state_instance.state.data)
+            cls._data = Data.from_json(cls._state_instance.state.data)
         # end if
-        return cls.__data
+        return cls._data
     # end def
 
     # noinspection PyMethodParameters
@@ -335,14 +334,20 @@ class Menu(object):
     @classmethod
     def store_data(cls: Type['Menu'], data: Data):
         assert isinstance(data, Data)
-        cls.__data = data
-        cls._state_instance.state.data = cls.__data
+        cls._data = data
+        cls._state_instance.state.data = cls._data
     # emd def
 
-    @classmethod
-    @property
+    # noinspection PyMethodParameters
+    @classproperty
     def id(cls) -> str:
-        return cls.get_value('_id')
+        """
+        Returns a unique name for this menu.
+        Name must be capslock and otherwise only contain numbers and the underscore.
+
+        :return: the name to use
+        """
+        return convert_to_underscore(cls.__name__).upper()
     # end def
 
     @classmethod
@@ -368,17 +373,6 @@ class Menu(object):
         :return:
         """
         cls._activate()
-    # end def
-
-    @classmethod
-    def _id(cls, data: None):
-        """
-        Returns a unique name for this menu.
-        Name must be capslock and otherwise only contain numbers and the underscore.
-
-        :return: the name to use
-        """
-        return convert_to_underscore(cls.__name__).upper()
     # end def
 
     title: OptionalClassValueOrCallable[str]
@@ -796,8 +790,8 @@ class GotoButton(Button):
     # end def
 
     @property
-    def id(self, data: Data) -> str:
-        return self.menu.get_value('_id')
+    def id(self) -> str:
+        return self.menu.id
     # end def
 # end class
 
@@ -1202,7 +1196,7 @@ class TestCheckboxMenu(CheckboxMenu):
     def checkboxes(cls: CheckboxMenu, data: Data) -> List[CheckboxButton]:
         x: TeleMenuInstancesItem = cls._state_instance
         s: TeleState = x.state.CURRENT
-        n: str = cls.get_value('_id')
+        n: str = cls.id
         s.data = Data(menus={n: MenuData(message_id=123, page=0, )})
         return [
             CheckboxButton(title='Eggs', selected=True, value='eggs'),
