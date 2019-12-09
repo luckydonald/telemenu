@@ -329,8 +329,20 @@ class Menu(object):
     # noinspection PyMethodParameters
     @data.setter
     def set_data(cls: Type['Menu'], data: Data):
+        cls.store_data(data)
+    # end def
+
+    @classmethod
+    def store_data(cls: Type['Menu'], data: Data):
         assert isinstance(data, Data)
         cls.__data = data
+        cls._state_instance.state.data = cls.__data
+    # emd def
+
+    @classmethod
+    @property
+    def id(cls) -> str:
+        return cls.get_value('_id', data=data)
     # end def
 
     @classmethod
