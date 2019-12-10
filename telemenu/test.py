@@ -377,38 +377,6 @@ class Menu(object):
         cls._activate()
     # end def
 
-    title: OptionalClassValueOrCallable[str]
-    description: OptionalClassValueOrCallable[str]
-    done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu', 'GotoButton']]
-    back: OptionalClassValueOrCallable[Union['BackButton', 'Menu', 'GotoButton']]
-    cancel: OptionalClassValueOrCallable[Union['CancelButton', 'Menu', 'GotoButton']]
-
-    @classmethod
-    @abstractmethod
-    def get_text(cls) -> str:
-        text = ""
-        title = cls.get_value('title')
-        if title:
-            text += f"<b>{escape(title)}</b>\n"
-        # end if
-        description = cls.get_value('description')
-        if description:
-            text += f"{escape(description)}\n"
-        # end if
-        # text += f"<i>Selected: {escape(description)}</i>\n"
-        return text
-    # end def
-
-    @classmethod
-    @abstractmethod
-    def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
-        """
-        This funtion is responsible for returning the `reply_markup` parameter,
-        as used in pytgbot.Bot.send_message and other send_* methods.
-        """
-        pass
-    # end def
-
     @classmethod
     def get_value(cls, key):
         """
@@ -508,6 +476,38 @@ class Menu(object):
         :return:
         """
         cls._state_instance = instance_item
+    # end def
+
+    title: OptionalClassValueOrCallable[str]
+    description: OptionalClassValueOrCallable[str]
+    done: OptionalClassValueOrCallable[Union['DoneButton', 'Menu', 'GotoButton']]
+    back: OptionalClassValueOrCallable[Union['BackButton', 'Menu', 'GotoButton']]
+    cancel: OptionalClassValueOrCallable[Union['CancelButton', 'Menu', 'GotoButton']]
+
+    @classmethod
+    @abstractmethod
+    def get_text(cls) -> str:
+        text = ""
+        title = cls.get_value('title')
+        if title:
+            text += f"<b>{escape(title)}</b>\n"
+        # end if
+        description = cls.get_value('description')
+        if description:
+            text += f"{escape(description)}\n"
+        # end if
+        # text += f"<i>Selected: {escape(description)}</i>\n"
+        return text
+    # end def
+
+    @classmethod
+    @abstractmethod
+    def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
+        """
+        This funtion is responsible for returning the `reply_markup` parameter,
+        as used in pytgbot.Bot.send_message and other send_* methods.
+        """
+        pass
     # end def
 # end class
 
