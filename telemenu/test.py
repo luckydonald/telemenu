@@ -15,6 +15,7 @@ from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
+from telestate.contrib.simple import TeleMachineSimpleDict
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from pytgbot.api_types.receivable.updates import Update
@@ -150,17 +151,38 @@ class TeleMenuInstancesItem(object):
 # end class
 
 
+# TODO: rewrite (de)serialize logic/extendability in the Telemachine class to be separate form the database driver.
+# TODO: maybe the drivers should be separate instead, and it's like `telemachine = Telemachine(driver=SimpleDictDBDriver).
+class TeleMenuStateMachine(TeleMachineSimpleDict):
+    """
+    Normal TeleStateMachine, but with custom (de)serialisation methods,
+    directly converting it to and from the `Data` type.
+    """
+    @staticmethod
+    def deserialize(state_name, db_data):
+        array = super().deserialize(state_name, db_data)
+        return Data.from_json(array)
+    # end def
+
+    @staticmethod
+    def serialize(state_name, state_data: 'Data'):
+        data = state_data.to_json()
+        return super().serialize(state_name, data)
+    # end def
+# end class
+
+
 @dataclass(init=False, repr=True)
 class TeleMenuMachine(object):
     instances: Dict[str, TeleMenuInstancesItem]
-    states: TeleMachine
+    states: TeleMenuStateMachine
 
-    def __init__(self, states: TeleMachine = None):
-        assert_type_or_raise(states, TeleMachine, None, parameter_name='states')
+    def __init__(self, states: TeleMenuStateMachine = None):
+        assert_type_or_raise(states, TeleMenuStateMachine, None, parameter_name='states')
         self.instances = {}
         self.states = states
         if not self.states:
-            self.states = TeleMachine(__name__)
+            self.states = TeleMenuStateMachine(__name__)
         # end def
     # end def
 
@@ -248,6 +270,7 @@ class MenuData(object):
 # end class
 
 
+# TODO: there is needed a way to add your own stuff, e.g. you have other states than only menus...
 class Data(object):
     menus: Dict[str, MenuData]  # keys are IDs.
     history: List[str]  # stack of IDs.
