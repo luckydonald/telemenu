@@ -738,6 +738,12 @@ class Button(object):
         """ returns the text for the button """
         pass
     # end def
+
+    @abstractmethod
+    def get_callback_data(self, data: Data) -> CallbackData:
+        """ returns the button data to identify the button. """
+        pass
+    # end def
 # end class
 
 
@@ -792,6 +798,13 @@ class GotoButton(Button):
     def id(self) -> str:
         return self.menu.id
     # end def
+
+    def get_callback_data(self, data: Data) -> CallbackData:
+        return CallbackData(
+            type=Menu.CALLBACK_BACK_BUTTON_TYPE,
+            value=self.id,
+        )
+    # end def
 # end class
 
 
@@ -812,6 +825,18 @@ class DoneButton(GotoButton):
 class BackButton(Button):
     label: ClassValueOrCallable[str] = "Back"  # todo: multi-language
     id: Union[str, None] = None
+
+    @property
+    def id(self) -> str:
+        return self.menu.id
+    # end def
+
+    def get_callback_data(self, data: Data) -> CallbackData:
+        return CallbackData(
+            type=Menu.CALLBACK_DONE_BUTTON_TYPE,
+            value=self.id,
+        )
+    # end def
 # end class
 
 
