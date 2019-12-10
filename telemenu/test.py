@@ -413,8 +413,8 @@ class Menu(object):
         """
         instance: TeleMenuInstancesItem = cls._state_instance
         if add_history_entry is None:
-            # None: Add history automatically, if we're not the active menu already.
-            add_history_entry = cls.data.history[-1] != cls.id
+            # None: Add history automatically, if we're not the active menu already, especially if the list is empty.
+            add_history_entry = len(cls.data.history) == 0 or cls.data.history[-1] != cls.id
         if add_history_entry:
             cls.data.history.append(cls.id)
         # end if
