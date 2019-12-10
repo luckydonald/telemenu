@@ -370,6 +370,24 @@ class Menu(object):
         return convert_to_underscore(cls.__name__).upper()
     # end def
 
+    # noinspection PyMethodParameters
+    @classmethod
+    def get_last_menu(cls, pop=True) -> Union[None, Type['Menu']]:
+        """
+        Returns the previous menu in the history, or None if there is none.
+        :return:
+        """
+        if not cls.data.history:
+            return None
+        # end if
+        if pop:
+            cls.data.history.pop(-1)
+        else:
+            last_menu_name = cls.data.history[-1]
+        # end if
+        return cls._state_instance.machine.instances[last_menu_name]
+    # end def
+
     @classmethod
     def _activate(cls):
         instance: TeleMenuInstancesItem = cls._state_instance
