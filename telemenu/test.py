@@ -342,11 +342,7 @@ class Menu(object):
     # noinspection PyMethodParameters
     @classproperty
     def data(cls: Type['Menu']) -> Data:
-        if cls._data is None:
-            # TODO: this would never sync, that can't be intended.
-            cls._data = Data.from_json(cls._state_instance.state.data)
-        # end if
-        return cls._data
+        return cls._state_instance.state.data
     # end def
     data: Data
 
@@ -359,7 +355,6 @@ class Menu(object):
     @classmethod
     def store_data(cls: Type['Menu'], data: Data):
         assert isinstance(data, Data)
-        cls._data = data
         cls._state_instance.state.data = cls._data
     # emd def
 
