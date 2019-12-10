@@ -313,7 +313,7 @@ class Menu(object):
     CALLBACK_BACK_BUTTON_TYPE = 'back'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
-    _state_instance: Union[ClassVar[TeleMenuInstancesItem], TeleMenuInstancesItem]
+    _state_instance: ClassVar[Union[TeleMenuInstancesItem, TeleMenuInstancesItem]]
     _data: Data = None
 
     # noinspection PyMethodParameters
