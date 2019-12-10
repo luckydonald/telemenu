@@ -380,10 +380,11 @@ class Menu(object):
         if not cls.data.history:
             return None
         # end if
+        current_menu_name = cls.data.history[-1]
+        assert current_menu_name == cls.id
+        last_menu_name = cls.data.history[-2]
         if pop:
             cls.data.history.pop(-1)
-        else:
-            last_menu_name = cls.data.history[-1]
         # end if
         return cls._state_instance.machine.instances[last_menu_name]
     # end def
