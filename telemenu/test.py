@@ -545,6 +545,10 @@ class Menu(object):
     @classmethod
     @abstractmethod
     def get_text(cls) -> str:
+        """
+        This function returns the HTML formatted text for the button.
+        :return:
+        """
         text = ""
         title = cls.get_value('title')
         if title:
@@ -932,6 +936,9 @@ class SelectableButton(Button):
 
 @dataclass(init=False, eq=False, repr=True)
 class SelectableMenu(ButtonMenu):
+    """
+    Menu for the option to choose one from many.
+    """
     MENU_TYPE = 'selectable_menu'  # used for CallbackData.type
 
     title: str
