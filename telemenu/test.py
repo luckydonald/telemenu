@@ -260,7 +260,7 @@ class MenuData(object):
     # end def
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, data: Dict[str, JSONType]) -> 'Data':
         return cls(
             message_id=data['message_id'],
             page=data['page'],
@@ -280,7 +280,7 @@ class Data(object):
         self.history = [] if history is None else history
     # end def
 
-    def to_json(self):
+    def to_json(self) -> Dict[str, JSONType]:
         return {
             "menus": self.menus,
             "history": self.history,
@@ -288,7 +288,7 @@ class Data(object):
         # end def
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, data: Dict[str, JSONType]) -> 'Data':
         return cls(
             menus={k: MenuData.from_json(v) for k, v in data['menus'].items()},
             history=data['history'],
@@ -816,6 +816,13 @@ class GotoMenu(ButtonMenu):
     menus: ClassValueOrCallableList['GotoButton']
 
     @classmethod
+    @abstractmethod
+    def menus(cls) -> List['GotoButton']:
+        pass
+    # end def
+
+
+    @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
         return [
             InlineKeyboardButton(
@@ -866,6 +873,10 @@ class GotoButton(Button):
             type=Menu.CALLBACK_BACK_BUTTON_TYPE,
             value=self.id,
         )
+    # end def
+
+    def get_label(self, data: Data):
+        return self.label
     # end def
 # end class
 
@@ -1402,6 +1413,8 @@ telemenu.get_current_menu().get_value('title')
 telemenu.get_current_menu().title
 f = telemenu.get_current_menu().title
 inspect.signature(f)
+TestCheckboxMenu.activate()
+telemenu.get_current_menu() == TestCheckboxMenu
 # ba = s.bind(telemenu.get_current_menu().menu, "!test")
 
 class BotMock(object):
