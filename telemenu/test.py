@@ -160,7 +160,10 @@ class TeleMenuStateMachine(TeleMachineSimpleDict):
     """
     @staticmethod
     def deserialize(state_name, db_data):
-        array = super().deserialize(state_name, db_data)
+        array: Union[Dict[str, JSONType], None] = super().deserialize(state_name, db_data)
+        if array is None:
+            return Data(menus=[], history=[])
+        # end if
         return Data.from_json(array)
     # end def
 
@@ -342,6 +345,13 @@ class Menu(object):
     # noinspection PyMethodParameters
     @classproperty
     def data(cls: Type['Menu']) -> Data:
+        if cls._state_instance is None:
+            # we're called by the @dataclasses class inspector
+            return None
+        # end if
+        if cls._state_instance.state.data is None:
+            return Data(menus={}, history=[])
+        # end if
         return cls._state_instance.state.data
     # end def
     data: Data
