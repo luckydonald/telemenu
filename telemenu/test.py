@@ -251,7 +251,7 @@ class MenuData(object):
         self.data = data
     # end def
 
-    def to_json(self):
+    def to_json(self) -> Dict[str, JSONType]:
         return {
             "message_id": self.message_id,
             "page": self.page,
@@ -275,7 +275,7 @@ class Data(object):
     menus: Dict[str, MenuData]  # keys are IDs.
     history: List[str]  # stack of IDs.
 
-    def __init__(self, menus=None, history=None):
+    def __init__(self, menus: Dict[str, JSONType] = None, history: List[str] = None):
         self.menus = {} if menus is None else menus
         self.history = [] if history is None else history
     # end def
