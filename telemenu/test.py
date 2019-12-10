@@ -310,6 +310,7 @@ class Menu(object):
     """
     MENU_TYPE = 'menu'  # used for CallbackData.type
     CALLBACK_DONE_BUTTON_TYPE = 'done'
+    CALLBACK_BACK_BUTTON_TYPE = 'back'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
     _state_instance: Union[ClassVar[TeleMenuInstancesItem], TeleMenuInstancesItem]
@@ -636,10 +637,10 @@ class ButtonMenu(Menu):
     @classmethod
     def get_back_button(cls) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        back: Union[BackButton, Menu] = cls.get_value('back')
-        assert isinstance(back, BackButton)
+        last_menu = cls.get_last_menu()
+        assert isinstance(last_menu, BackButton)
         return InlineKeyboardButton(
-            text=back.label,
+            text=last_menu.label,
             callback_data=CallbackData(
                 type=cls.CALLBACK_DONE_BUTTON_TYPE,
                 value=None,
@@ -752,7 +753,7 @@ class GotoMenu(ButtonMenu):
             InlineKeyboardButton(
                 text=menu.label, callback_data=CallbackData(
                     type=cls.MENU_TYPE,
-                    value=menu.menu.get_value('id'),
+                    value=menu.menu.id if isinstance(menu, GotoButton) else menu.id,
                 ).to_json_str()
             )
             for menu in cls.get_value('menus')
