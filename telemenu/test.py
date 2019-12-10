@@ -390,19 +390,40 @@ class Menu(object):
     # end def
 
     @classmethod
-    def _activate(cls):
+    def _activate(cls, add_history_entry: Union[bool, None] = None):
+        """
+        Activates the underlying state of the menu, and copies over the data to the new state.
+
+        :param add_history_entry: If we should add to the menu history.
+                                  `None` (default): Automatically add the new menu to the history, if that's not the active menu already.
+                                  `True`: Forcefully add the menu to the history, even if we are activating the menu we're already are on.
+                                  `False`: Don't append to the history.
+        :type  add_history_entry: bool|None
+        :return:
+        """
         instance: TeleMenuInstancesItem = cls._state_instance
-        data: JSONType = instance.machine.states.CURRENT.data
-        instance.state.activate(data)
+        if add_history_entry is None:
+            # None: Add history automatically, if we're not the active menu already.
+            add_history_entry = cls.data.history[-1] != cls.id
+        if add_history_entry:
+            cls.data.history.append(cls.id)
+        # end if
+        instance.state.activate(cls.data)
     # end def
 
     @classmethod
-    def activate(cls):
+    def activate(cls, add_history_entry: Union[bool, None] = None):
         """
-        Activates the underlaying state of the menu, and copies over the data.
+        Activates the underlying state of the menu, and copies over the data to the new state.
+
+        :param add_history_entry: If we should add to the menu history.
+                                  `None` (default): Automatically add the new menu to the history, if that's not the active menu already.
+                                  `True`: Forcefully add the menu to the history, even if we are activating the menu we're already are on.
+                                  `False`: Don't append to the history.
+        :type  add_history_entry: bool|None
         :return:
         """
-        cls._activate()
+        cls._activate(add_history_entry=add_history_entry)
     # end def
 
     @classmethod
