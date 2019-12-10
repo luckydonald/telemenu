@@ -884,7 +884,7 @@ class DoneButton(GotoButton):
 
 
 @dataclass
-class BackButton(Button):
+class BackButton(GotoButton):
     label: ClassValueOrCallable[str] = "Back"  # todo: multi-language
     id: Union[str, None] = None
 
