@@ -385,7 +385,8 @@ class Menu(object):
             return None
         # end if
         if cls._state_instance.state.data is None:
-            return Data(menus={}, history=[])
+            # initialize the data for menus.
+            cls._state_instance.state.data = Data(menus={}, history=[])
         # end if
         return cls._state_instance.state.data
     # end def
