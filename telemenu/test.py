@@ -1097,7 +1097,7 @@ class SelectableMenu(ButtonMenu):
         buttons: List[InlineKeyboardButton] = []
         for selectable_button in selectable_buttons:
             box = InlineKeyboardButton(
-                text=selectable_button.get_label(),
+                text=selectable_button.get_label(data=cls.data),
                 callback_data=CallbackData(
                     type=cls.MENU_TYPE,
                     value=selectable_button.value,
