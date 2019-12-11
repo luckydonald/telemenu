@@ -240,6 +240,29 @@ class TeleMenuMachine(object):
         # end if
         return self.instances[state.name].menu
     # end def
+
+    # noinspection PyMethodParameters
+    def get_last_menu(self, activate=False) -> Union[None, Type['Menu']]:
+        """
+        Returns the previous menu in the history, or None if there is none.
+        :return:
+        """
+        if not self.states.CURRENT.data.history:
+            return None
+        # end if
+        current_menu_name = self.get_current_menu().id
+        most_recent_menu_name = self.states.CURRENT.data.history[-1]
+        assert most_recent_menu_name == current_menu_name  # fail = the current state was not added to the history
+        last_menu_name = self.states.CURRENT.data.history[-2]
+        if activate:
+            self.states.CURRENT.data.history.pop(-1)
+        # end if
+        last_menu = self.instances[last_menu_name].menu
+        if activate:
+            last_menu.activate(add_history_entry=False)  # history already added, we're just jumping back
+        # end if
+        return last_menu
+    # end def
 # end class
 
 
@@ -413,21 +436,12 @@ class Menu(object):
 
     # noinspection PyMethodParameters
     @classmethod
-    def get_last_menu(cls, pop=True) -> Union[None, Type['Menu']]:
+    def get_last_menu(cls, activate=False) -> Union[None, Type['Menu']]:
         """
         Returns the previous menu in the history, or None if there is none.
         :return:
         """
-        if not cls.data.history:
-            return None
-        # end if
-        current_menu_name = cls.data.history[-1]
-        assert current_menu_name == cls.id
-        last_menu_name = cls.data.history[-2]
-        if pop:
-            cls.data.history.pop(-1)
-        # end if
-        return cls._state_instance.machine.instances[last_menu_name]
+        return cls._state_instance.machine.get_last_menu(activate=activate)
     # end def
 
     @classmethod
