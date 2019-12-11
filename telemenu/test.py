@@ -448,13 +448,21 @@ class Menu(object):
         :return:
         """
         instance: TeleMenuInstancesItem = cls._state_instance
+        data = cls._state_instance.machine.states.CURRENT.data
+        if data is None:
+            data = Data()
+        # end if
         if add_history_entry is None:
             # None: Add history automatically, if we're not the active menu already, especially if the list is empty.
-            add_history_entry = len(cls.data.history) == 0 or cls.data.history[-1] != cls.id
-        if add_history_entry:
-            cls.data.history.append(cls.id)
+            add_history_entry = len(data.history) == 0 or data.history[-1] != cls.id
         # end if
-        instance.state.activate(cls.data)
+        if add_history_entry:
+            data.history.append(cls.id)
+        # end if
+        if cls.id not in data.menus:
+            data.menus[cls.id] = MenuData()
+        # end if
+        instance.state.activate(data)
     # end def
 
     @classmethod
