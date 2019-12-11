@@ -244,11 +244,11 @@ class TeleMenuMachine(object):
 
 
 class MenuData(object):
-    message_id: int
+    message_id: Union[int, None]
     page: int
     data: JSONType
 
-    def __init__(self, message_id: int, page: int = 0, data: JSONType = None):
+    def __init__(self, message_id: Union[int, None] = None, page: int = 0, data: JSONType = None):
         self.message_id = message_id
         self.page = page
         self.data = data
