@@ -1477,7 +1477,11 @@ telemenu.get_current_menu().title
 f = telemenu.get_current_menu().title
 inspect.signature(f)
 TestCheckboxMenu.activate()
+assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU']
 telemenu.get_current_menu() == TestCheckboxMenu
+assert telemenu.get_last_menu() == TestMainMenu
+telemenu.get_last_menu(activate=True)
+assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
 # ba = s.bind(telemenu.get_current_menu().menu, "!test")
 
 class BotMock(object):
