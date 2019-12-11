@@ -75,7 +75,7 @@ class Example(object):
         return "(8 staticmethod)\nPage " + str(data.button_page)
     # end def
 
-    def get_value(cls, key):
+    def get_value_by_name(cls, key):
         return Menu.get_value_by_name(cls, key)
     # end def
 
@@ -86,37 +86,37 @@ class Example(object):
     def test_var0(self):
         data = Data()
         data.button_page = 123
-        self.assertEqual(self.get_value('var0'), "(0 normal def)\nPage 123")
+        self.assertEqual(self.get_value_by_name('var0'), "(0 normal def)\nPage 123")
     # end def
 
     def test_var1(self):
         data = Data()
         data.button_page = 123
-        self.assertEqual(self.get_value('var1'), "(1 normal str)\nPage 123")
+        self.assertEqual(self.get_value_by_name('var1'), "(1 normal str)\nPage 123")
     # end def
 
     def test_var2(self):
         data = Data()
         data.button_page = 123
-        self.assertEqual(self.get_value('var2'), "(2 lambda)\nPage 123")
+        self.assertEqual(self.get_value_by_name('var2'), "(2 lambda)\nPage 123")
     # end def
 
     def test_var3(self):
         data = Data()
         data.button_page = 123
-        self.assertEqual(self.get_value('var3'), "(3 classmethod)\nPage 123")
+        self.assertEqual(self.get_value_by_name('var3'), "(3 classmethod)\nPage 123")
     # end def
 
     def test_var5(self):
         data = Data()
         data.button_page = 123
-        self.assertEqual(self.get_value('var5'), "(5 classmethod)\nPage 123")
+        self.assertEqual(self.get_value_by_name('var5'), "(5 classmethod)\nPage 123")
     # end def
 
     def test_var6(self):
         data = Data()
         data.button_page = 123
-        self.assertEqual(self.get_value('var6'), "(6 property)\nPage 123")
+        self.assertEqual(self.get_value_by_name('var6'), "(6 property)\nPage 123")
     # end def
 # end class
 
