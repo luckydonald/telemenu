@@ -409,6 +409,7 @@ class Menu(object):
         return cls._state_instance.state.data
     # end def
     data: ClassVar[Data]
+    data: Data
 
     @classproperty
     def menu_data(cls: Type['Menu']) -> Union[MenuData, None]:
@@ -556,6 +557,7 @@ class Menu(object):
             return value()
         # end if
         if is_class_method(value):
+            value: Callable
             # @classmethod
             # def some_func(cls, data)
             sig = inspect.signature(value)
@@ -653,7 +655,7 @@ class Menu(object):
     @abstractmethod
     def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
         """
-        This funtion is responsible for returning the `reply_markup` parameter,
+        This funktion is responsible for returning the `reply_markup` parameter,
         as used in pytgbot.Bot.send_message and other send_* methods.
         """
         pass
