@@ -375,18 +375,13 @@ class Menu(object):
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
     _state_instance: ClassVar[Union[TeleMenuInstancesItem, TeleMenuInstancesItem]]
-    _data: Data = None
 
     # noinspection PyMethodParameters
     @classproperty
-    def data(cls: Type['Menu']) -> Data:
+    def data(cls: Type['Menu']) -> Union[Data, None]:
         if cls._state_instance is None:
             # we're called by the @dataclasses class inspector
             return None
-        # end if
-        if cls._state_instance.state.data is None:
-            # initialize the data for menus.
-            cls._state_instance.state.data = Data(menus={}, history=[])
         # end if
         return cls._state_instance.state.data
     # end def
