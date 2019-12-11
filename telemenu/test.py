@@ -410,6 +410,16 @@ class Menu(object):
     # end def
     data: ClassVar[Data]
 
+    @classproperty
+    def menu_data(cls: Type['Menu']) -> Union[MenuData, None]:
+        if cls.data is None:
+            return None
+        if cls.id not in cls.data.menus:
+            return None
+        # end if
+        return cls.data.menus[cls.id]
+    # end def
+
     # noinspection PyPropertyDefinition,PyMethodParameters
     @data.setter
     def data(cls: Type['Menu'], data: Union[Data, None]):
