@@ -3,7 +3,6 @@
 import inspect
 import unittest
 
-import inspect_mate
 import json
 import re
 from abc import abstractmethod
@@ -21,6 +20,7 @@ from luckydonaldUtils.exceptions import assert_type_or_raise
 from pytgbot.api_types.receivable.updates import Update
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 from .utils import convert_to_underscore
+from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
 
 __author__ = 'luckydonald'
 
@@ -548,7 +548,7 @@ class Menu(object):
             # some_var = some_function()
             return value()
             # end if
-        if inspect_mate.is_regular_method(cls, key):
+        if is_regular_method(value):
             # def some_func(self, ...)
             sig = inspect.signature(value)
             if 'data' in sig.parameters:
@@ -557,7 +557,7 @@ class Menu(object):
                 # end if
             return value(self=cls)
         # end if
-        if inspect_mate.is_static_method(cls, key):
+        if is_static_method(value):
             # @staticmethod
             # def some_func(...):
             sig = inspect.signature(value)
@@ -567,7 +567,7 @@ class Menu(object):
             # end if
             return value()
         # end if
-        if inspect_mate.is_property_method(cls, key):
+        if is_property_method(value):
             # @property
             # def some_func(self):
             sig = inspect.signature(value)
