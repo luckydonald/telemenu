@@ -141,7 +141,7 @@ class TeleMenuInstancesItem(object):
 
     @property
     def global_data(self) -> 'Data':
-        return Data.from_json(self.state.data)
+        return Data.from_dict(self.state.data)
     # end def
 
     @property
@@ -164,12 +164,12 @@ class TeleMenuStateMachine(TeleMachineSimpleDict):
         if array is None:
             return Data(menus=[], history=[])
         # end if
-        return Data.from_json(array)
+        return Data.from_dict(array)
     # end def
 
     @staticmethod
     def serialize(state_name, state_data: 'Data'):
-        data = state_data.to_json()
+        data = state_data.to_dict()
         return super().serialize(state_name, data)
     # end def
 # end class
@@ -254,7 +254,7 @@ class MenuData(object):
         self.data = data
     # end def
 
-    def to_json(self) -> Dict[str, JSONType]:
+    def to_dict(self) -> Dict[str, JSONType]:
         return {
             "message_id": self.message_id,
             "page": self.page,
@@ -263,7 +263,7 @@ class MenuData(object):
     # end def
 
     @classmethod
-    def from_json(cls, data: Dict[str, JSONType]) -> 'Data':
+    def from_dict(cls, data: Dict[str, JSONType]) -> 'Data':
         return cls(
             message_id=data['message_id'],
             page=data['page'],
@@ -283,7 +283,7 @@ class Data(object):
         self.history = [] if history is None else history
     # end def
 
-    def to_json(self) -> Dict[str, JSONType]:
+    def to_dict(self) -> Dict[str, JSONType]:
         return {
             "menus": self.menus,
             "history": self.history,
@@ -291,9 +291,9 @@ class Data(object):
         # end def
 
     @classmethod
-    def from_json(cls, data: Dict[str, JSONType]) -> 'Data':
+    def from_dict(cls, data: Dict[str, JSONType]) -> 'Data':
         return cls(
-            menus={k: MenuData.from_json(v) for k, v in data['menus'].items()},
+            menus={k: MenuData.from_dict(v) for k, v in data['menus'].items()},
             history=data['history'],
         )
     # end def
