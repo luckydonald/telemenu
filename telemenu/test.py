@@ -389,14 +389,14 @@ class Menu(object):
 
     # noinspection PyMethodParameters
     @data.setter
-    def set_data(cls: Type['Menu'], data: Data):
+    def set_data(cls: Type['Menu'], data: Union[Data, None]):
         cls.store_data(data)
     # end def
 
     @classmethod
-    def store_data(cls: Type['Menu'], data: Data):
-        assert isinstance(data, Data)
-        cls._state_instance.state.data = cls._data
+    def store_data(cls: Type['Menu'], data: Union[Data, None]):
+        assert isinstance(data, Data) or data is None
+        cls._state_instance.state.data = data
     # emd def
 
     # noinspection PyMethodParameters
