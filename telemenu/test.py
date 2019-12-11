@@ -1218,6 +1218,15 @@ class SendMenu(Menu):
     def get_back_button(cls) -> Union[None, BackButton]:
         pass
     # end def
+
+    @classmethod
+    def reply_markup(cls) -> Union[None, ReplyMarkup]:
+        return ForceReply(selective=True)
+    # end def
+
+    @classmethod
+    def send_message(cls, bot: Bot, chat_id: int) -> Message:
+        pass
 # end class
 
 
