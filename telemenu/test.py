@@ -1527,6 +1527,14 @@ telemenu.get_current_menu() == TestCheckboxMenu
 assert telemenu.get_last_menu() == TestMainMenu
 telemenu.get_last_menu(activate=True)
 assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
+assert (
+    telemenu.get_current_menu().get_value(telemenu.get_current_menu().text)
+    ==
+    telemenu.get_current_menu().get_value_by_name('text')
+)
+TestTextUrlMenu.activate()
+menu = telemenu.get_current_menu()
+assert isinstance(menu.reply_markup(), ForceReply)
 # ba = s.bind(telemenu.get_current_menu().menu, "!test")
 
 
