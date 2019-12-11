@@ -387,9 +387,9 @@ class Menu(object):
     # end def
     data: Data
 
-    # noinspection PyMethodParameters
+    # noinspection PyPropertyDefinition,PyMethodParameters
     @data.setter
-    def set_data(cls: Type['Menu'], data: Union[Data, None]):
+    def data(cls: Type['Menu'], data: Union[Data, None]):
         cls.store_data(data)
     # end def
 
