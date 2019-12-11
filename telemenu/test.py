@@ -660,6 +660,25 @@ class Menu(object):
         """
         pass
     # end def
+
+    @classmethod
+    @abstractmethod
+    def send_message(cls, bot: Bot, chat_id: int) -> Message:
+        """
+        This function sends a message to a chat ID and stores the information about it in `menu.data.menus[menu.id].message_id`.
+
+        :param chat_id:
+        :return:
+        """
+        bot.send_message(
+            chat_id=chat_id,
+            text=cls.get_value(cls.text),
+            parse_mode='html',
+            disable_web_page_preview=True,
+            disable_notification=False,
+            # reply_to_message_id=None,
+            reply_markup=cls.get_value(cls.reply_markup),
+        )
 # end class
 
 
