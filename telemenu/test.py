@@ -76,7 +76,7 @@ class Example(object):
     # end def
 
     def get_value(cls, key):
-        return Menu.get_value(cls, key)
+        return Menu.get_value_by_name(cls, key)
     # end def
 
     def assertEqual(self, a, b):
@@ -499,7 +499,7 @@ class Menu(object):
     # end def
 
     @classmethod
-    def get_value(cls, key):
+    def get_value_by_name(cls, key):
         """
         This function is able to grab any value from a menu class by property name,
         no matter if it is a string or (class-/instance-/lambda-/...) function.
@@ -531,7 +531,7 @@ class Menu(object):
             # some_var = some_function()
             return value()
         # end if
-        if inspect_mate.is_class_method(cls, key):
+        if is_class_method(value):
             # @classmethod
             # def some_func(cls, data)
             sig = inspect.signature(value)
@@ -613,11 +613,11 @@ class Menu(object):
         :return:
         """
         text = ""
-        title = cls.get_value('title')
+        title = cls.get_value_by_name('title')
         if title:
             text += f"<b>{escape(title)}</b>\n"
         # end if
-        description = cls.get_value('description')
+        description = cls.get_value_by_name('description')
         if description:
             text += f"{escape(description)}\n"
         # end if
@@ -739,7 +739,7 @@ class ButtonMenu(Menu):
 
     @classmethod
     def get_done_button(cls) -> Union[InlineKeyboardButton, None]:
-        done: Union[DoneButton, Menu] = cls.get_value('done')
+        done: Union[DoneButton, Menu] = cls.get_value_by_name('done')
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
@@ -776,7 +776,7 @@ class ButtonMenu(Menu):
     @classmethod
     def get_cancel_button(cls) -> Union[InlineKeyboardButton, None]:
         # TODO implement
-        back: Union[BackButton, Type[Menu]] = cls.get_value('back')
+        back: Union[BackButton, Type[Menu]] = cls.get_value_by_name('back')
         assert isinstance(back, CancelButton)
         return InlineKeyboardButton(
             text=back.label,
@@ -894,7 +894,7 @@ class GotoMenu(ButtonMenu):
                     value=menu.menu.id if isinstance(menu, GotoButton) else menu.id,
                 ).to_json_str()
             )
-            for menu in cls.get_value('menus')
+            for menu in cls.get_value_by_name('menus')
         ]
     # end def
 
@@ -1047,7 +1047,7 @@ class SelectableMenu(ButtonMenu):
                 CheckboxButton,
                 RadioButton
             ]
-        ] = cls.get_value(key)
+        ] = cls.get_value_by_name(key)
 
         buttons: List[InlineKeyboardButton] = []
         for selectable_button in selectable_buttons:
@@ -1471,8 +1471,8 @@ telemenu.states.CURRENT.data
 telemenu.states.CURRENT
 telemenu.get_current_menu()
 telemenu.get_current_menu()
-telemenu.get_current_menu().get_value('title')
-telemenu.get_current_menu().get_value('title')
+telemenu.get_current_menu().get_value_by_name('title')
+telemenu.get_current_menu().get_value_by_name('title')
 telemenu.get_current_menu().title
 f = telemenu.get_current_menu().title
 inspect.signature(f)
