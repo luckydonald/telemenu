@@ -408,7 +408,7 @@ class Menu(object):
         # end if
         return cls._state_instance.state.data
     # end def
-    data: Data
+    data: ClassVar[Data]
 
     # noinspection PyPropertyDefinition,PyMethodParameters
     @data.setter
@@ -1497,6 +1497,7 @@ assert telemenu.get_last_menu() == TestMainMenu
 telemenu.get_last_menu(activate=True)
 assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
 # ba = s.bind(telemenu.get_current_menu().menu, "!test")
+
 
 class BotMock(object):
     class BotMockFunc(object): pass
