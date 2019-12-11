@@ -513,6 +513,20 @@ class Menu(object):
         if value == DEFAULT_PLACEHOLDER:
             raise KeyError(f'Key {key!r} not found.')
         # end if
+        return cls.get_value(value)
+    # end def
+
+    @classmethod
+    def get_value(cls, value: Union[Callable, LambdaType, str, property, JSONType, Any]) -> Any:
+        """
+        This function is able to grab any value from a menu class by property name,
+        no matter if it is a string or (class-/instance-/lambda-/...) function.
+        Also it will provide the `data` to that function as well.
+        In case of native strings, str.format(data=data) is called as well.
+
+        :param value: The variable to resolve.
+        :return:
+        """
 
         # params = dict(state=None, user=None, chat=None)
         if isinstance(value, str):
