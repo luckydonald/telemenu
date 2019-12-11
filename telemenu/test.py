@@ -270,6 +270,18 @@ class MenuData(object):
             data=data['data'],
         )
     # end def
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'message_id={self.message_id!r}, '
+            f'page={self.page!r}, '
+            f'data={self.data!r}'
+            ')'
+        )
+    # end def
+
+    __str__ = __repr__
 # end class
 
 
@@ -297,6 +309,17 @@ class Data(object):
             history=data['history'],
         )
     # end def
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'menus={self.menus!r}, '
+            f'history={self.history!r}'
+            ')'
+        )
+    # end def
+
+    __str__ = __repr__
 # end class
 
 
@@ -320,6 +343,18 @@ class CallbackData(object):
     def from_json_str(cls, string):
         return cls(**json.loads(string))
     # end def
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'type={self.type!r}, '
+            f'id={self.id!r}, '
+            f'value={self.value!r}'
+            ')'
+        )
+    # end def
+
+    __str__ = __repr__
 # end class
 
 
