@@ -17,7 +17,7 @@ from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import TeleMachineSimpleDict
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
-from pytgbot.api_types.receivable.updates import Update
+from pytgbot.api_types.receivable.updates import Update, Message
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 from .utils import convert_to_underscore
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
@@ -633,7 +633,7 @@ class Menu(object):
 
     @classmethod
     @abstractmethod
-    def get_text(cls) -> str:
+    def text(cls) -> str:
         """
         This function returns the HTML formatted text for the button.
         :return:
@@ -653,7 +653,7 @@ class Menu(object):
 
     @classmethod
     @abstractmethod
-    def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
+    def reply_markup(cls) -> Union[None, ReplyMarkup]:
         """
         This funktion is responsible for returning the `reply_markup` parameter,
         as used in pytgbot.Bot.send_message and other send_* methods.
@@ -669,7 +669,7 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
     @classmethod
-    def get_reply_markup(cls) -> Union[None, ReplyMarkup]:
+    def reply_markup(cls) -> Union[None, ReplyMarkup]:
         """
         Generate an inline markup for the message to contain.
         :return:
@@ -865,7 +865,7 @@ class ButtonMenu(Menu):
 
         reply_markup = cls.get_keyboard() if not done else None
         bot.edit_message_text(
-            text=cls.get_text(),
+            text=cls.get_value(cls.text),
             chat_id=None,
             message_id=None,
             parse_mode='html',
@@ -928,7 +928,7 @@ class GotoMenu(ButtonMenu):
     def send_message(cls, bot: Bot, chat_id: Union[int, str]):
         bot.send_message(
             chat_id=chat_id,
-            text=cls.get_text(),
+            text=cls.cls.get_value(cls.text),
             parse_mode='html',
             disable_web_page_preview=True,
             disable_notification=False,
@@ -1184,12 +1184,12 @@ class SendMenu(Menu):
     # end def
 
     @classmethod
-    def get_text(cls) -> str:
+    def text(cls) -> str:
         """
         This is lacking translations, so you might have to overwrite it with your own texts...
         :return:
         """
-        text = super().get_text()
+        text = cls.get_value(super().text)
         return (
             text + "\n\n" +
             cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button() is not None]
