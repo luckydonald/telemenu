@@ -1188,6 +1188,7 @@ class SendMenu(Menu):
     """
     Superclass for all things which don't really have buttons, but instead needs something sent.
     """
+
     MENU_TYPE = 'send'
     TEXTUAL_BUTTON_TEXT_ALTERNATIVE = {  # True: has back button.
         True: "You can click /back to go back to the last menu or press /cancel to abort the whole process.",
@@ -1220,6 +1221,7 @@ class SendMenu(Menu):
             cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button() is not None]
         )
     # end def
+
     @classmethod
     def get_back_button(cls) -> Union[None, BackButton]:
         pass
