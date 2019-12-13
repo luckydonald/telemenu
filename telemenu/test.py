@@ -732,6 +732,75 @@ class ClassAwareClassMethodDecorator(object):
 # end class
 
 
+class ClassAwareClassMethodDecorator2(object):
+    """
+    Decorator, but knowing the class in the end
+    https://stackoverflow.com/a/54316392/3423324
+    """
+    def __init__(self, function: Callable):
+        logger.debug(f"ClassAwareClassMethodDecorator2: received function {function!r}.")
+        self.fn = function
+    # end def
+
+    def __call__(self, *args, **kwargs):
+        logger.debug(f"ClassAwareClassMethodDecorator2: got called with {args!r} {kwargs!r}")
+        return self.fn
+    # end def
+
+    def __set_name__(self, owner, name):
+        # do something with owner, i.e.
+        logger.debug(f"ClassAwareClassMethodDecorator2: decorating {self.fn} as {name!r} on class {owner}.")
+        # self.fn.class_name = owner.__name__
+
+        # then replace ourself with the original method
+        setattr(owner, name, self.decorate(function=self.fn, name=name, cls=owner))
+    # end def
+
+    # noinspection PyUnusedLocal
+    @staticmethod
+    @abstractmethod
+    def decorate(function: Callable, name: str, cls: Type):
+        return function
+    # end def
+# end class
+
+
+class menustate(ClassAwareClassMethodDecorator):
+    @classmethod
+    def test(cls, *args):
+        logger.info(f'test({cls!r},{a!r} )')
+
+        def inner(func):
+            return func()
+        # end def
+        return inner
+    # end def
+
+    class on_command(ClassAwareClassMethodDecorator):
+        @staticmethod
+        def decorate(function: Callable, name: str, cls: Type[Menu]):
+            logger.success(f'REGISTEREING {function.__name__} as {name!r} to {cls.__name__}...')
+            assert cls.tblueprint is not None
+            return cast(TBlueprint, cls.tblueprint).on_command('TODO')(function)  # TODO
+    # end class
+
+    #class on_startup(ClassAwareClassMethodDecorator):
+    #class add_startup_listener
+    #class remove_startup_listener
+# end class
+
+class Test(Menu):
+    # noinspection PyNestedDecorators
+    @classmethod
+    #@menustate.test('arg')
+    def on_callback_query(cls, update: Update):
+        """
+        Handles callbackdata, registered by
+        :param update:
+        :return:
+        """
+
+
 @dataclass(init=False, eq=False, repr=True)
 class ButtonMenu(Menu):
     """
@@ -739,7 +808,7 @@ class ButtonMenu(Menu):
     """
 
     # noinspection PyNestedDecorators
-    @ClassAwareClassMethodDecorator
+    @ClassAwareClassMethodDecorator2('test')
     @classmethod
     def on_callback_query(cls, update: Update):
         """
