@@ -897,9 +897,8 @@ class ButtonMenu(Menu):
                      Used to e.g. include the selection in the message when the new menu is opened below.
         :return:
         """
-        bot: Bot = None
-        data: Data = cls._state_instance.state.data
-
+        bot: Bot = cast(Bot, cls.bot)
+        assert_type_or_raise(bot, Bot, parameter_name='bot')
         reply_markup = cls.get_keyboard() if not done else None
         bot.edit_message_text(
             text=cls.get_value(cls.text),
