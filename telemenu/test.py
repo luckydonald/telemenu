@@ -704,12 +704,42 @@ class Menu(object):
 # end class
 
 
+class ClassAwareClassMethodDecorator(object):
+    """
+    Decorator, but knowing the class in the end
+    https://stackoverflow.com/a/54316392/3423324
+    """
+    def __init__(self, fn: Callable):
+        logger.debug(f"received function {fn}.")
+        self.fn = fn
+    # end def
+
+    def __set_name__(self, owner, name):
+        # do something with owner, i.e.
+        logger.debug(f"decorating {self.fn} as {name!r} on class {owner}.")
+        # self.fn.class_name = owner.__name__
+
+        # then replace ourself with the original method
+        setattr(owner, name, self.decorate(function=self.fn, name=name, cls=owner))
+    # end def
+
+    # noinspection PyUnusedLocal
+    @staticmethod
+    @abstractmethod
+    def decorate(function: Callable, name: str, cls: Type):
+        return function
+    # end def
+# end class
+
+
 @dataclass(init=False, eq=False, repr=True)
 class ButtonMenu(Menu):
     """
     Subclass for everything with inline Keyboard
     """
 
+    # noinspection PyNestedDecorators
+    @ClassAwareClassMethodDecorator
     @classmethod
     def on_callback_query(cls, update: Update):
         """
