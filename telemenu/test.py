@@ -431,7 +431,17 @@ class Menu(object):
     def store_data(cls: Type['Menu'], data: Union[Data, None]):
         assert isinstance(data, Data) or data is None
         cls._state_instance.state.data = data
-    # emd def
+    # end def
+
+    bot: ClassVar[Bot]
+    # noinspection PyMethodParameters
+    @classproperty
+    def bot(cls: Type['Menu']) -> Union[Bot, None]:
+        if not cls._state_instance:
+            return None
+        # end if
+        return cast(TBlueprint, cls._state_instance.machine.blueprint).bot
+    # end def
 
     # noinspection PyMethodParameters
     @classproperty
