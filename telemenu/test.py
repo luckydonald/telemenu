@@ -10,6 +10,7 @@ from html import escape
 from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, Optional, cast
 from pytgbot import Bot
+from teleflask import TBlueprint
 from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from luckydonaldUtils.typing import JSONType
@@ -440,8 +441,19 @@ class Menu(object):
         if not cls._state_instance:
             return None
         # end if
-        return cast(TBlueprint, cls._state_instance.machine.blueprint).bot
+        return cast(TBlueprint, cls.tblueprint).bot
     # end def
+
+    tblueprint: ClassVar[TBlueprint]
+    # noinspection PyMethodParameters
+    @classproperty
+    def tblueprint(cls: Type['Menu']) -> Union[TBlueprint, None]:
+        if not cls._state_instance:
+            return None
+        # end if
+        return cast(TeleMachine, cls._state_instance.machine).blueprint
+    # end def
+
 
     # noinspection PyMethodParameters
     @classproperty
