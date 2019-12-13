@@ -445,7 +445,7 @@ class Menu(object):
 
     # noinspection PyMethodParameters
     @classproperty
-    def id(cls) -> str:
+    def id(cls: Type['Menu']) -> str:
         """
         Returns a unique name for this menu.
         Name must be capslock and otherwise only contain numbers and the underscore.
@@ -642,7 +642,6 @@ class Menu(object):
     cancel: OptionalClassValueOrCallable[Union['CancelButton', 'Menu', 'GotoButton']]
 
     @classmethod
-    @abstractmethod
     def text(cls) -> str:
         """
         This function returns the HTML formatted text for the button.
@@ -907,6 +906,7 @@ class ButtonMenu(Menu):
             disable_web_page_preview=True,
             reply_markup=reply_markup,
         )
+    # end def
 # end class
 
 
