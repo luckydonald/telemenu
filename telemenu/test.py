@@ -1489,8 +1489,13 @@ class TestRadioMenu(RadioMenu):
             RadioButton(title="Fluttershy", selected=False, value='fs'),
             RadioButton(title="Rarity", selected=False, value='rara'),
             RadioButton(title="Twilight", selected=False, value='ts'),
-            RadioButton(title="Rainbow Dash", selected=False, value='rd'),
+            RadioButton(title="Pinkie Pie", selected=False, value='pp'),
             RadioButton(title="Littlepip", selected=True, value='waifu'),
+            RadioButton(title="Your Mom", selected=False, value='mom'),
+            RadioButton(title="Changelings", selected=False, value='bug'),
+            RadioButton(title="Cheesalys", selected=False, value='BUG'),
+            RadioButton(title="Your face", selected=False, value=':('),
+            RadioButton(title="Spike", selected=False, value='just_no'),
         ]
     # end def
 # end class
