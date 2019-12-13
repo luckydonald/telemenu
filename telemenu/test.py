@@ -696,6 +696,38 @@ class ButtonMenu(Menu):
     """
     Subclass for everything with inline Keyboard
     """
+
+    @classmethod
+    def on_callback_query(cls, update: Update):
+        """
+        Handles callbackdata, registered by
+        :param update:
+        :return:
+        """
+        # CallbackData(
+        #     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+        #     value=data.page - 1,
+        # ).to_json_str(),
+
+        data = CallbackData.from_json_str(update.callback_query.data)
+        try:
+            return cls.process_callback_data(data)
+        except AbortProcessingPlease as e:
+            return e.return_value
+        # end try
+    # end def
+
+    @classmethod
+    def process_callback_data(cls, data: CallbackData):
+        # check if we need to do pagination
+        if data.type == cls.CALLBACK_PAGINATION_BUTTONS_TYPE:
+            assert isinstance(cls.menu_data, MenuData)
+            cls.menu_data.page += 1
+            cls.refresh(done=False)
+            raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
+        # end if
+    # end def
+
     @classmethod
     def reply_markup(cls) -> Union[None, ReplyMarkup]:
         """
