@@ -789,12 +789,15 @@ class ButtonMenu(Menu):
             ))
         # end if
 
-        double_columns = [[], []]
+        button_rows = []
         for i, button in enumerate(selected_buttons + pagination_buttons):
-            double_columns[i % 2].append(button)
+            if i % 2 == 0:
+                button_rows.append([])  # add list
+            # end if
+            button_rows[-1].append(button)
         # end for
 
-        return InlineKeyboardMarkup(inline_keyboard=double_columns)
+        return InlineKeyboardMarkup(inline_keyboard=button_rows)
     # end def
 
     @classmethod
