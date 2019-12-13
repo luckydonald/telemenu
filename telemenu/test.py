@@ -760,7 +760,7 @@ class ButtonMenu(Menu):
         """
         buttons = cls.get_buttons()
 
-        pages = len(buttons) // 10
+        pages = (len(buttons) // 10) + 1
         data: MenuData = cls.menu_data
         if data.page >= pages:
             data.page = pages - 1
