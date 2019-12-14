@@ -21,6 +21,7 @@ from luckydonaldUtils.exceptions import assert_type_or_raise
 from teleflask.server.blueprints import TBlueprint
 from pytgbot.api_types.receivable.updates import Update, Message
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
+from .data import MenuData, Data
 from .utils import convert_to_underscore
 from .machine import registerer, TeleMenuMachine
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
@@ -174,86 +175,6 @@ class TeleMenuStateMachine(TeleStateMachine):
         data = state_data.to_dict()
         return super().serialize(state_name, data)
     # end def
-# end class
-
-
-class MenuData(object):
-    message_id: Union[int, None]
-    page: int
-    data: JSONType
-
-    def __init__(self, message_id: Union[int, None] = None, page: int = 0, data: JSONType = None):
-        self.message_id = message_id
-        self.page = page
-        self.data = data
-    # end def
-
-    def to_dict(self) -> Dict[str, JSONType]:
-        return {
-            "message_id": self.message_id,
-            "page": self.page,
-            "data": self.data,
-        }
-    # end def
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, JSONType]) -> 'Data':
-        return cls(
-            message_id=data['message_id'],
-            page=data['page'],
-            data=data['data'],
-        )
-    # end def
-
-    def __repr__(self):
-        return (
-            f'{self.__class__.__name__}('
-            f'message_id={self.message_id!r}, '
-            f'page={self.page!r}, '
-            f'data={self.data!r}'
-            ')'
-        )
-    # end def
-
-    __str__ = __repr__
-# end class
-
-
-# TODO: there is needed a way to add your own stuff, e.g. you have other states than only menus...
-class Data(object):
-    menus: Dict[str, MenuData]  # keys are IDs.
-    history: List[str]  # stack of IDs.
-
-    def __init__(self, menus: Dict[str, JSONType] = None, history: List[str] = None):
-        self.menus = {} if menus is None else menus
-        self.history = [] if history is None else history
-    # end def
-
-    def to_dict(self) -> Dict[str, JSONType]:
-        return {
-            "menus": self.menus,
-            "history": self.history,
-        }
-        # end def
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, JSONType]) -> 'Data':
-        return cls(
-            menus={k: MenuData.from_dict(v) for k, v in data['menus'].items()},
-            history=data['history'],
-        )
-    # end def
-
-    def __repr__(self):
-        return (
-            f'{self.__class__.__name__}('
-            f'menus={self.menus!r}, '
-            f'history={self.history!r}'
-            ')'
-        )
-    # end def
-
-    __str__ = __repr__
 # end class
 
 
