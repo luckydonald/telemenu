@@ -16,7 +16,7 @@ from dataclasses import dataclass, field as dataclass_field
 from teleflask.exceptions import AbortProcessingPlease
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
-from telestate.contrib.simple import TeleStateMachineSimpleDict
+from telestate.contrib.simple import SimpleDictDriver
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from teleflask.server.blueprints import TBlueprintSetupState, TBlueprint
@@ -156,7 +156,7 @@ class TeleMenuInstancesItem(object):
 
 # TODO: rewrite (de)serialize logic/extendability in the Telemachine class to be separate form the database driver.
 # TODO: maybe the drivers should be separate instead, and it's like `telemachine = Telemachine(driver=SimpleDictDBDriver).
-class TeleMenuStateMachine(TeleStateMachineSimpleDict):
+class TeleMenuStateMachine(TeleStateMachine):
     """
     Normal TeleStateMachine, but with custom (de)serialisation methods,
     directly converting it to and from the `Data` type.
@@ -322,12 +322,12 @@ class TeleMenuMachine(object):
     instances: Dict[str, TeleMenuInstancesItem]
     states: TeleMenuStateMachine
 
-    def __init__(self, states: TeleMenuStateMachine = None, teleflask_or_tblueprint=None):
+    def __init__(self, states: TeleMenuStateMachine = None, database_driver=None, teleflask_or_tblueprint=None):
         assert_type_or_raise(states, TeleMenuStateMachine, None, parameter_name='states')
         self.instances = {}
         self.states = states
         if not self.states:
-            self.states = TeleMenuStateMachine(__name__, teleflask_or_tblueprint)
+            self.states = TeleMenuStateMachine(__name__, database_driver, teleflask_or_tblueprint)
         # end def
     # end def
 
@@ -1724,7 +1724,7 @@ class UploadMenu(SendMenu):
 # ------------------------------
 
 
-telemenu = TeleMenuMachine()
+telemenu = TeleMenuMachine(database_driver=SimpleDictDriver())
 
 
 @telemenu.register
