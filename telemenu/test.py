@@ -11,12 +11,12 @@ from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, cast, Tuple, Generator
 from pytgbot import Bot
 from teleflask import Teleflask
-from telestate import TeleMachine, TeleState
+from telestate import TeleStateMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from teleflask.exceptions import AbortProcessingPlease
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
-from telestate.contrib.simple import TeleMachineSimpleDict
+from telestate.contrib.simple import TeleStateMachineSimpleDict
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from teleflask.server.blueprints import TBlueprintSetupState, TBlueprint
@@ -156,7 +156,7 @@ class TeleMenuInstancesItem(object):
 
 # TODO: rewrite (de)serialize logic/extendability in the Telemachine class to be separate form the database driver.
 # TODO: maybe the drivers should be separate instead, and it's like `telemachine = Telemachine(driver=SimpleDictDBDriver).
-class TeleMenuStateMachine(TeleMachineSimpleDict):
+class TeleMenuStateMachine(TeleStateMachineSimpleDict):
     """
     Normal TeleStateMachine, but with custom (de)serialisation methods,
     directly converting it to and from the `Data` type.
@@ -616,7 +616,7 @@ class Menu(object):
         if not cls._state_instance:
             return None
         # end if
-        return cast(TeleMachine, cls._state_instance.machine).blueprint
+        return cast(TeleStateMachine, cls._state_instance.machine).blueprint
     # end def
 
 

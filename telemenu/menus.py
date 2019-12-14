@@ -14,7 +14,7 @@ from teleflask.new_messages import TextMessage, SendableMessageBase
 from teleflask.server.base import TeleflaskMixinBase
 from teleflask.server.mixins import StartupMixin
 
-from telestate import TeleState, TeleMachine
+from telestate import TeleState, TeleStateMachine
 from .buttons import GotoMenuButton, ToggleButton, GotoStateButton
 
 __author__ = 'luckydonald'
@@ -309,7 +309,7 @@ class Menu(StartupMixin, TeleflaskMixinBase):
         raise NotImplementedError('Subclass must implement this.')
     # end def
 
-    def __init__(self, telemachine: TeleMachine):
+    def __init__(self, telemachine: TeleStateMachine):
         super().__init__()
         if self.state is None:
             name = self.create_state_name(self.__class__.__name__)
