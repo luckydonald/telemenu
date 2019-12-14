@@ -8,7 +8,6 @@ import re
 from abc import abstractmethod
 from typing import Type, Union, List, Callable, TypeVar, cast
 from telestate import TeleState
-from dataclasses import dataclass
 from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
@@ -18,7 +17,7 @@ from .data import MenuData, Data
 from .menus import Menu, GotoMenu, CheckboxMenu, RadioMenu, TextStrMenu, TextIntMenu, TextFloatMenu
 from .menus import TextPasswordMenu, TextEmailMenu, TextTelMenu, TextUrlMenu, UploadMenu
 from .buttons import GotoButton, DoneButton, CheckboxButton, RadioButton
-from .machine import TeleMenuMachine
+from .machine import TeleMenuMachine, TeleMenuInstancesItem
 
 __author__ = 'luckydonald'
 
@@ -120,33 +119,6 @@ class Example(object):
 
 
 DEFAULT_PLACEHOLDER = object()
-
-
-@dataclass(init=False, repr=True)
-class TeleMenuInstancesItem(object):
-    """
-    This holds a menu and a telestate to register functions to.
-    """
-    machine: 'TeleMenuMachine'
-    state: TeleState
-    menu: Type['Menu']
-
-    def __init__(self, machine: 'TeleMenuMachine', state: TeleState, menu: Type['Menu']):
-        self.machine = machine
-        self.state = state
-        self.menu = menu
-    # end def
-
-    @property
-    def global_data(self) -> 'Data':
-        return Data.from_dict(self.state.data)
-    # end def
-
-    @property
-    def state_data(self) -> 'MenuData':
-        return self.global_data.menus[self.state.name]
-    # end def
-# end class
 
 
 class CallbackData(object):
@@ -267,9 +239,6 @@ class menustate(ClassAwareClassMethodDecorator):
 
 
 telemenu = TeleMenuMachine(database_driver=SimpleDictDriver())
-
-
-# end class
 
 
 @telemenu.register

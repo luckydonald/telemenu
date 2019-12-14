@@ -12,7 +12,7 @@ from teleflask import TBlueprint, Teleflask
 from telestate import TeleState, TeleStateMachine
 from .menus import Menu
 from .data import Data
-from .test import TeleMenuInstancesItem, logger
+from .test import logger
 
 __author__ = 'luckydonald'
 
@@ -41,6 +41,33 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
     def serialize(state_name, state_data: 'Data'):
         data = state_data.to_dict()
         return super().serialize(state_name, data)
+    # end def
+# end class
+
+
+@dataclass(init=False, repr=True)
+class TeleMenuInstancesItem(object):
+    """
+    This holds a menu and a telestate to register functions to.
+    """
+    machine: 'TeleMenuMachine'
+    state: TeleState
+    menu: Type['Menu']
+
+    def __init__(self, machine: 'TeleMenuMachine', state: TeleState, menu: Type['Menu']):
+        self.machine = machine
+        self.state = state
+        self.menu = menu
+    # end def
+
+    @property
+    def global_data(self) -> 'Data':
+        return Data.from_dict(self.state.data)
+    # end def
+
+    @property
+    def state_data(self) -> 'MenuData':
+        return self.global_data.menus[self.state.name]
     # end def
 # end class
 
