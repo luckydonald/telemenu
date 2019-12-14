@@ -10,7 +10,7 @@ from html import escape
 from types import LambdaType, BuiltinFunctionType
 from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, cast, Tuple, Generator
 from pytgbot import Bot
-from teleflask import TBlueprint
+from teleflask import Teleflask
 from telestate import TeleMachine, TeleState
 from dataclasses import dataclass, field as dataclass_field
 from teleflask.exceptions import AbortProcessingPlease
@@ -19,6 +19,7 @@ from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import TeleMachineSimpleDict
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
+from teleflask.server.blueprints import TBlueprintSetupState, TBlueprint
 from pytgbot.api_types.receivable.updates import Update, Message
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply, ReplyMarkup
 from .utils import convert_to_underscore
@@ -373,6 +374,17 @@ class TeleMenuMachine(object):
         self.instances[name] = instance_item
         menu_to_register.register_state_instance(instance_item)
         return menu_to_register
+    # end def
+
+    def register_bot(self, teleflask_or_tblueprint: Union[TBlueprintSetupState, TBlueprint, Teleflask]):
+        """
+        Registers an bot to use with the internal blueprint of the TeleStateMachine.
+
+        :param tblueprint: The Teleflask instance or blueprint to use.
+        :type  teleflask_or_tblueprint: Teleflask | TBlueprint
+        :return:
+        """
+        return self.states.register_bot(teleflask_or_tblueprint)
     # end def
 
     def get_current_menu(self) -> Type[Union[None, 'Menu']]:
