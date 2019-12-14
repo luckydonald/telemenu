@@ -8,7 +8,7 @@ import re
 from abc import abstractmethod
 from html import escape
 from types import LambdaType, BuiltinFunctionType
-from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, Optional, cast
+from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, Optional, cast, Tuple
 from pytgbot import Bot
 from teleflask import TBlueprint
 from telestate import TeleMachine, TeleState
@@ -207,11 +207,12 @@ class TeleMenuMachine(object):
 
         # def menu.id can be overridden by the subclass.
         name = menu_to_register.id  # parameter data = old name (uppersnake class name)
-
         if name in self.instances:
             raise ValueError(f'A class with name {name!r} is already registered.')
         # end if
         new_state = TeleState(name=name)
+        listener_to_register = tmenu.collect_marked_functions(menu_to_register)
+
         if hasattr(menu_to_register, 'on_message'):
             pass
         # end if
@@ -765,18 +766,125 @@ class ClassAwareClassMethodDecorator2(object):
 # end class
 
 
-class menustate(ClassAwareClassMethodDecorator):
-    @classmethod
-    def test(cls, *args):
-        logger.info(f'test({cls!r},{a!r} )')
+class tmenu(object):
+    """
+    Mark functions to be included in the menu's state's tblueprint,
+    as soon as that is assigned.
 
-        def inner(func):
-            return func()
+    Basically first the decorators next to the functions in the class are executed,
+    and a marker is set.
+    `function._tmenu_mark_ = tmenu.StoreMark(...)`
+
+    Later this can be retrieved with `tmenu.collect_marked_functions(cls)`.
+    In our case that is called by `@telemenu.register` where `telemenu = TelemenuMachine(...)`.
+
+    Basically a complicated version of https://stackoverflow.com/a/2367605/3423324.
+    """
+    class StoredMark(object):
+        MARK = '_tmenu_mark_'
+
+        marked_function: Callable
+        register_function: Callable
+        register_args: Tuple
+        register_kwargs: Dict[str, Any]
+        register_name: Union[str, None]
+
+        def __init__(
+            self,
+            marked_function: Callable,
+            register_function: Callable,
+            register_args: Tuple,
+            register_kwargs: Dict[str, Any]
+        ):
+            self.marked_function = marked_function
+            self.register_function = register_function
+            self.register_args = register_args
+            self.register_kwargs = register_kwargs
+            self.register_name = None
         # end def
-        return inner
+    # end class
+
+    @classmethod
+    def _mark_function(cls, menu_function, register_function, *args, **kwargs):
+        setattr(
+            menu_function,
+            tmenu.StoredMark.MARK,
+            cls.StoredMark(
+                marked_function=menu_function,
+                register_function=register_function,
+                register_args=args, register_kwargs=kwargs,
+            )
+        )
     # end def
 
-    class on_command(ClassAwareClassMethodDecorator):
+    @classmethod
+    def collect_marked_functions_iter(cls, menu: Type['Menu']):
+        """
+        Method generating (returning/yielding) a list of all previously marked functions.
+        :param menu:
+        :return:
+        """
+        for name, method in inspect.getmembers(menu, inspect.isroutine):
+            if not hasattr(method, tmenu.StoredMark.MARK):  # this might wake it up.
+                method = getattr(menu, name)
+            # end if
+            if hasattr(method, tmenu.StoredMark.MARK):
+                mark: cls.StoredMark = getattr(method, tmenu.FLAG)
+                mark.register_name = name
+                yield mark
+            # end if
+        # end for
+    # end def
+
+    @classmethod
+    def collect_marked_functions(cls, menu: Type['Menu']):
+        """
+        Method generating (returning/yielding) a list of all previously marked functions.
+        :param menu: The menu we want to collect the @tmenu.* stuff on.
+        :return:
+        """
+        return list(cls.collect_marked_functions_iter(menu))
+    # end def
+
+    @staticmethod
+    def _build_listener(register_function):
+        def decorator_function(*required_keywords):
+            """
+            Like `BotCommandsMixin.on_message`, but for a static `Menu`.
+            """
+            def actual_wrapping_method(function):
+                tmenu._mark_function(function, register_function, *required_keywords)
+                return function
+            # end def
+            if (
+                len(required_keywords) == 1 and  # given could be the function, or a single required_keyword.
+                not isinstance(required_keywords[0], str) # not string -> must be function
+             ):
+                # -> plain function, no strings
+                # @on_message
+                found_function = required_keywords[0]
+                required_keywords = tuple()  # we call the wrapper ourself, but remove the function from `required_keywords`
+                return actual_wrapping_method(function=found_function)  # not string -> must be function
+            # end if
+            # -> else: *required_keywords are the strings
+            # @on_message("text", "sticker", "whatever")
+            return actual_wrapping_method  # let that function be called again with the function.
+        # end def
+        return decorator_function
+    # end def
+
+    on_message: Callable
+    on_command: Callable
+# end def
+
+
+tmenu.on_message: Callable = staticmethod(getattr(tmenu, '_build_listener')('on_message'))
+# noinspection PyProtectedMember
+tmenu.on_command: Callable = staticmethod(getattr(tmenu, '_build_listener')('on_command'))
+
+
+class menustate(ClassAwareClassMethodDecorator):
+    class on_command_menustate(ClassAwareClassMethodDecorator):
         @staticmethod
         def decorate(function: Callable, name: str, cls: Type[Menu]):
             logger.success(f'REGISTEREING {function.__name__} as {name!r} to {cls.__name__}...')
@@ -788,17 +896,6 @@ class menustate(ClassAwareClassMethodDecorator):
     #class add_startup_listener
     #class remove_startup_listener
 # end class
-
-class Test(Menu):
-    # noinspection PyNestedDecorators
-    @classmethod
-    #@menustate.test('arg')
-    def on_callback_query(cls, update: Update):
-        """
-        Handles callbackdata, registered by
-        :param update:
-        :return:
-        """
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -1538,6 +1635,34 @@ class UploadMenu(SendMenu):
 
 
 telemenu = TeleMenuMachine()
+
+
+@telemenu.register
+class RegisterTestMenu(Menu):
+    # noinspection PyNestedDecorators
+    @classmethod
+    @tmenu.on_message
+    def on_message_listener(cls, update: Update, msg: Message):
+        """
+        Handles callbackdata, registered by
+        :param update:
+        :return:
+        """
+        pass
+    # end def
+
+    @classmethod
+    @tmenu.on_command('init')
+    def on_command_listener(cls, update: Update, text: Union[str, None]):
+        """
+        Handles callbackdata, registered by
+        :param update:
+        :return:
+        :return:
+        """
+        pass
+    # end def
+# end class
 
 
 @telemenu.register
