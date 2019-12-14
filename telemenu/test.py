@@ -784,7 +784,7 @@ class tmenu(object):
         MARK = '_tmenu_mark_'
 
         marked_function: Callable
-        register_function: Callable
+        register_function: str
         register_args: Tuple
         register_kwargs: Dict[str, Any]
         register_name: Union[str, None]
@@ -792,7 +792,7 @@ class tmenu(object):
         def __init__(
             self,
             marked_function: Callable,
-            register_function: Callable,
+            register_function: str,
             register_args: Tuple,
             register_kwargs: Dict[str, Any]
         ):
@@ -830,10 +830,10 @@ class tmenu(object):
     # end def
 
     @classmethod
-    def collect_marked_functions_iter(cls, menu: Type['Menu']):
+    def collect_marked_functions_iter(cls, menu: Type['Menu']) -> Generator['StoredMark', None, None]:
         """
-        Method generating (returning/yielding) a list of all previously marked functions.
-        :param menu:
+        Method generating yielding a list of all previously marked functions.
+        :param menu: The menu we want to collect the @tmenu.* stuff on.
         :return:
         """
         for name, method in inspect.getmembers(menu, inspect.isroutine):
@@ -849,9 +849,9 @@ class tmenu(object):
     # end def
 
     @classmethod
-    def collect_marked_functions(cls, menu: Type['Menu']):
+    def collect_marked_functions(cls, menu: Type['Menu']) -> List['StoredMark']:
         """
-        Method generating (returning/yielding) a list of all previously marked functions.
+        Method generating returning a list of all previously marked functions.
         :param menu: The menu we want to collect the @tmenu.* stuff on.
         :return:
         """
