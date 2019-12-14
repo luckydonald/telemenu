@@ -940,12 +940,14 @@ class ButtonMenu(Menu):
     # noinspection PyNestedDecorators
     @ClassAwareClassMethodDecorator2('test')
     @classmethod
+    @TeleMenuMachine.registerer.on_update('callback_query')
     def on_callback_query(cls, update: Update):
         """
         Handles callbackdata, registered by
         :param update:
         :return:
         """
+        # Update.callback_query
         # CallbackData(
         #     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
         #     value=data.page - 1,
@@ -1539,10 +1541,12 @@ class TextMenu(SendMenu):
         raise NotImplementedError('Subclasses must implement that.')
     # end def
 
+    # noinspection PyUnusedLocal
     @classmethod
-    def on_update(cls, update, message):
-        text = message
-        pass
+    @TeleMenuMachine.registerer.on_message('text')
+    def on_message_listener(cls, update: Update, msg: Message):
+        logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
+        return cls._parse(msg.text)
     # end def
 
 # end class
