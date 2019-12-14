@@ -1357,7 +1357,7 @@ class UploadMenu(SendMenu):
     @classmethod
     @TeleMenuMachine.registerer.on_message
     def on_message_listener(cls, update: Update, msg: Message):
-        from pytgbot.api_types.receivable.media import File, PhotoSize
+        from pytgbot.api_types.receivable.media import PhotoSize
         if not hasattr(msg, cls.UPDATE_ATTRIBUTE):
             return None
         # end if
