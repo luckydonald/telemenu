@@ -154,8 +154,6 @@ class TeleMenuInstancesItem(object):
 # end class
 
 
-# TODO: rewrite (de)serialize logic/extendability in the Telemachine class to be separate form the database driver.
-# TODO: maybe the drivers should be separate instead, and it's like `telemachine = Telemachine(driver=SimpleDictDBDriver).
 class TeleMenuStateMachine(TeleStateMachine):
     """
     Normal TeleStateMachine, but with custom (de)serialisation methods,
