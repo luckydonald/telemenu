@@ -829,7 +829,7 @@ class tmenu(object):
                 method = getattr(menu, name)
             # end if
             if hasattr(method, tmenu.StoredMark.MARK):
-                mark: cls.StoredMark = getattr(method, tmenu.FLAG)
+                mark: cls.StoredMark = getattr(method, tmenu.StoredMark.MARK)
                 mark.register_name = name
                 yield mark
             # end if
