@@ -271,11 +271,11 @@ class registerer(object):
 
     @staticmethod
     def _build_listener(register_function):
-        def decorator_function(*required_keywords):
+        def decorator_function(*required_keywords: Tuple[str]) -> Union[Callable,  Callable[[Callable], Callable]]:
             """
             Like `BotCommandsMixin.on_message`, but for a static `Menu`.
             """
-            def actual_wrapping_method(function):
+            def actual_wrapping_method(function:  Callable):
                 registerer._mark_function(function, register_function, *required_keywords)
                 return function
             # end def
@@ -296,15 +296,23 @@ class registerer(object):
         return decorator_function
     # end def
 
-    on_message: Callable
-    on_command: Callable
+    on_message: Union[Callable[[Callable], Callable], Callable[..., Callable[[Callable], Callable]]]
+    on_command: Union[Callable[[Callable], Callable], Callable[..., Callable[[Callable], Callable]]]
+    on_update: Union[Callable[[Callable], Callable], Callable[..., Callable[[Callable], Callable]]]
+
+    @classmethod
+    def on_update(cls, *args: str):
+        pass
+    # pass
 # end def
 
 
-registerer.on_message: Callable = staticmethod(getattr(registerer, '_build_listener')('on_message'))
-# noinspection PyProtectedMember
+# noinspection PyTypeHints
+registerer.on_message: Callable[[], Callable] = staticmethod(getattr(registerer, '_build_listener')('on_message'))
+# noinspection PyTypeHints
 registerer.on_command: Callable = staticmethod(getattr(registerer, '_build_listener')('on_command'))
-
+# noinspection PyTypeHints
+registerer.on_update: Callable = staticmethod(getattr(registerer, '_build_listener')('on_update'))
 
 
 @dataclass(init=False, repr=True)
