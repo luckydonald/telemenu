@@ -1327,22 +1327,27 @@ class SelectableButton(Button):
     STATE_EMOJIS = {True: '1️⃣', False: '🅾️'}
     title: str
     value: JSONType
-    selected: bool
+    default_selected: bool
 
     def __init__(
         self,
         title,
         value: JSONType,
-        selected: bool = False
+        default_selected: bool = False
     ):
         self.title = title
         self.value = value
-        self.selected = selected
+        self.default_selected = default_selected
     # end def
 
-    def get_label(self, data: Data):
+    @abstractmethod
+    def get_selected(self, menu_data: MenuData) -> bool:
+        pass
+    # end def
+
+    def get_label(self, menu_data: MenuData):
         """ returns the text for the button """
-        return self.STATE_EMOJIS[self.selected] + " " + self.title
+        return self.STATE_EMOJIS[self.get_selected(menu_data)] + " " + self.title
     # end def
 # end def
 
@@ -1391,7 +1396,7 @@ class SelectableMenu(ButtonMenu):
         buttons: List[InlineKeyboardButton] = []
         for selectable_button in selectable_buttons:
             box = InlineKeyboardButton(
-                text=selectable_button.get_label(data=cls.data),
+                text=selectable_button.get_label(menu_data=cls.menu_data),
                 callback_data=CallbackData(
                     type=cls.MENU_TYPE,
                     value=selectable_button.value,
@@ -1413,6 +1418,7 @@ class SelectableMenu(ButtonMenu):
 @dataclass(init=False, eq=False, repr=True)
 class CheckboxMenu(SelectableMenu):
     MENU_TYPE = 'checkbox'  # used for CallbackData.type
+    DATA_TYPE = Dict[str, bool]  # key is
 
     checkboxes: ClassValueOrCallable['CheckboxButton']
 
@@ -1430,19 +1436,31 @@ class CheckboxMenu(SelectableMenu):
         :return:
         """
         button = update.callback_query.data
-        cls.data.menus[cls.id][button] = not cls.data.menus[cls.id][button]  # toggle the button.
+        cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
     # end def
 # end class
 
 
 class CheckboxButton(SelectableButton):
     STATE_EMOJIS = {True: "✅", False: "❌"}
+
+    def get_selected(self, menu_data: MenuData) -> bool:
+        if (
+            self.value in menu_data.data and
+            isinstance(menu_data.data, dict) and
+            isinstance(menu_data.data[self.value], bool)
+        ):
+            return menu_data.data[self.value]
+        # end if
+        return self.default_selected
+    # end def
 # end class
 
 
 @dataclass(init=False, eq=False, repr=True)
 class RadioMenu(SelectableMenu):
     MENU_TYPE = 'radiobutton'  # used for CallbackData.type
+    DATA_TYPE = str
 
     radiobuttons: ClassValueOrCallable['RadioButton']
     data: str
@@ -1468,6 +1486,16 @@ class RadioMenu(SelectableMenu):
 
 class RadioButton(SelectableButton):
     STATE_EMOJIS = {True: "🔘", False: "⚫️"}
+
+    def get_selected(self, menu_data: MenuData) -> bool:
+        if (
+            self.value in menu_data.data and
+            isinstance(menu_data.data, str)
+        ):
+            return menu_data.data == self.value
+        # end if
+        return self.default_selected
+    # end def
 # end class
 
 
