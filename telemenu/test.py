@@ -164,7 +164,7 @@ class TeleMenuStateMachine(TeleMachineSimpleDict):
     def deserialize(state_name, db_data):
         array: Union[Dict[str, JSONType], None] = super().deserialize(state_name, db_data)
         if array is None:
-            return Data(menus=[], history=[])
+            return Data(menus={}, history=[])
         # end if
         return Data.from_dict(array)
     # end def
