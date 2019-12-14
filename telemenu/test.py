@@ -211,11 +211,21 @@ class TeleMenuMachine(object):
             raise ValueError(f'A class with name {name!r} is already registered.')
         # end if
         new_state = TeleState(name=name)
-        listener_to_register = tmenu.collect_marked_functions(menu_to_register)
 
-        if hasattr(menu_to_register, 'on_message'):
-            pass
+        # register all marked function
+        mark: tmenu.StoredMark
+        for mark in tmenu.collect_marked_functions_iter(menu_to_register):
+            # collect the correct telestate/tblueprint register function.
+            logger.debug(f'found mark: {mark!r}')
+            register_function: Callable = getattr(new_state, mark.register_function)
+            assert register_function.__name__ == mark.register_function
+            logger.debug(
+                f'registering marked function: '
+                f'@{register_function!r}(*{mark.register_args}, **{mark.register_kwargs})({mark.marked_function})'
+            )
+            register_function(*mark.register_args, **mark.register_kwargs)(mark.marked_function)
         # end if
+
         self.states.register_state(name, state=new_state)
         instance_item = TeleMenuInstancesItem(
             machine=self, state=new_state, menu=menu_to_register
