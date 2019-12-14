@@ -802,6 +802,18 @@ class tmenu(object):
             self.register_kwargs = register_kwargs
             self.register_name = None
         # end def
+
+        def __repr__(self) -> str:
+            return (
+                f'{self.__class__.__name__}('
+                f'marked_function={self.marked_function!r}, '
+                f'register_function={self.register_function!r}, '
+                f'register_args={self.register_args!r}, '
+                f'register_kwargs={self.register_kwargs!r}, '
+                f'register_name={self.register_name!r}'
+                f')'
+            )
+        # end def
     # end class
 
     @classmethod
