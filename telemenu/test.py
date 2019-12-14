@@ -372,7 +372,6 @@ class TeleMenuMachine(object):
         )
         self.instances[name] = instance_item
         menu_to_register.register_state_instance(instance_item)
-        #menu_to_register._tblueprint = TBlueprint()
         return menu_to_register
     # end def
 
@@ -552,7 +551,6 @@ class Menu(object):
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
     _state_instance: ClassVar[Union[TeleMenuInstancesItem, TeleMenuInstancesItem]]
-    _tblueprint: TBlueprint
 
     # noinspection PyMethodParameters
     @classproperty
@@ -659,16 +657,6 @@ class Menu(object):
             data.menus[cls.id] = MenuData()
         # end if
         instance.state.activate(data)
-    # end def
-
-    @classmethod
-    def _register_blueprints(cls, tblueprint: TBlueprint):
-        """
-        Classes can overwrite this class to have functions accept updates and stuff.
-        :param tblueprint:
-        :return:
-        """
-        cls._tblueprint = tblueprint
     # end def
 
     @classmethod
@@ -982,12 +970,6 @@ class ButtonMenu(Menu):
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
-    # end def
-
-    @classmethod
-    def _register_blueprints(cls, tblueprint: TBlueprint):
-        super()._register_blueprints(tblueprint)
-        tblueprint.on_update('callback_query')(cls.on_callback_query)
     # end def
 
     @classmethod
@@ -1499,9 +1481,6 @@ class RadioMenu(SelectableMenu):
         button = update.callback_query.data
         cls.data = button
     # end def
-
-    #@classmethod
-    #def on_update(cls):
 # end class
 
 
