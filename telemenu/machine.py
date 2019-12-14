@@ -7,12 +7,12 @@ from typing import Callable, Tuple, Dict, Any, Union, Type, Generator, List
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from luckydonaldUtils.logger import logging
 from luckydonaldUtils.typing import JSONType
-from teleflask import TBlueprint, Teleflask
 from teleflask.server.blueprints import TBlueprintSetupState
-
-from telemenu.data import Data
-from telemenu.test import TeleMenuInstancesItem, Menu, logger
+from teleflask import TBlueprint, Teleflask
 from telestate import TeleState, TeleStateMachine
+from .menus import Menu
+from .data import Data
+from .test import TeleMenuInstancesItem, logger
 
 __author__ = 'luckydonald'
 
