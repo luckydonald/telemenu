@@ -320,12 +320,12 @@ class TeleMenuMachine(object):
     instances: Dict[str, TeleMenuInstancesItem]
     states: TeleMenuStateMachine
 
-    def __init__(self, states: TeleMenuStateMachine = None):
+    def __init__(self, states: TeleMenuStateMachine = None, teleflask_or_tblueprint=None):
         assert_type_or_raise(states, TeleMenuStateMachine, None, parameter_name='states')
         self.instances = {}
         self.states = states
         if not self.states:
-            self.states = TeleMenuStateMachine(__name__)
+            self.states = TeleMenuStateMachine(__name__, teleflask_or_tblueprint)
         # end def
     # end def
 
