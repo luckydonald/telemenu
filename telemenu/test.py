@@ -1669,10 +1669,39 @@ class UploadMenu(SendMenu):
     """
     A force reply file upload.
     """
-    MENU_TYPE = 'text_upload'  # used for CallbackData.type
+    MENU_TYPE = 'upload_file'  # used for CallbackData.type
+    UPDATE_ATTRIBUTE = 'document'
 
     allowed_mime_types: Union[List[Union[str, Pattern]], None] = None
     allowed_extensions: Union[List[str], None] = None
+
+    @classmethod
+    @TeleMenuMachine.registerer.on_message
+    def on_message_listener(cls, update: Update, msg: Message):
+        from pytgbot.api_types.receivable.media import File, PhotoSize
+        if not hasattr(msg, cls.UPDATE_ATTRIBUTE):
+            return None
+        # end if
+        file_attr = getattr(msg, cls.UPDATE_ATTRIBUTE)  # something like msg.document, msg.photo, ...
+        if hasattr(file_attr, 'file_id'):  # Document, Video, Gif, Sticker, ...
+            file_id = file_attr.file_id
+        elif isinstance(file_attr, list):
+            biggest_size = 0
+            biggest_file = None
+            for photo in file_attr:
+                assert isinstance(photo, PhotoSize)
+                if photo.file_size > biggest_size:
+                    biggest_file = photo.file_id
+                    biggest_size = photo.file_size
+                # end if
+            # end for
+            file_id = biggest_file
+        else:
+            raise ValueError(f'Don\'t know how to handle `Message.{cls.UPDATE_ATTRIBUTE}`...')
+        # end if
+
+        return file_id
+    # end def
 # end def
 
 
