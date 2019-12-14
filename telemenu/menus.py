@@ -22,9 +22,10 @@ from teleflask.exceptions import AbortProcessingPlease
 
 from .data import Data, MenuData
 from .test import TeleMenuInstancesItem, DEFAULT_PLACEHOLDER, OptionalClassValueOrCallable, CallbackData
-from .test import DoneButton, BackButton, CancelButton, ClassValueOrCallableList, GotoButton, SelectableButton
-from .test import CheckboxButton, RadioButton, ClassValueOrCallable, logger, telemenu
+from .test import ClassValueOrCallableList
+from .test import ClassValueOrCallable, logger, telemenu
 from .utils import convert_to_underscore
+from .buttons import GotoButton, DoneButton, BackButton, CancelButton, SelectableButton, CheckboxButton, RadioButton
 from .machine import TeleMenuMachine, registerer
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
 from telestate import TeleStateMachine
