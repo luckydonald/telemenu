@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import re
 import inspect
 import unittest
 
-import json
-import re
 from abc import abstractmethod
 from typing import Type, Union, List, Callable, TypeVar, cast
 from telestate import TeleState
-from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
 from teleflask.server.blueprints import TBlueprint
@@ -115,44 +113,6 @@ class Example(object):
         data.button_page = 123
         self.assertEqual(self.get_value_by_name('var6'), "(6 property)\nPage 123")
     # end def
-# end class
-
-
-DEFAULT_PLACEHOLDER = object()
-
-
-class CallbackData(object):
-    type: str
-    value: JSONType
-    id: JSONType
-
-    # noinspection PyShadowingBuiltins
-    def __init__(self, type: str, id: JSONType = None, value: JSONType = None):
-        self.type = type
-        self.id = id
-        self.value = value
-    # end def
-
-    def to_json_str(self):
-        return json.dumps({'type': self.type, 'id': self.id, 'value': self.value})
-    # end def
-
-    @classmethod
-    def from_json_str(cls, string):
-        return cls(**json.loads(string))
-    # end def
-
-    def __repr__(self):
-        return (
-            f'{self.__class__.__name__}('
-            f'type={self.type!r}, '
-            f'id={self.id!r}, '
-            f'value={self.value!r}'
-            ')'
-        )
-    # end def
-
-    __str__ = __repr__
 # end class
 
 

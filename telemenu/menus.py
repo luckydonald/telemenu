@@ -20,8 +20,8 @@ from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardB
 from teleflask import TBlueprint
 from teleflask.exceptions import AbortProcessingPlease
 
-from .data import Data, MenuData
-from .test import DEFAULT_PLACEHOLDER, OptionalClassValueOrCallable, CallbackData
+from .data import Data, MenuData, CallbackData
+from .test import OptionalClassValueOrCallable
 from .test import ClassValueOrCallableList
 from .test import ClassValueOrCallable, logger, telemenu
 from .utils import convert_to_underscore
@@ -34,6 +34,9 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     logging.add_colored_handler(level=logging.DEBUG)
 # end if
+
+
+DEFAULT_PLACEHOLDER = object()
 
 
 class Menu(object):

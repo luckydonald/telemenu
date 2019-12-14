@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import json
 from typing import Union, Dict, List
 
 from luckydonaldUtils.logger import logging
@@ -11,6 +12,41 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     logging.add_colored_handler(level=logging.DEBUG)
 # end if
+
+
+class CallbackData(object):
+    type: str
+    value: JSONType
+    id: JSONType
+
+    # noinspection PyShadowingBuiltins
+    def __init__(self, type: str, id: JSONType = None, value: JSONType = None):
+        self.type = type
+        self.id = id
+        self.value = value
+    # end def
+
+    def to_json_str(self):
+        return json.dumps({'type': self.type, 'id': self.id, 'value': self.value})
+    # end def
+
+    @classmethod
+    def from_json_str(cls, string):
+        return cls(**json.loads(string))
+    # end def
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'type={self.type!r}, '
+            f'id={self.id!r}, '
+            f'value={self.value!r}'
+            ')'
+        )
+    # end def
+
+    __str__ = __repr__
+# end class
 
 
 class MenuData(object):

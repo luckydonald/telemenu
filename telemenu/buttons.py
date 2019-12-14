@@ -10,9 +10,9 @@ __author__ = 'luckydonald'
 
 from luckydonaldUtils.typing import JSONType
 
-from telemenu.data import Data, MenuData
-from telemenu.menus import Menu
-from telemenu.test import CallbackData, ClassValueOrCallable
+from .data import Data, MenuData, CallbackData
+from .menus import Menu
+from .test import ClassValueOrCallable
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
