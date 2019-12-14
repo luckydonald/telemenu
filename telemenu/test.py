@@ -937,8 +937,6 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
 
-    # noinspection PyNestedDecorators
-    @ClassAwareClassMethodDecorator2('test')
     @classmethod
     @TeleMenuMachine.registerer.on_update('callback_query')
     def on_callback_query(cls, update: Update):
@@ -1360,19 +1358,6 @@ class SelectableMenu(ButtonMenu):
     MENU_TYPE = 'selectable_menu'  # used for CallbackData.type
 
     title: str
-    value: JSONType
-    selected: bool
-
-    def __init__(
-        self,
-        title,
-        value: JSONType,
-        selected: bool = False
-    ):
-        self.title = title
-        self.value = value
-        self.selected = selected
-    # end def
 
     # noinspection PyShadowingBuiltins
     @classmethod
@@ -1562,7 +1547,6 @@ class TextMenu(SendMenu):
     """
     MENU_TYPE = 'text'  # used for CallbackData.type
 
-
     @classmethod
     @abstractmethod
     def _parse(cls, text: str) -> JSONType:
@@ -1576,7 +1560,6 @@ class TextMenu(SendMenu):
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
         return cls._parse(msg.text)
     # end def
-
 # end class
 
 
