@@ -36,7 +36,7 @@ class MenuData(object):
     # end def
 
     @classmethod
-    def from_dict(cls, data: Dict[str, JSONType]) -> 'Data':
+    def from_dict(cls, data: Dict[str, JSONType]) -> 'MenuData':
         return cls(
             message_id=data['message_id'],
             page=data['page'],
