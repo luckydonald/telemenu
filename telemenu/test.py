@@ -8,7 +8,7 @@ import re
 from abc import abstractmethod
 from html import escape
 from types import LambdaType, BuiltinFunctionType
-from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, Optional, cast, Tuple
+from typing import Type, Dict, Union, List, ClassVar, Callable, Any, TypeVar, Pattern, cast, Tuple, Generator
 from pytgbot import Bot
 from teleflask import TBlueprint
 from telestate import TeleMachine, TeleState
