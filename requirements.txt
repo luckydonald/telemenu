@@ -1,0 +1,15 @@
+# uwsgi
+uwsgi
+
+# flask
+flask
+
+# teleflask
+-e git://github.com/luckydonald/teleflask.git@43fcf3d3e61116dcd1690e2c1a24798c45718984#egg=teleflask_43fcf3
+
+# pytgbot
+-e git://github.com/luckydonald/pytgbot.git@5f433ca9e467a3cd5979b661373755f8a2ab698a#egg=pytgbot_5f433c  # 2019-08-16 after 4.4, Sticker.is_animated
+
+# luckydonald-utils
+-e git://github.com/luckydonald/python-utils.git@10e9b79e22f2fc805db80f16c382fb05d317ba88#egg=luckydonald-utils
+
