@@ -20,13 +20,10 @@ from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardB
 from teleflask import TBlueprint
 from teleflask.exceptions import AbortProcessingPlease
 
+from . import ClassValueOrCallable, OptionalClassValueOrCallable, ClassValueOrCallableList
 from .data import Data, MenuData, CallbackData
-from .test import OptionalClassValueOrCallable
-from .test import ClassValueOrCallableList
-from .test import ClassValueOrCallable, logger, telemenu
 from .utils import convert_to_underscore
-from .buttons import GotoButton, DoneButton, BackButton, CancelButton, SelectableButton, CheckboxButton, RadioButton
-from .machine import TeleMenuMachine, registerer, TeleMenuInstancesItem
+from .machine import TeleMenuMachine, TeleMenuInstancesItem
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
 from telestate import TeleStateMachine
 
@@ -357,6 +354,8 @@ class Menu(object):
             # reply_to_message_id=None,
             reply_markup=cls.get_value(cls.reply_markup),
         )
+    # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -504,6 +503,7 @@ class ButtonMenu(Menu):
 
     @classmethod
     def get_done_button(cls) -> Union[InlineKeyboardButton, None]:
+        from .buttons import DoneButton
         done: Union[DoneButton, Menu] = cls.get_value_by_name('done')
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
@@ -527,6 +527,8 @@ class ButtonMenu(Menu):
     @classmethod
     def get_back_button(cls) -> Union[InlineKeyboardButton, None]:
         # TODO implement
+        from .buttons import GotoButton, BackButton
+
         last_menu = cls.get_last_menu()
         assert isinstance(last_menu, BackButton)
         return InlineKeyboardButton(
@@ -541,6 +543,8 @@ class ButtonMenu(Menu):
     @classmethod
     def get_cancel_button(cls) -> Union[InlineKeyboardButton, None]:
         # TODO implement
+        from .buttons import GotoButton, BackButton, CancelButton
+
         back: Union[BackButton, Type[Menu]] = cls.get_value_by_name('back')
         assert isinstance(back, CancelButton)
         return InlineKeyboardButton(
@@ -611,6 +615,7 @@ class ButtonMenu(Menu):
             reply_markup=reply_markup,
         )
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -624,7 +629,6 @@ class GotoMenu(ButtonMenu):
     def menus(cls) -> List['GotoButton']:
         pass
     # end def
-
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
@@ -651,6 +655,7 @@ class GotoMenu(ButtonMenu):
             reply_markup=cls.get_keyboard(),
         )
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -673,6 +678,8 @@ class SelectableMenu(ButtonMenu):
         :param key: the name of the class variable containing the list of selectable buttons.
         :return: list of inline buttons
         """
+        from .buttons import GotoButton, SelectableButton, CheckboxButton, RadioButton
+
         selectable_buttons: List[
             Union[
                 SelectableButton,
@@ -700,6 +707,7 @@ class SelectableMenu(ButtonMenu):
     def get_buttons(cls) -> List[InlineKeyboardButton]:
         pass
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -725,6 +733,7 @@ class CheckboxMenu(SelectableMenu):
         button = update.callback_query.data
         cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -751,6 +760,7 @@ class RadioMenu(SelectableMenu):
         button = update.callback_query.data
         cls.data = button
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -793,7 +803,7 @@ class SendMenu(Menu):
     # end def
 
     @classmethod
-    def get_back_button(cls) -> Union[None, BackButton]:
+    def get_back_button(cls) -> Union[None, 'telemenu.buttons.BackButton']:
         pass
     # end def
 
@@ -805,6 +815,8 @@ class SendMenu(Menu):
     @classmethod
     def send_message(cls, bot: Bot, chat_id: int) -> Message:
         pass
+    # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -828,6 +840,7 @@ class TextMenu(SendMenu):
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
         return cls._parse(msg.text)
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -841,6 +854,7 @@ class TextStrMenu(TextMenu):
     def _parse(cls, text: str) -> JSONType:
         return text
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -854,6 +868,7 @@ class TextIntMenu(TextMenu):
     def _parse(cls, text: str) -> JSONType:
         return int(text)
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -866,6 +881,7 @@ class TextFloatMenu(TextMenu):
     def _parse(self, text: str) -> float:
         return float(text)
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -877,6 +893,7 @@ class TextPasswordMenu(TextMenu):
     def _parse(self, text: str) -> str:
         return text
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -891,6 +908,7 @@ class TextEmailMenu(TextMenu):
             raise ValueError('No good email.')
         return text
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -904,6 +922,7 @@ class TextTelMenu(TextMenu):
         # TODO: add validation.
         return text
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -922,6 +941,7 @@ class TextUrlMenu(TextMenu):
         # TODO: improve validation.
         return text
     # end def
+# end class
 
 
 @dataclass(init=False, eq=False, repr=True)
@@ -962,30 +982,4 @@ class UploadMenu(SendMenu):
 
         return file_id
     # end def
-
-
-@telemenu.register
-class RegisterTestMenu(Menu):
-    # noinspection PyNestedDecorators
-    @classmethod
-    @registerer.on_message
-    def on_message_listener(cls, update: Update, msg: Message):
-        """
-        Handles callbackdata, registered by
-        :param update:
-        :return:
-        """
-        pass
-    # end def
-
-    @classmethod
-    @registerer.on_command('init')
-    def on_command_listener(cls, update: Update, text: Union[str, None]):
-        """
-        Handles callbackdata, registered by
-        :param update:
-        :return:
-        :return:
-        """
-        pass
-    # end def
+# end class

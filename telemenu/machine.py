@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import inspect
-from dataclasses import dataclass
-from typing import Callable, Tuple, Dict, Any, Union, Type, Generator, List
-
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from luckydonaldUtils.logger import logging
 from luckydonaldUtils.typing import JSONType
 from teleflask.server.blueprints import TBlueprintSetupState
+from dataclasses import dataclass
 from teleflask import TBlueprint, Teleflask
 from telestate import TeleState, TeleStateMachine
-from .menus import Menu
-from .data import Data
-from .test import logger
+from typing import Callable, Tuple, Dict, Any, Union, Type, Generator, List, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .data import Data, MenuData
+    from .menus import Menu
+# end if
 
 __author__ = 'luckydonald'
 
@@ -52,9 +52,9 @@ class TeleMenuInstancesItem(object):
     """
     machine: 'TeleMenuMachine'
     state: TeleState
-    menu: Type['Menu']
+    menu: Type['telemenu.menus.Menu']
 
-    def __init__(self, machine: 'TeleMenuMachine', state: TeleState, menu: Type['Menu']):
+    def __init__(self, machine: 'TeleMenuMachine', state: TeleState, menu: Type['telemenu.menus.Menu']):
         self.machine = machine
         self.state = state
         self.menu = menu
@@ -233,6 +233,7 @@ class TeleMenuMachine(object):
         :param menu_to_register: The menu to register
         :return: the class again, unchanged.
         """
+        from .menus import Menu
         if not issubclass(menu_to_register, Menu):
             raise TypeError(
                 f"the parameter menu_to_register should be subclass of {Menu!r}, "

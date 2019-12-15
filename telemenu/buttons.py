@@ -10,9 +10,8 @@ __author__ = 'luckydonald'
 
 from luckydonaldUtils.typing import JSONType
 
+from . import ClassValueOrCallable
 from .data import Data, MenuData, CallbackData
-from .menus import Menu
-from .test import ClassValueOrCallable
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -44,11 +43,11 @@ class Button(object):
 
 
 class GotoButton(Button):
-    menu: ClassValueOrCallable[Type[Menu]]
+    menu: ClassValueOrCallable[Type['telemenu.menus.Menu']]
     label: ClassValueOrCallable[str]
     id: str
 
-    def __init__(self, menu: Type[Menu], label=None):
+    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None):
         if label is None:
             label = menu.title
         # end if
@@ -78,7 +77,7 @@ class DoneButton(GotoButton):
     label: ClassValueOrCallable[str] = "Done"  # todo: multi-language
     id: Union[str, None] = None
 
-    def __init__(self, menu: Type[Menu], label=None):
+    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None):
         if label is None:
             label = self.__class__.label
         # end if

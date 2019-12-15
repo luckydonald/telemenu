@@ -4,12 +4,12 @@ import re
 import inspect
 import unittest
 
-from abc import abstractmethod
-from typing import Type, Union, List, Callable, TypeVar, cast
+from typing import List, Union
+from teleflask import Teleflask
 from telestate import TeleState
 from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
-from teleflask.server.blueprints import TBlueprint
+from pytgbot.api_types.receivable.updates import Update
 from pytgbot.api_types.sendable.reply_markup import ForceReply
 from .data import MenuData, Data
 from .menus import Menu, GotoMenu, CheckboxMenu, RadioMenu, TextStrMenu, TextIntMenu, TextFloatMenu
@@ -17,18 +17,14 @@ from .menus import TextPasswordMenu, TextEmailMenu, TextTelMenu, TextUrlMenu, Up
 from .buttons import GotoButton, DoneButton, CheckboxButton, RadioButton
 from .machine import TeleMenuMachine, TeleMenuInstancesItem
 
+from .somewhere import API_KEY
+
 __author__ = 'luckydonald'
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     logging.add_colored_handler(level=logging.DEBUG)
 # end if
-
-T = TypeVar('T')  # Any type.
-ClassValueOrCallable = Union[T, Callable[['Data'], T]]
-
-OptionalClassValueOrCallable = Union[ClassValueOrCallable[T], type(None)]
-ClassValueOrCallableList = List[ClassValueOrCallable[T]]
 
 
 class Example(object):
@@ -116,89 +112,41 @@ class Example(object):
 # end class
 
 
-class ClassAwareClassMethodDecorator(object):
-    """
-    Decorator, but knowing the class in the end
-    https://stackoverflow.com/a/54316392/3423324
-    """
-    def __init__(self, fn: Callable):
-        logger.debug(f"received function {fn}.")
-        self.fn = fn
-    # end def
-
-    def __set_name__(self, owner, name):
-        # do something with owner, i.e.
-        logger.debug(f"decorating {self.fn} as {name!r} on class {owner}.")
-        # self.fn.class_name = owner.__name__
-
-        # then replace ourself with the original method
-        setattr(owner, name, self.decorate(function=self.fn, name=name, cls=owner))
-    # end def
-
-    # noinspection PyUnusedLocal
-    @staticmethod
-    @abstractmethod
-    def decorate(function: Callable, name: str, cls: Type):
-        return function
-    # end def
-# end class
-
-
-class ClassAwareClassMethodDecorator2(object):
-    """
-    Decorator, but knowing the class in the end
-    https://stackoverflow.com/a/54316392/3423324
-    """
-    def __init__(self, function: Callable):
-        logger.debug(f"ClassAwareClassMethodDecorator2: received function {function!r}.")
-        self.fn = function
-    # end def
-
-    def __call__(self, *args, **kwargs):
-        logger.debug(f"ClassAwareClassMethodDecorator2: got called with {args!r} {kwargs!r}")
-        return self.fn
-    # end def
-
-    def __set_name__(self, owner, name):
-        # do something with owner, i.e.
-        logger.debug(f"ClassAwareClassMethodDecorator2: decorating {self.fn} as {name!r} on class {owner}.")
-        # self.fn.class_name = owner.__name__
-
-        # then replace ourself with the original method
-        setattr(owner, name, self.decorate(function=self.fn, name=name, cls=owner))
-    # end def
-
-    # noinspection PyUnusedLocal
-    @staticmethod
-    @abstractmethod
-    def decorate(function: Callable, name: str, cls: Type):
-        return function
-    # end def
-# end class
-
-
-class menustate(ClassAwareClassMethodDecorator):
-    class on_command_menustate(ClassAwareClassMethodDecorator):
-        @staticmethod
-        def decorate(function: Callable, name: str, cls: Type[Menu]):
-            logger.success(f'REGISTEREING {function.__name__} as {name!r} to {cls.__name__}...')
-            assert cls.tblueprint is not None
-            return cast(TBlueprint, cls.tblueprint).on_command('TODO')(function)  # TODO
-    # end class
-
-    #class on_startup(ClassAwareClassMethodDecorator):
-    #class add_startup_listener
-    #class remove_startup_listener
-# end class
-
-
 # ------------------------------
 # TEST CLASSES
 # here the stuff is implemented
 # ------------------------------
 
 
-telemenu = TeleMenuMachine(database_driver=SimpleDictDriver())
+teleflask = Teleflask(api_key=API_KEY)
+telemenu = TeleMenuMachine(database_driver=SimpleDictDriver(), teleflask_or_tblueprint=teleflask)
+
+@telemenu.register
+class RegisterTestMenu(Menu):
+    # noinspection PyNestedDecorators
+    @classmethod
+    @TeleMenuMachine.registerer.on_message
+    def on_message_listener(cls, update: Update, msg: Message):
+        """
+        Handles callbackdata, registered by
+        :param update:
+        :return:
+        """
+        pass
+    # end def
+
+    @classmethod
+    @TeleMenuMachine.registerer.on_command('init')
+    def on_command_listener(cls, update: Update, text: Union[str, None]):
+        """
+        Handles callbackdata, registered by
+        :param update:
+        :return:
+        :return:
+        """
+        pass
+    # end def
+# end class
 
 
 @telemenu.register
