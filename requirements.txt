@@ -5,7 +5,7 @@ uwsgi
 flask
 
 # teleflask
--e git://github.com/luckydonald/teleflask.git@43fcf3d3e61116dcd1690e2c1a24798c45718984#egg=teleflask_43fcf3
+-e git://github.com/luckydonald/teleflask.git@652cd1008f4b335b905599c4b4dd577d6e8f6a94#egg=teleflask_652cd1
 
 # pytgbot
 -e git://github.com/luckydonald/pytgbot.git@5f433ca9e467a3cd5979b661373755f8a2ab698a#egg=pytgbot_5f433c  # 2019-08-16 after 4.4, Sticker.is_animated
