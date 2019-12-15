@@ -9,7 +9,7 @@ from teleflask import Teleflask
 from telestate import TeleState
 from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
-from pytgbot.api_types.receivable.updates import Update
+from pytgbot.api_types.receivable.updates import Update, Message
 from pytgbot.api_types.sendable.reply_markup import ForceReply
 from .data import MenuData, Data
 from .menus import Menu, GotoMenu, CheckboxMenu, RadioMenu, TextStrMenu, TextIntMenu, TextFloatMenu
