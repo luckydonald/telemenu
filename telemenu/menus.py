@@ -660,6 +660,19 @@ class GotoMenu(ButtonMenu):
             reply_markup=cls.get_keyboard(),
         )
     # end def
+
+    @classmethod
+    def process_callback_data(cls, data: CallbackData):
+        if data.type == cls.MENU_TYPE:
+            menu_id = data.value
+            menu: Menu = cls._state_instance.machine.instances[menu_id]
+            cls.refresh(done=False)
+            menu.activate()
+            menu.send_message()
+            raise AbortProcessingPlease()
+        # end if
+        super().process_callback_data(data)
+    # end def
 # end class
 
 
