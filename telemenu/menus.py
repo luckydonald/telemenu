@@ -606,10 +606,14 @@ class ButtonMenu(Menu):
         bot: Bot = cast(Bot, cls.bot)
         assert_type_or_raise(bot, Bot, parameter_name='bot')
         reply_markup = cls.get_keyboard() if not done else None
+        message_id = cast(MenuData, cls.menu_data).message_id
+        update: Update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
+        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(update)
+        assert_type_or_raise(chat_id, int, parameter_name='chat_id')
         bot.edit_message_text(
             text=cls.get_value(cls.text),
-            chat_id=None,
-            message_id=None,
+            chat_id=chat_id,
+            message_id=message_id,
             parse_mode='html',
             disable_web_page_preview=True,
             reply_markup=reply_markup,
