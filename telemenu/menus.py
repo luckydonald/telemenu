@@ -632,6 +632,7 @@ class GotoMenu(ButtonMenu):
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
+        from .buttons import GotoButton
         return [
             InlineKeyboardButton(
                 text=menu.label, callback_data=CallbackData(
@@ -647,7 +648,7 @@ class GotoMenu(ButtonMenu):
     def send_message(cls, bot: Bot, chat_id: Union[int, str]):
         bot.send_message(
             chat_id=chat_id,
-            text=cls.cls.get_value(cls.text),
+            text=cls.get_value(cls.text),
             parse_mode='html',
             disable_web_page_preview=True,
             disable_notification=False,
