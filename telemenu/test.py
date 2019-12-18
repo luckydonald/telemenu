@@ -121,6 +121,11 @@ class Example(object):
 teleflask = Teleflask(api_key=API_KEY)
 telemenu = TeleMenuMachine(database_driver=SimpleDictDriver(), teleflask_or_tblueprint=teleflask)
 
+telemenu.states.DEFAULT.on_command('start')
+telemenu.states.DEFAULT.on_command('help')
+def cmd_start(update: Update, text: Union[str, None]):
+
+
 @telemenu.register
 class RegisterTestMenu(Menu):
     # noinspection PyNestedDecorators
@@ -339,10 +344,13 @@ class BotMock(object):
 
 class UnitTests(unittest.TestCase):
     def test_state_change(self):
-         telemenu.states.CURRENT
          self.assertEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
          TestMainMenu.activate()
          self.assertNotEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should not be default any longer.')
          self.assertEquals(telemenu.states.CURRENT, TestMainMenu._state_instance, 'current state should be state of activated menu.')
     # end def
 # end class
+
+from telestate import TeleStateMachine
+
+teleflask.process_update(Update(123, Message()))
