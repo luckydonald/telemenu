@@ -26,7 +26,7 @@ from .data import Data, MenuData, CallbackData
 from .utils import convert_to_underscore
 from .machine import TeleMenuMachine, TeleMenuInstancesItem, TeleStateMachineMenuSerialisationAdapter
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
-from telestate import TeleStateMachine
+from telestate import TeleStateMachine, TeleState
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -374,7 +374,7 @@ class Menu(object):
         reply_markup = cls.get_value(cls.reply_markup)
 
         update: Update
-        update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
+        update = cast(TeleState, cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT).update
 
         chat_id: Union[int, None]
         user_id: Union[int, None]
