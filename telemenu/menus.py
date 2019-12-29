@@ -642,34 +642,6 @@ class ButtonMenu(Menu):
         """
         pass
     # end def
-
-    @classmethod
-    def refresh(cls, done: bool = False):
-        """
-        Edit the posted message to reflect new state, or post a new one if needed.
-        # TODO: If a new message is to be posted, the new message_id must be tracked,
-        # TODO: and maybe also the old keyboard removed.
-
-        :param done: Set to true if this message is not the current any longer.
-                     Used to e.g. include the selection in the message when the new menu is opened below.
-        :return:
-        """
-        bot: Bot = cast(Bot, cls.bot)
-        assert_type_or_raise(bot, Bot, parameter_name='bot')
-        reply_markup = cls.get_keyboard() if not done else None
-        message_id = cast(MenuData, cls.menu_data).message_id
-        update: Update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
-        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(update)
-        assert_type_or_raise(chat_id, int, parameter_name='chat_id')
-        bot.edit_message_text(
-            text=cls.get_value(cls.text),
-            chat_id=chat_id,
-            message_id=message_id,
-            parse_mode='html',
-            disable_web_page_preview=True,
-            reply_markup=reply_markup,
-        )
-    # end def
 # end class
 
 
