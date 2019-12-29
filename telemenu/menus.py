@@ -396,17 +396,18 @@ class Menu(object):
         )
         # If a new message is to be posted, the new message_id must be tracked.
         cast(MenuData, cls.menu_data).message_id = msg.message_id
+        return msg
     # end def
 
     @classmethod
-    def refresh(cls, done: bool = False):
+    def refresh(cls, done: bool = False) -> Message:
         """
         Edit the posted message to reflect new state, or post a new one if needed.
         To find the message to edit it uses the last saved state message_id as be found in `menu.data.menus[menu.id].message_id`.
 
         # TODO: If a new message is to be posted newly, the new message_id must be tracked,
         # TODO: and maybe also the old keyboard removed.
-        # TODO: maybe menus should offer a 'def done_text_appendum(cls) -> str' function for `done=True`.
+        # TODO: maybe menus should offer a 'def done_text_addendum(cls) -> str' function for `done=True`.
 
         :param done: Set to true if this message is not the current any longer.
                      Used to e.g. include the selection in the message when the new menu is opened below.
@@ -434,7 +435,7 @@ class Menu(object):
 
         # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(update)
 
-        bot.edit_message_text(
+        msg = bot.edit_message_text(
             text=text,
             chat_id=chat_id,
             message_id=message_id,
@@ -442,6 +443,7 @@ class Menu(object):
             disable_web_page_preview=True,
             reply_markup=reply_markup,
         )
+        return msg
     # end def
 # end class
 
