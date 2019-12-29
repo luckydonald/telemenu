@@ -629,24 +629,6 @@ class ButtonMenu(Menu):
     @classmethod
     def get_own_buttons(cls) -> List[InlineKeyboardButton]:
         return []
-
-    @classmethod
-    def register_state_instance(cls, instance_item: TeleMenuInstancesItem):
-        """
-        Function to register a state.
-
-        :param instance_item:
-        :return:
-        """
-        super().register_state_instance(instance_item)
-
-        # basically defining
-        @instance_item.state.on_update('inline_query')
-        def on_inline_query_wrapper(update: Update):
-            result = cls.on_inline_query(update)
-            cls.refresh()
-        # end def
-        cls.on_inline_query = instance_item.state.on_update(cls.on_inline_query, 'inline_query')
     # end def
 
     @classmethod
