@@ -699,7 +699,7 @@ class GotoMenu(ButtonMenu):
             menu: Menu = cls._state_instance.machine.instances[menu_id]
             cls.refresh(done=False)
             menu.activate()
-            menu.send(chat_id)
+            menu.send()
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
