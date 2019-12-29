@@ -213,7 +213,7 @@ registerer.on_update: Callable = staticmethod(getattr(registerer, '_build_listen
 @dataclass(init=False, repr=True)
 class TeleMenuMachine(object):
     instances: Dict[str, TeleMenuInstancesItem]
-    states: TeleStateMachineMenuSerialisationAdapter
+    states: Union[TeleStateMachineMenuSerialisationAdapter, TeleStateMachine]
 
     def __init__(self, states: TeleStateMachineMenuSerialisationAdapter = None, database_driver=None, teleflask_or_tblueprint=None):
         assert_type_or_raise(states, TeleStateMachineMenuSerialisationAdapter, None, parameter_name='states')
