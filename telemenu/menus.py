@@ -338,7 +338,7 @@ class Menu(object):
 
     @classmethod
     #@abstractmethod
-    def send_message(cls, bot: Bot, chat_id: int) -> Message:
+    def send(cls, bot: Bot, chat_id: int) -> Message:
         """
         This function sends a message to a chat ID and stores the information about it in `menu.data.menus[menu.id].message_id`.
 
@@ -678,7 +678,7 @@ class GotoMenu(ButtonMenu):
     # end def
 
     @classmethod
-    def send_message(cls, bot: Bot, chat_id: Union[int, str]):
+    def send(cls, bot: Bot, chat_id: Union[int, str]):
         bot.send_message(
             chat_id=chat_id,
             text=cls.get_value(cls.text),
@@ -697,7 +697,7 @@ class GotoMenu(ButtonMenu):
             menu: Menu = cls._state_instance.machine.instances[menu_id]
             cls.refresh(done=False)
             menu.activate()
-            menu.send_message()
+            menu.send(chat_id)
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
@@ -860,7 +860,7 @@ class SendMenu(Menu):
     # end def
 
     @classmethod
-    def send_message(cls, bot: Bot, chat_id: int) -> Message:
+    def send(cls, bot: Bot, chat_id: int) -> Message:
         pass
     # end def
 # end class
