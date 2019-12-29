@@ -24,7 +24,7 @@ from teleflask.exceptions import AbortProcessingPlease
 from . import ClassValueOrCallable, OptionalClassValueOrCallable, ClassValueOrCallableList
 from .data import Data, MenuData, CallbackData
 from .utils import convert_to_underscore
-from .machine import TeleMenuMachine, TeleMenuInstancesItem
+from .machine import TeleMenuMachine, TeleMenuInstancesItem, TeleStateMachineMenuSerialisationAdapter
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
 from telestate import TeleStateMachine
 
@@ -99,6 +99,26 @@ class Menu(object):
         return cast(TBlueprint, cls.tblueprint).bot
     # end def
 
+    menu_machine: ClassVar[TBlueprint]
+    # noinspection PyMethodParameters
+    @classproperty
+    def menu_machine(cls: Type['Menu']) -> Union[TeleMenuMachine, None]:
+        if not cls._state_instance:
+            return None
+        # end if
+        return cast(TeleMenuMachine, cls._state_instance.machine)
+    # end def
+
+    state_machine: ClassVar[TBlueprint]
+    # noinspection PyMethodParameters
+    @classproperty
+    def state_machine(cls: Type['Menu']) -> Union[TeleStateMachine, TeleStateMachineMenuSerialisationAdapter, None]:
+        if not cls._state_instance:
+            return None
+        # end if
+        return cast(TeleMenuMachine, cls.menu_machine).states
+    # end def
+
     tblueprint: ClassVar[TBlueprint]
     # noinspection PyMethodParameters
     @classproperty
@@ -106,9 +126,8 @@ class Menu(object):
         if not cls._state_instance:
             return None
         # end if
-        return cast(TeleStateMachine, cls._state_instance.machine).blueprint
+        return cast(TeleStateMachine, cls.state_machine).blueprint
     # end def
-
 
     # noinspection PyMethodParameters
     @classproperty
