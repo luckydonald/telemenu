@@ -691,19 +691,6 @@ class GotoMenu(ButtonMenu):
     # end def
 
     @classmethod
-    def send(cls, bot: Bot, chat_id: Union[int, str]):
-        bot.send_message(
-            chat_id=chat_id,
-            text=cls.get_value(cls.text),
-            parse_mode='html',
-            disable_web_page_preview=True,
-            disable_notification=False,
-            # reply_to_message_id=None,
-            reply_markup=cls.get_keyboard(),
-        )
-    # end def
-
-    @classmethod
     def process_callback_data(cls, data: CallbackData):
         if data.type == cls.MENU_TYPE:
             menu_id = data.value
@@ -870,11 +857,6 @@ class SendMenu(Menu):
     @classmethod
     def reply_markup(cls) -> Union[None, ReplyMarkup]:
         return ForceReply(selective=True)
-    # end def
-
-    @classmethod
-    def send(cls, bot: Bot, chat_id: int) -> Message:
-        pass
     # end def
 # end class
 
