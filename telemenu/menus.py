@@ -5,7 +5,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field as dataclass_field
 from html import escape
 from types import LambdaType, BuiltinFunctionType
-from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern
+from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple
 
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
@@ -17,6 +17,7 @@ from luckydonaldUtils.typing import JSONType
 from pytgbot import Bot
 from pytgbot.api_types.receivable.updates import Message, Update
 from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
+from pytgbot.api_types.sendable.reply_markup import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from teleflask import TBlueprint
 from teleflask.exceptions import AbortProcessingPlease
 
@@ -338,30 +339,55 @@ class Menu(object):
 
     @classmethod
     #@abstractmethod
-    def send(cls, bot: Bot, chat_id: int) -> Message:
+    def send(cls) -> Message:
         """
-        This function sends a message to a chat ID and stores the information about it in `menu.data.menus[menu.id].message_id`.
+        This function sends a message to the state's chat and stores the information about it in the current update.
 
-        :param chat_id:
         :return:
         """
-        bot.send_message(
+        bot: Bot = cast(Bot, cls.bot)
+        assert_type_or_raise(bot, Bot, parameter_name='bot')
+
+        text: str
+        text = cls.get_value(cls.text)
+
+        reply_markup: Union[None, ReplyMarkup, ReplyKeyboardMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply]
+        reply_markup = cls.get_value(cls.reply_markup)
+
+        update: Update
+        update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
+
+        chat_id: Union[int, None]
+        user_id: Union[int, None]
+        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(update)
+
+        reply_chat: Union[int, None]
+        reply_msg: Union[int, None]
+        reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(update)
+        assert_type_or_raise(chat_id, int, parameter_name='chat_id')
+
+        msg = bot.send_message(
             chat_id=chat_id,
-            text=cls.get_value(cls.text),
+            text=text,
             parse_mode='html',
             disable_web_page_preview=True,
             disable_notification=False,
-            # reply_to_message_id=None,
-            reply_markup=cls.get_value(cls.reply_markup),
+            reply_to_message_id=reply_msg,
+            reply_markup=reply_markup,
         )
+        # If a new message is to be posted, the new message_id must be tracked.
+        cast(MenuData, cls.menu_data).message_id = msg.message_id
     # end def
 
     @classmethod
     def refresh(cls, done: bool = False):
         """
         Edit the posted message to reflect new state, or post a new one if needed.
-        # TODO: If a new message is to be posted, the new message_id must be tracked,
+        To find the message to edit it uses the last saved state message_id as be found in `menu.data.menus[menu.id].message_id`.
+
+        # TODO: If a new message is to be posted newly, the new message_id must be tracked,
         # TODO: and maybe also the old keyboard removed.
+        # TODO: maybe menus should offer a 'def done_text_appendum(cls) -> str' function for `done=True`.
 
         :param done: Set to true if this message is not the current any longer.
                      Used to e.g. include the selection in the message when the new menu is opened below.
@@ -369,14 +395,28 @@ class Menu(object):
         """
         bot: Bot = cast(Bot, cls.bot)
         assert_type_or_raise(bot, Bot, parameter_name='bot')
-        reply_markup = cls.get_keyboard() if not done else None
+
+        text: str
+        text = cls.get_value(cls.text)
+
+        reply_markup: Union[None, ReplyMarkup, ReplyKeyboardMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply]
+        reply_markup = cls.get_value(cls.reply_markup) if not done else None
+
+        message_id: int
         message_id = cast(MenuData, cls.menu_data).message_id
-        update: Update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
+
+        update: Update
+        update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
+
+        chat_id: Union[int, None]
+        user_id: Union[int, None]
         chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(update)
-        # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(update)
         assert_type_or_raise(chat_id, int, parameter_name='chat_id')
+
+        # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(update)
+
         bot.edit_message_text(
-            text=cls.get_value(cls.text),
+            text=text,
             chat_id=chat_id,
             message_id=message_id,
             parse_mode='html',
