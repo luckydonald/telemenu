@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+""" Usage:
+API_KEY = "......";  from pytgbot.bot import Bot; bot = Bot(API_KEY); from luckydonaldUtils.logger import logging; logger = logging.getLogger(__name__); logging.add_colored_handler(level=logging.DEBUG);import sys;sys.path.extend(['.../r2tg/code/r2tg/telemenu_dist']);from telemenu.test import telemenu, teleflask, TestCheckboxMenu, Menu, TestTextUrlMenu, TestRadioMenu, RegisterTestMenu, Update, Message, Chat
+"""
 import re
 import inspect
 import unittest
 
 from typing import List, Union
+
+from pytgbot.api_types.receivable.peer import Chat
 from teleflask import Teleflask
 from telestate import TeleState
 from luckydonaldUtils.logger import logging
@@ -124,6 +129,8 @@ telemenu = TeleMenuMachine(database_driver=SimpleDictDriver(), teleflask_or_tblu
 telemenu.states.DEFAULT.on_command('start')
 telemenu.states.DEFAULT.on_command('help')
 def cmd_start(update: Update, text: Union[str, None]):
+    RegisterTestMenu.send()
+# end def
 
 
 @telemenu.register
@@ -353,4 +360,9 @@ class UnitTests(unittest.TestCase):
 
 from telestate import TeleStateMachine
 
-teleflask.process_update(Update(123, Message()))
+teleflask.process_update(Update(123, Message(456, 0, Chat(-123, 'private'))))
+
+teleflask.process_update(Update(123, Message(456, 0, Chat(-123, 'private'), text="/start wowsa")))
+
+menu = telemenu.get_current_menu()
+menu.send()
