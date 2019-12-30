@@ -41,7 +41,16 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
     def serialize(state_name, state_data: 'Data'):
         data = state_data.to_dict()
         return super().serialize(state_name, data)
+
+    def process_result(self, update, result):
+        from telemenu.menus import Menu
+        if issubclass(update, Menu):
+            return update.send()
+        # end if
+        return super().process_result(update, result)
     # end def
+
+
 # end class
 
 
