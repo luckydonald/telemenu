@@ -670,11 +670,11 @@ class ButtonMenu(Menu):
 class GotoMenu(ButtonMenu):
     MENU_TYPE = 'gotomenu'  # used for CallbackData.type
 
-    menus: ClassValueOrCallableList['GotoButton']
+    menus: ClassValueOrCallableList[Union['GotoButton', Type['Menu']]]
 
     @classmethod
     @abstractmethod
-    def menus(cls) -> List['GotoButton']:
+    def menus(cls) -> List['GotoButton', Type['Menu']]:
         pass
     # end def
 
