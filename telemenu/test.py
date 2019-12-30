@@ -360,9 +360,10 @@ class UnitTests(unittest.TestCase):
 
 from telestate import TeleStateMachine
 
-teleflask.process_update(Update(123, Message(456, 0, Chat(-123, 'private'))))
+# teleflask.process_update(Update(123, Message(456, 0, Chat(-123, 'private'))))
 
+teleflask.process_update(Update(123, Message(456, 0, Chat(-123, 'private'), text="/cancel")))
 teleflask.process_update(Update(123, Message(456, 0, Chat(-123, 'private'), text="/start wowsa")))
 
-menu = telemenu.get_current_menu()
-menu.send()
+# menu = telemenu.get_current_menu()
+# menu.send()
