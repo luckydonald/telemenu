@@ -674,7 +674,7 @@ class GotoMenu(ButtonMenu):
 
     @classmethod
     @abstractmethod
-    def menus(cls) -> List['GotoButton', Type['Menu']]:
+    def menus(cls) -> List[Union['GotoButton', Type['Menu']]]:
         pass
     # end def
 

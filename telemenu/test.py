@@ -7,7 +7,7 @@ import re
 import inspect
 import unittest
 
-from typing import List, Union
+from typing import List, Union, cast
 
 from pytgbot.api_types.receivable.peer import Chat
 from teleflask import Teleflask
@@ -304,37 +304,37 @@ class TestUploadMenu(UploadMenu):
     done = DoneButton(TestMainMenu)
 # end class
 
-print('breakpoint')
-telemenu.instances['TEST_MAIN_MENU']
-telemenu.instances['TEST_MAIN_MENU'].menu
-telemenu.instances['TEST_MAIN_MENU'].menu.activate()
-print(telemenu.instances[TestMainMenu.id])
-print(telemenu.get_current_menu())
-assert telemenu.instances[TestMainMenu.id].menu == telemenu.get_current_menu()
-telemenu.states.CURRENT.data
-telemenu.states.CURRENT
-telemenu.get_current_menu()
-telemenu.get_current_menu()
-telemenu.get_current_menu().get_value_by_name('title')
-telemenu.get_current_menu().get_value_by_name('title')
-telemenu.get_current_menu().title
-f = telemenu.get_current_menu().title
-inspect.signature(f)
-TestCheckboxMenu.activate()
-assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU']
-telemenu.get_current_menu() == TestCheckboxMenu
-assert telemenu.get_last_menu() == TestMainMenu
-telemenu.get_last_menu(activate=True)
-assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
-assert (
-    telemenu.get_current_menu().get_value(telemenu.get_current_menu().text)
-    ==
-    telemenu.get_current_menu().get_value_by_name('text')
-)
-TestTextUrlMenu.activate()
-menu = telemenu.get_current_menu()
-assert isinstance(menu.reply_markup(), ForceReply)
-# ba = s.bind(telemenu.get_current_menu().menu, "!test")
+def test_foooop():
+    print('breakpoint')
+    telemenu.instances['TEST_MAIN_MENU'].menu
+    telemenu.instances['TEST_MAIN_MENU'].menu.activate()
+    print(telemenu.instances[TestMainMenu.id])
+    print(telemenu.get_current_menu())
+    assert telemenu.instances[TestMainMenu.id].menu == telemenu.get_current_menu()
+    telemenu.states.CURRENT.data
+    telemenu.states.CURRENT
+    telemenu.get_current_menu()
+    telemenu.get_current_menu()
+    telemenu.get_current_menu().get_value_by_name('title')
+    telemenu.get_current_menu().get_value_by_name('title')
+    telemenu.get_current_menu().title
+    f = telemenu.get_current_menu().title
+    inspect.signature(f)
+    TestCheckboxMenu.activate()
+    assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU']
+    telemenu.get_current_menu() == TestCheckboxMenu
+    assert telemenu.get_last_menu() == TestMainMenu
+    telemenu.get_last_menu(activate=True)
+    assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
+    assert (
+        telemenu.get_current_menu().get_value(telemenu.get_current_menu().text)
+        ==
+        telemenu.get_current_menu().get_value_by_name('text')
+    )
+    TestTextUrlMenu.activate()
+    menu = telemenu.get_current_menu()
+    assert isinstance(menu.reply_markup(), ForceReply)
+    # ba = s.bind(telemenu.get_current_menu().menu, "!test")
 
 
 class BotMock(object):
@@ -346,6 +346,7 @@ class BotMock(object):
             return None
         # end def
         return function
+    # end def
 # end class
 
 
@@ -354,7 +355,7 @@ class UnitTests(unittest.TestCase):
          self.assertEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
          TestMainMenu.activate()
          self.assertNotEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should not be default any longer.')
-         self.assertEquals(telemenu.states.CURRENT, TestMainMenu._state_instance, 'current state should be state of activated menu.')
+         self.assertEquals(telemenu.states.CURRENT, cast(TeleMenuInstancesItem, TestMainMenu._state_instance).state, 'current state should be state of activated menu.')
     # end def
 # end class
 
