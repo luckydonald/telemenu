@@ -7,7 +7,7 @@ import re
 import inspect
 import unittest
 
-from typing import List, Union
+from typing import List, Union, cast
 
 from pytgbot.api_types.receivable.peer import Chat
 from teleflask import Teleflask
@@ -346,6 +346,7 @@ class BotMock(object):
             return None
         # end def
         return function
+    # end def
 # end class
 
 
@@ -354,7 +355,7 @@ class UnitTests(unittest.TestCase):
          self.assertEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
          TestMainMenu.activate()
          self.assertNotEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should not be default any longer.')
-         self.assertEquals(telemenu.states.CURRENT, TestMainMenu._state_instance, 'current state should be state of activated menu.')
+         self.assertEquals(telemenu.states.CURRENT, cast(TeleMenuInstancesItem, TestMainMenu._state_instance).state, 'current state should be state of activated menu.')
     # end def
 # end class
 
