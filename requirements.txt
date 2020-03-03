@@ -8,7 +8,7 @@ flask
 -e git://github.com/luckydonald/teleflask.git@652cd1008f4b335b905599c4b4dd577d6e8f6a94#egg=teleflask_652cd1
 
 # pytgbot
--e git://github.com/luckydonald/pytgbot.git@67d95bd2816102bb47637de22afa1e7167248d2d#egg=pytgbot_67d95b  # 2020-02-27 after 4.5.1, language keys.
+-e git://github.com/luckydonald/pytgbot.git@67d95bd2816102bb47637de22afa1e7167248d2d#egg=pytgbot_67d95b  # 2020-02-27 after 4.6.1, language keys.
 
 # luckydonald-utils
 -e git://github.com/luckydonald/python-utils.git@10e9b79e22f2fc805db80f16c382fb05d317ba88#egg=luckydonald-utils
