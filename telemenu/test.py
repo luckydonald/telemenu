@@ -304,39 +304,6 @@ class TestUploadMenu(UploadMenu):
     done = DoneButton(TestMainMenu)
 # end class
 
-def test_foooop():
-    print('breakpoint')
-    telemenu.instances['TEST_MAIN_MENU'].menu
-    telemenu.instances['TEST_MAIN_MENU'].menu.activate()
-    print(telemenu.instances[TestMainMenu.id])
-    print(telemenu.get_current_menu())
-    assert telemenu.instances[TestMainMenu.id].menu == telemenu.get_current_menu()
-    telemenu.states.CURRENT.data
-    telemenu.states.CURRENT
-    telemenu.get_current_menu()
-    telemenu.get_current_menu()
-    telemenu.get_current_menu().get_value_by_name('title')
-    telemenu.get_current_menu().get_value_by_name('title')
-    telemenu.get_current_menu().title
-    f = telemenu.get_current_menu().title
-    inspect.signature(f)
-    TestCheckboxMenu.activate()
-    assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU']
-    telemenu.get_current_menu() == TestCheckboxMenu
-    assert telemenu.get_last_menu() == TestMainMenu
-    telemenu.get_last_menu(activate=True)
-    assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
-    assert (
-        telemenu.get_current_menu().get_value(telemenu.get_current_menu().text)
-        ==
-        telemenu.get_current_menu().get_value_by_name('text')
-    )
-    TestTextUrlMenu.activate()
-    menu = telemenu.get_current_menu()
-    assert isinstance(menu.reply_markup(), ForceReply)
-    # ba = s.bind(telemenu.get_current_menu().menu, "!test")
-
-
 class BotMock(object):
     class BotMockFunc(object): pass
 
@@ -357,6 +324,45 @@ class UnitTests(unittest.TestCase):
          self.assertNotEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should not be default any longer.')
          self.assertEquals(telemenu.states.CURRENT, cast(TeleMenuInstancesItem, TestMainMenu._state_instance).state, 'current state should be state of activated menu.')
     # end def
+
+    def test_state_change_2(self):
+        telemenu.instances['TEST_MAIN_MENU'].menu.activate()
+        self.assertEqual(telemenu.get_current_menu(), TestMainMenu)
+        self.assertEqual(telemenu.instances[TestMainMenu.id].menu, telemenu.get_current_menu())
+    # end def
+
+    def test_get_property(self):
+        telemenu.instances[TestMainMenu.id].menu.activate()
+        self.assertEqual(telemenu.get_current_menu().get_value_by_name('title'), "Where to go?")
+    # end def
+
+    def foopr(self):
+        telemenu.states.CURRENT.data
+        telemenu.states.CURRENT
+        telemenu.get_current_menu()
+        telemenu.get_current_menu()
+        telemenu.get_current_menu().get_value_by_name('title')
+        telemenu.get_current_menu().get_value_by_name('title')
+        telemenu.get_current_menu().title
+        f = telemenu.get_current_menu().title
+        inspect.signature(f)
+        TestCheckboxMenu.activate()
+        assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU']
+        telemenu.get_current_menu() == TestCheckboxMenu
+        assert telemenu.get_last_menu() == TestMainMenu
+        telemenu.get_last_menu(activate=True)
+        assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
+        assert (
+            telemenu.get_current_menu().get_value(telemenu.get_current_menu().text)
+            ==
+            telemenu.get_current_menu().get_value_by_name('text')
+        )
+        TestTextUrlMenu.activate()
+        menu = telemenu.get_current_menu()
+        assert isinstance(menu.reply_markup(), ForceReply)
+        # ba = s.bind(telemenu.get_current_menu().menu, "!test")
+
+
 # end class
 
 from telestate import TeleStateMachine
