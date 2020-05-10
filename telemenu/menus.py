@@ -212,7 +212,8 @@ class Menu(object):
         if update:
             cast(TeleMenuInstancesItem, cls._state_instance).state.set_update(update)
         # end def
-        cls._activate()
+        cls.activate()
+        cls.send()
     # end def
 
     @classmethod
