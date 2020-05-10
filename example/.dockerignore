@@ -1,0 +1,13 @@
+# ignore everything first
+*
+**/*
+
+# Now re-include what we need.
+!r2tg/code/r2tg/telemenu_dist
+!r2tg/code/r2tg/telemenu_dist/**
+!r2tg/code/r2tg/telemenu_dist/**/*
+
+# Now re-include what we need.
+!slides/code/slides/telestate_dist
+!slides/code/slides/telestate_dist/**
+!slides/code/slides/telestate_dist/**/*

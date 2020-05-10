@@ -1,7 +1,14 @@
 version: '2.1'
 services:
   bot:
-    build: ..
+    build:
+      # here: r2tg/code/r2tg/telemenu_dist/example/docker-compose.yml
+      context: ..//..////..//..////////////..//////.
+      dockerfile: r2tg/code/r2tg/telemenu_dist/example/DebugBuild.Dockerfile
+      args:
+        FOLDER: r2tg/code/r2tg/telemenu_dist
+        TELESTATE_DIST: slides/code/slides/telestate_dist
+
     restart: "unless-stopped"
     environment:
       TG_API_KEY:
