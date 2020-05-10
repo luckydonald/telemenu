@@ -204,14 +204,11 @@ class Menu(object):
     # end def
 
     @classmethod
-    def show(cls, update=None):
+    def show(cls):
         """
         Activates the menu, and returns a sendable update.
         :return:
         """
-        if update:
-            cast(TeleMenuInstancesItem, cls._state_instance).state.set_update(update)
-        # end def
         cls.activate()
         cls.send()
     # end def
