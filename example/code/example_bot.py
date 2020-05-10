@@ -57,7 +57,7 @@ def cmd_test(update: Update, data: str = None):
 # end def
 
 
-@bot.on_command('start')
+@menus.states.ALL.on_command('start')
 def cmd_start(update: Update, data: str = None):
     MainMenu.show()
     return "Welcome."
