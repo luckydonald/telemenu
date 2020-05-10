@@ -12,7 +12,7 @@ from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
 from pytgbot.api_types.receivable.updates import Update
 
-from telemenu.buttons import GotoButton
+from telemenu.buttons import GotoButton, BackButton
 
 __author__ = 'luckydonald'
 
@@ -38,29 +38,29 @@ def slash():
 
 @menus.register
 class MainMenu(GotoMenu):
-    @classmethod
-    def on_inline_query(cls, update: Update):
-        pass
-
     title = "test"
     description = "Lorem ipsum"
 
     def menus(self) -> List[GotoButton]:
-        return []
+        return [TestMenu]
     # end def
 # end class
 
 
-@menus.states.DEFAULT.on_command('test')
-def cmd_test(update: Update, data: str = None):
-    return "TEST SUCCESSFUL."
-# end def
+@menus.register
+class TestMenu(GotoMenu):
+    title = "This is a sub menu"
+    description = lambda x: f'SUCH WOW {x!r}'
+
+    def menus(self) -> List[GotoButton]:
+        return [BackButton('back')]
+    # end def
+# end class
 
 
 @menus.states.ALL.on_command('start')
 def cmd_start(update: Update, data: str = None):
     MainMenu.show()
-    return "Welcome."
 # end def
 
 
