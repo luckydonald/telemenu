@@ -165,6 +165,7 @@ class Menu(object):
         """
         instance: TeleMenuInstancesItem = cls._state_instance
         data = cls._state_instance.machine.states.CURRENT.data
+        logger.debug(f'activating menu {cls.id!r}.\nCurrent data is {data!r}, current update is {cls._state_instance.machine.states.CURRENT.update!r}.')
         if data is None:
             data = Data()
         # end if
