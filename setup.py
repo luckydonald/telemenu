@@ -27,7 +27,7 @@ def parse_requirements(requirements):
 
 
 setup(
-    name='teleflask', version="0.0.0",
+    name='telemenu', version="0.0.0",
     description='Easily create menus for Telegram Bots.',
     long_description=long_description,
     # The project's main homepage.
@@ -74,8 +74,8 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-            *parse_requirements('requirements.txt'),  # for now as this is only in development.
-        ],
+        # TODO!
+    ],
     # List additional groups of dependencies here (e.g. development dependencies).
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
