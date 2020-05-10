@@ -58,8 +58,9 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
         :rtype: list
         """
         from telemenu.menus import Menu
-        if issubclass(update, Menu):
-            return update.send()
+        logger.debug(f'Processing result: {result!r}')
+        if result and issubclass(result, Menu):
+            return result.send()
         # end if
         return super().process_result(update, result)
     # end def
