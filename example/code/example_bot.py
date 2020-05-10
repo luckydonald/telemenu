@@ -16,19 +16,17 @@ from telemenu.buttons import GotoButton
 
 __author__ = 'luckydonald'
 
-
+logging.add_colored_handler(logger_name=None, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-if __name__ == '__main__':
-    logging.add_colored_handler(level=logging.DEBUG)
-# end if
 
-API_KEY = environ.get('API_KEY')
-assert API_KEY
+logging.test_logger_levels()
+
+API_KEY = environ.get('TG_API_KEY')
+assert API_KEY  # TG_API_KEY env variable
 
 app = Flask(__name__)
 bot = Teleflask(API_KEY, app=app)
-states = TeleStateMachine(__name__, database_driver=SimpleDictDriver(), teleflask_or_tblueprint=bot)
-menus = TeleMenuMachine(states)
+menus = TeleMenuMachine(database_driver=SimpleDictDriver(), teleflask_or_tblueprint=bot)
 
 
 @menus.register
@@ -46,8 +44,24 @@ class MainMenu(GotoMenu):
 # end class
 
 
-@states.DEFAULT.on_command('start')
+@menus.states.DEFAULT.on_command('test')
+def cmd_test(update: Update, data: str = None):
+    return "TEST SUCCESSFUL."
+# end def
+
+
+@bot.on_command('start')
 def cmd_start(update: Update, data: str = None):
-    MainMenu.activate()
+    MainMenu.show()
     return "Welcome."
+# end def
+
+
+@bot.on_update
+def debug(update: Update):
+    logger.info(f'Current state: {menus.states.CURRENT!r}')
+    logger.info(f'Current messages listeners: {menus.states.CURRENT.update_handler.message_listeners!r}')
+    logger.info(f'Current update listeners: {menus.states.CURRENT.update_handler.update_listeners!r}')
+    logger.info(f'Global messages listeners: {menus.states.CURRENT.update_handler.teleflask.message_listeners!r}')
+    logger.info(f'Global update listeners: {menus.states.CURRENT.update_handler.teleflask.update_listeners!r}')
 # end def
