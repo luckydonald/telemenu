@@ -692,7 +692,7 @@ class GotoMenu(ButtonMenu):
         menus: List[Union[GotoButton, Type[Menu]]] = cls.get_value_by_name('menus')
         return [
             InlineKeyboardButton(
-                text=menu.label, callback_data=CallbackData(
+                text=menu.label if isinstance(menu, GotoButton) else menu.get_value_by_name('title'), callback_data=CallbackData(
                     type=cls.MENU_TYPE,
                     value=menu.menu.id if isinstance(menu, GotoButton) else menu.id,
                 ).to_json_str()
