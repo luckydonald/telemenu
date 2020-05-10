@@ -1,0 +1,17 @@
+version: '2.1'
+services:
+  bot:
+    build: .
+    restart: "unless-stopped"
+    environment:
+      TG_API_KEY:
+      URL_PATH:
+      URL_HOSTNAME:
+      URL_PROXY_HOST:
+      HEALTHCHECK_URL: "/healthcheck"
+      PORT: 8080
+      MODULE_NAME: 'example_bot'
+      VARIABLE_NAME: 'app'
+      APP_MODULE: 'example_bot:app'
+      WORKERS_PER_CORE: 1
+      WEB_CONCURRENCY: 1
