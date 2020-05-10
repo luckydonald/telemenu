@@ -27,6 +27,7 @@ from .utils import convert_to_underscore
 from .machine import TeleMenuMachine, TeleMenuInstancesItem, TeleStateMachineMenuSerialisationAdapter
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
 from telestate import TeleStateMachine, TeleState
+from telestate.constants import KEEP_PREVIOUS
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -152,7 +153,7 @@ class Menu(object):
     # end def
 
     @classmethod
-    def _activate(cls, add_history_entry: Union[bool, None] = None):
+    def _activate(cls, add_history_entry: Union[bool, None] = None, update: Union[Update, None, KEEP_PREVIOUS.__class__] = KEEP_PREVIOUS):
         """
         Activates the underlying state of the menu, and copies over the data to the new state.
 
@@ -161,6 +162,11 @@ class Menu(object):
                                   `True`: Forcefully add the menu to the history, even if we are activating the menu we're already are on.
                                   `False`: Don't append to the history.
         :type  add_history_entry: bool|None
+
+        :param update: The Telegram Update this state is based on. Default is `KEEP_PREVIOUS`,
+                       so if you activate this state without specifying an different value for this,
+                       the update will stay the same for the new chosen state.
+        :type  update: KEEP_PREVIOUS.__class__|Update|None
         :return:
         """
         instance: TeleMenuInstancesItem = cls._state_instance
@@ -179,7 +185,7 @@ class Menu(object):
         if cls.id not in data.menus:
             data.menus[cls.id] = MenuData()
         # end if
-        instance.state.activate(data)
+        instance.state.activate(data, update=update)
     # end def
 
     @classmethod
