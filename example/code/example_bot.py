@@ -29,6 +29,13 @@ bot = Teleflask(API_KEY, app=app)
 menus = TeleMenuMachine(database_driver=SimpleDictDriver(), teleflask_or_tblueprint=bot)
 
 
+@app.route('/')
+def slash():
+    logger.debug('aaaa!')
+    return "bbbb!"
+# end def
+
+
 @menus.register
 class MainMenu(GotoMenu):
     @classmethod
