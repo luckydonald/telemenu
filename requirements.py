@@ -6,4 +6,5 @@ requirements = [
     "telestate",
     "pytgbot",
     "luckydonald-utils",
+    "typeguard"
 ]

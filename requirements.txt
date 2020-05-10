@@ -16,3 +16,6 @@ flask
 # luckydonald-utils
 -e git://github.com/luckydonald/python-utils.git@10e9b79e22f2fc805db80f16c382fb05d317ba88#egg=luckydonald-utils
 
+# typeguard
+typeguard==2.7.1
+

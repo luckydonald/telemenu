@@ -2,18 +2,17 @@
 # -*- coding: utf-8 -*-
 import inspect
 from abc import abstractmethod
-from dataclasses import dataclass, field as dataclass_field
 from html import escape
 from types import LambdaType, BuiltinFunctionType
 from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple
+from typeguard import check_type
+from dataclasses import dataclass, field as dataclass_field
 
 from luckydonaldUtils.decorators import classproperty
 from luckydonaldUtils.exceptions import assert_type_or_raise
+from luckydonaldUtils.typing import JSONType
 from luckydonaldUtils.logger import logging
 
-__author__ = 'luckydonald'
-
-from luckydonaldUtils.typing import JSONType
 from pytgbot import Bot
 from pytgbot.api_types.receivable.updates import Message, Update
 from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
@@ -26,8 +25,12 @@ from .data import Data, MenuData, CallbackData
 from .utils import convert_to_underscore
 from .machine import TeleMenuMachine, TeleMenuInstancesItem, TeleStateMachineMenuSerialisationAdapter
 from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_method, is_property_method
+
 from telestate import TeleStateMachine, TeleState
 from telestate.constants import KEEP_PREVIOUS
+
+__author__ = 'luckydonald'
+
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -690,6 +693,7 @@ class GotoMenu(ButtonMenu):
     def get_buttons(cls) -> List[InlineKeyboardButton]:
         from .buttons import GotoButton
         menus: List[Union[GotoButton, Type[Menu]]] = cls.get_value_by_name('menus')
+        check_type(argname='self.menus', value=menus, expected_type=List[Union[GotoButton, Type[Menu]]])
         return [
             InlineKeyboardButton(
                 text=menu.label if isinstance(menu, GotoButton) else menu.get_value_by_name('title'), callback_data=CallbackData(
