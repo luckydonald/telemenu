@@ -3,6 +3,7 @@ requirements = [
     "uwsgi",
     "flask",
     "teleflask",
+    "telestate",
     "pytgbot",
     "luckydonald-utils",
 ]
