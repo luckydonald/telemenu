@@ -433,7 +433,7 @@ class Menu(object):
         message_id = cast(MenuData, cls.menu_data).message_id
 
         update: Update
-        update = cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT.update
+        update = cast(TeleState, cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT).update
 
         chat_id: Union[int, None]
         user_id: Union[int, None]
