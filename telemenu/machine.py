@@ -306,12 +306,13 @@ class TeleMenuMachine(object):
         return self.states.register_bot(teleflask_or_tblueprint)
     # end def
 
-    def get_current_menu(self) -> Type[Union[None, 'Menu']]:
+    def get_current_menu(self) -> Union[None, Type['Menu']]:
         """
         Get the current menu.
         Return `None` if is the `DEFAULT` state, or does not exist in the menu.
 
         :return: The current menu or None.
+        :rtype: Menu|None
         """
         state = self.states.CURRENT
         if state == self.states.DEFAULT:
