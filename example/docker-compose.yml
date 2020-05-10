@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   bot:
-    build: .
+    build: ..
     restart: "unless-stopped"
     environment:
       TG_API_KEY:

@@ -1,4 +1,0 @@
-# For now, telemenu should install everything needed.
-
-# telemenu
--e git://github.com/luckydonald/telemenu.git@deploy4#egg=telemenu
