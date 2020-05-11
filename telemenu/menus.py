@@ -465,8 +465,8 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
 
-    @TeleMenuMachine.mark_for_register.on_update('callback_query')
     @classmethod
+    @TeleMenuMachine.mark_for_register.on_update('callback_query')  # yes, this must be under the classmethod!
     def _on_callback_query(cls, update: Update):
         """
         Handles callback data of the menu buttons.
