@@ -16,14 +16,17 @@ from telemenu.machine import MarkForRegister
 
 
 def decorator(func):
-    if isinstance(func, classmethod):
+    func_to_mark = func
+    if isinstance(func_to_mark, classmethod):
+        # while an attribute of the the `@classmethod` wrapper can be set, every attribute read will be proxied to the function instead.
+        # So it would be there, but we could never read it.
+        # Instead we need to set the attribute on the function not on the classmethod wrapper.
         # https://t.me/c/1111136772/117738
         # https://stackoverflow.com/a/1677671/3423324#how-does-a-classmethod-object-work
-        func = func.__get__(None, classmethod).__func__
-        logger.debug(f'function is classmethod, underlying function to be marked is {func!r}.')
+        func_to_mark = func_to_mark.__get__(None, classmethod).__func__
     # end if
-    setattr(func, '_special_attr_', 'maybe ponies?')
-    return func
+    setattr(func_to_mark, '_special_attr_', 'maybe ponies?')
+    return func  # this is not func_to_mark, as we need to return the `@classmethod` one.
 # end def
 
 
@@ -59,7 +62,7 @@ class DecoratorTests(unittest.TestCase):
         result = method('test')
         self.assertEqual(result, 'test')
         print(type(method))
-        self.assertEqual(method._special_attr_.__func__, 'maybe ponies?')
+        self.assertEqual(method._special_attr_, 'maybe ponies?')
 
     def test_two(self):
         method = Foo.method_two
