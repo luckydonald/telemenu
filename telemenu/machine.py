@@ -150,6 +150,7 @@ class MarkForRegister(object):
 
     @classmethod
     def _mark_function(cls, menu_function, register_function, *args, **kwargs):
+        logger.debug(f'marking function {menu_function!r} as {register_function!r}')
         setattr(
             menu_function,
             MarkForRegister.StoredMark.MARK,
@@ -168,11 +169,14 @@ class MarkForRegister(object):
         :param menu: The menu we want to collect the @MarkForRegister.* stuff on.
         :return:
         """
-        for name, method in inspect.getmembers(menu, inspect.isroutine):
+        functions = inspect.getmembers(menu, inspect.isroutine)
+        logger.debug(f'collecting functions of class {menu!r}, checking {[name for name, _ in functions]!r}.')
+        for name, method in functions:
             if not hasattr(method, MarkForRegister.StoredMark.MARK):  # this might wake it up.
                 method = getattr(menu, name)
             # end if
             if hasattr(method, MarkForRegister.StoredMark.MARK):
+                logger.debug(f'found marked function {name!r}.')
                 mark: cls.StoredMark = getattr(method, MarkForRegister.StoredMark.MARK)
                 mark.register_name = name
                 yield mark
@@ -192,11 +196,14 @@ class MarkForRegister(object):
 
     @staticmethod
     def _build_listener(register_function):
+        logger.debug(f'building listener decorator for function {register_function!r}')
         def decorator_function(*required_keywords: Tuple[str]) -> Union[Callable,  Callable[[Callable], Callable]]:
             """
             Like `BotCommandsMixin.on_message`, but for a static `Menu`.
             """
+            logger.debug('waiting for a function to mark...')
             def actual_wrapping_method(function:  Callable):
+                logger.debug(f'marking function {function!r}')
                 MarkForRegister._mark_function(function, register_function, *required_keywords)
                 return function
             # end def

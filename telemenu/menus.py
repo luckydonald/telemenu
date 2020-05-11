@@ -479,8 +479,8 @@ class ButtonMenu(Menu):
         #     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
         #     value=data.page - 1,
         # ).to_json_str(),
-
         data = CallbackData.from_json_str(update.callback_query.data)
+        logger.debug('processing callback query with data: {data!r}.')
         try:
             cls.process_callback_data(data)
             raise NotImplementedError(f'The data {data!r} was not handled.')
