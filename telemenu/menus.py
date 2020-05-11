@@ -217,7 +217,7 @@ class Menu(object):
     @classmethod
     def show(cls):
         """
-        Activates the menu, and returns a sendable update.
+        Activates the menu, and sends a menu, returning the send message.
         :return:
         """
         cls.activate()
@@ -304,7 +304,13 @@ class Menu(object):
             sig = inspect.signature(value)
             if 'data' in sig.parameters:
                 # def some_func(data)
+                if 'cls' in sig.parameters:
+                    return value(cls=cls, data=cls.data)
+                # end if
                 return value(data=cls.data)
+            # end if
+            if 'cls' in sig.parameters:
+                return value(cls=cls)
             # end if
             return value()
         # end if
