@@ -133,6 +133,14 @@ class Menu(object):
         return cast(TeleStateMachine, cls.state_machine).blueprint
     # end def
 
+    update: ClassVar[Update]
+
+    # noinspection PyMethodParameters
+    @classproperty
+    def current_update(cls: Type['Menu']) -> Union[Update, None]:
+        return cast(TeleState, cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT).update
+    # end def
+
     # noinspection PyMethodParameters
     @classproperty
     def id(cls: Type['Menu']) -> str:
@@ -174,7 +182,7 @@ class Menu(object):
         """
         instance: TeleMenuInstancesItem = cls._state_instance
         data = cls._state_instance.machine.states.CURRENT.data
-        logger.debug(f'activating menu {cls.id!r}.\nCurrent data is {data!r}, current update is {cls._state_instance.machine.states.CURRENT.update!r}.')
+        logger.debug(f'activating menu {cls.id!r}.\nCurrent data is {data!r}, current update is {cls.current_update!r}.')
         if data is None:
             data = Data()
         # end if
@@ -384,16 +392,13 @@ class Menu(object):
         reply_markup: Union[None, ReplyMarkup, ReplyKeyboardMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply]
         reply_markup = cls.get_value(cls.reply_markup)
 
-        update: Update
-        update = cast(TeleState, cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT).update
-
         chat_id: Union[int, None]
         user_id: Union[int, None]
-        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(update)
+        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(cls.current_update)
 
         reply_chat: Union[int, None]
         reply_msg: Union[int, None]
-        reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(update)
+        reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(cls.current_update)
         assert_type_or_raise(chat_id, int, parameter_name='chat_id')
 
         msg = bot.send_message(
@@ -436,15 +441,12 @@ class Menu(object):
         message_id: int
         message_id = cast(MenuData, cls.menu_data).message_id
 
-        update: Update
-        update = cast(TeleState, cast(TeleStateMachine, cls._state_instance.machine).states.CURRENT).update
-
         chat_id: Union[int, None]
         user_id: Union[int, None]
-        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(update)
+        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(cls.current_update)
         assert_type_or_raise(chat_id, int, parameter_name='chat_id')
 
-        # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(update)
+        # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(cls.current_update)
 
         msg = bot.edit_message_text(
             text=text,
