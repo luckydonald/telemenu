@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from luckydonaldUtils.logger import logging
+logging.add_colored_handler(logger_name=None, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 from os import environ
 from typing import List, Union, Type
 
@@ -7,7 +11,6 @@ from flask import Flask
 from teleflask import Teleflask
 from telemenu.menus import GotoMenu, Menu
 from telemenu.machine import TeleMenuMachine
-from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
 from pytgbot.api_types.receivable.updates import Update
 
@@ -15,10 +18,6 @@ from telemenu.buttons import GotoButton, BackButton
 
 __author__ = 'luckydonald'
 
-logging.add_colored_handler(logger_name=None, level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-logging.test_logger_levels()
 
 API_KEY = environ.get('TG_API_KEY')
 assert API_KEY  # TG_API_KEY env variable
