@@ -31,7 +31,9 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
     """
     @classmethod
     def deserialize(cls, state_name, db_data):
+        logger.debug(f'serializing db data {db_data}')
         array: Union[Dict[str, JSONType], None] = super(cls, cls).deserialize(state_name, db_data)
+        logger.debug(f'deserializing array {db_data}')
         if array is None:
             # no data yet, so we provide a empty skeleton of data
             return Data(menus={}, history=[])
