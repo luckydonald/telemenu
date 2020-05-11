@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import inspect
+from functools import wraps
+
 from luckydonaldUtils.exceptions import assert_type_or_raise
 from luckydonaldUtils.logger import logging
 from luckydonaldUtils.typing import JSONType
@@ -111,6 +113,8 @@ class MarkForRegister(object):
     In our case that is called by `@telemenu.register` where `telemenu = TelemenuMachine(...)`.
 
     Basically a complicated version of https://stackoverflow.com/a/2367605/3423324.
+
+    This solves the problem that those
     """
     class StoredMark(object):
         MARK = '_tmenu_mark_'
@@ -120,19 +124,22 @@ class MarkForRegister(object):
         register_args: Tuple
         register_kwargs: Dict[str, Any]
         register_name: Union[str, None]
+        is_classmethod: bool
 
         def __init__(
             self,
             marked_function: Callable,
             register_function: str,
             register_args: Tuple,
-            register_kwargs: Dict[str, Any]
+            register_kwargs: Dict[str, Any],
+            is_classmethod: bool,
         ):
             self.marked_function = marked_function
             self.register_function = register_function
             self.register_args = register_args
             self.register_kwargs = register_kwargs
-            self.register_name = None
+            self.is_classmethod = is_classmethod
+            self.register_name = None,
         # end def
 
         def __repr__(self) -> str:
@@ -143,6 +150,7 @@ class MarkForRegister(object):
                 f'register_args={self.register_args!r}, '
                 f'register_kwargs={self.register_kwargs!r}, '
                 f'register_name={self.register_name!r}'
+                f'is_classmethod={self.is_classmethod!r}'
                 f')'
             )
         # end def
@@ -152,25 +160,32 @@ class MarkForRegister(object):
     def _mark_function(cls, menu_function, register_function, *args, **kwargs) -> None:
         logger.debug(f'marking function {menu_function!r} as {register_function!r}')
         editable_function = menu_function
+        is_classmethod = False
         if isinstance(editable_function, classmethod):
+            is_classmethod = True
             # while an attribute of the the `@classmethod` wrapper can be set, every attribute read will be proxied to the function instead.
-            # So it would be there, but we could never read it.
+            # while an attribute of the the `@classmethod` wrapper can be set, every attribute read will be proxied to the function instead. So it would be there, but we could never read it.
             # Instead we need to set the attribute on the function not on the classmethod wrapper.
             # https://t.me/c/1111136772/117738
             # https://stackoverflow.com/a/1677671/3423324#how-does-a-classmethod-object-work
             editable_function = editable_function.__get__(None, classmethod).__func__
             logger.debug(f'function is classmethod, underlying function to be marked is {editable_function!r}.')
+            # make sure this is still a classmethod
+            # https://stackoverflow.com/a/8990408/3423324#decorating-a-method-thats-already-a-classmethod
+            # menu_function = classmethod(editable_function)
         # end if
         logger.debug(f'marking function {menu_function!r} as {register_function!r}')
         setattr(
             editable_function,
             MarkForRegister.StoredMark.MARK,
             cls.StoredMark(
-                marked_function=menu_function,
+                marked_function=editable_function,
                 register_function=register_function,
                 register_args=args, register_kwargs=kwargs,
+                is_classmethod=is_classmethod,
             )
         )
+        return menu_function
     # end def
 
     @classmethod
@@ -216,8 +231,7 @@ class MarkForRegister(object):
             logger.debug(f'waiting for a function to mark, got keywords: {required_keywords!r}')
             def _build_listener_actual_wrapping_method(function:  Callable):
                 logger.debug(f'marking function {function!r}')
-                MarkForRegister._mark_function(function, register_function, *required_keywords)
-                return function
+                return MarkForRegister._mark_function(function, register_function, *required_keywords)
             # end def
             if (
                 len(required_keywords) == 1 and  # given could be the function, or a single required_keyword.
@@ -319,7 +333,15 @@ class TeleMenuMachine(object):
                 f'registering marked function: '
                 f'@{mark.register_function!r}(*{mark.register_args}, **{mark.register_kwargs})({mark.marked_function})'
             )
-            register_function(*mark.register_args, **mark.register_kwargs)(mark.marked_function)
+            marked_function = mark.marked_function
+            if mark.is_classmethod:
+                @wraps(mark.marked_function)
+                def wrapper_to_add_the_cls_parameter(*args, **kwargs):
+                    return mark.marked_function(menu_to_register, *args, **kwargs)
+                # end def
+                marked_function = wrapper_to_add_the_cls_parameter
+            # end if
+            register_function(*mark.register_args, **mark.register_kwargs)(marked_function)
         # end if
 
         self.states.register_state(name, state=new_state)

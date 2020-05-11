@@ -465,8 +465,8 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
 
-    @classmethod
     @TeleMenuMachine.mark_for_register.on_update('callback_query')  # yes, this must be under the classmethod!
+    @classmethod
     def _on_callback_query(cls, update: Update):
         """
         Handles callback data of the menu buttons.
@@ -474,6 +474,8 @@ class ButtonMenu(Menu):
         :param update:
         :return:
         """
+        logger.debug(f'Got called for update: {cls!r}, {update!r}')
+        assert isinstance(update, Update)
         # Update.callback_query
         # CallbackData(
         #     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
@@ -922,8 +924,8 @@ class TextMenu(SendMenu):
     # end def
 
     # noinspection PyUnusedLocal
-    @classmethod
     @TeleMenuMachine.mark_for_register.on_message('text')
+    @classmethod
     def on_message_listener(cls, update: Update, msg: Message):
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
         return cls._parse(msg.text)
@@ -1043,8 +1045,8 @@ class UploadMenu(SendMenu):
     allowed_mime_types: Union[List[Union[str, Pattern]], None] = None
     allowed_extensions: Union[List[str], None] = None
 
-    @classmethod
     @TeleMenuMachine.mark_for_register.on_message
+    @classmethod
     def on_message_listener(cls, update: Update, msg: Message):
         from pytgbot.api_types.receivable.media import PhotoSize
         if not hasattr(msg, cls.UPDATE_ATTRIBUTE):
