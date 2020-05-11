@@ -27,9 +27,9 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
     Normal TeleStateMachine, but with custom (de)serialisation methods,
     directly converting it to and from the `Data` type.
     """
-    @staticmethod
-    def deserialize(state_name, db_data):
-        array: Union[Dict[str, JSONType], None] = super().deserialize(state_name, db_data)
+    @classmethod
+    def deserialize(cls, state_name, db_data):
+        array: Union[Dict[str, JSONType], None] = super(cls, cls).deserialize(state_name, db_data)
         if array is None:
             # no data yet, so we provide a empty skeleton of data
             return Data(menus={}, history=[])
@@ -37,10 +37,10 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
         return Data.from_dict(array)
     # end def
 
-    @staticmethod
-    def serialize(state_name, state_data: 'Data'):
+    @classmethod
+    def serialize(cls, state_name, state_data: 'Data'):
         data = state_data.to_dict()
-        return super().serialize(state_name, data)
+        return super(cls, cls).serialize(state_name, data)
 
     def process_result(self, update, result):
         """
