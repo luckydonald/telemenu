@@ -137,7 +137,7 @@ def cmd_start(update: Update, text: Union[str, None]):
 class RegisterTestMenu(Menu):
     # noinspection PyNestedDecorators
     @classmethod
-    @TeleMenuMachine.registerer.on_message
+    @TeleMenuMachine.mark_for_register.on_message
     def on_message_listener(cls, update: Update, msg: Message):
         """
         Handles callbackdata, registered by
@@ -148,7 +148,7 @@ class RegisterTestMenu(Menu):
     # end def
 
     @classmethod
-    @TeleMenuMachine.registerer.on_command('init')
+    @TeleMenuMachine.mark_for_register.on_command('init')
     def on_command_listener(cls, update: Update, text: Union[str, None]):
         """
         Handles callbackdata, registered by

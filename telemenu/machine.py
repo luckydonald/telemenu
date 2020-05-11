@@ -98,16 +98,16 @@ class TeleMenuInstancesItem(object):
 # end class
 
 
-class registerer(object):
+class MarkForRegister(object):
     """
     Mark functions to be included in the menu's state's tblueprint,
     as soon as that is assigned.
 
     Basically first the decorators next to the functions in the class are executed,
     and a marker is set.
-    `function._tmenu_mark_ = registerer.StoreMark(...)`
+    `function._tmenu_mark_ = MarkForRegister.StoreMark(...)`
 
-    Later this can be retrieved with `registerer.collect_marked_functions(cls)`.
+    Later this can be retrieved with `MarkForRegister.collect_marked_functions(cls)`.
     In our case that is called by `@telemenu.register` where `telemenu = TelemenuMachine(...)`.
 
     Basically a complicated version of https://stackoverflow.com/a/2367605/3423324.
@@ -152,7 +152,7 @@ class registerer(object):
     def _mark_function(cls, menu_function, register_function, *args, **kwargs):
         setattr(
             menu_function,
-            registerer.StoredMark.MARK,
+            MarkForRegister.StoredMark.MARK,
             cls.StoredMark(
                 marked_function=menu_function,
                 register_function=register_function,
@@ -165,15 +165,15 @@ class registerer(object):
     def collect_marked_functions_iter(cls, menu: Type['Menu']) -> Generator['StoredMark', None, None]:
         """
         Method generating yielding a list of all previously marked functions.
-        :param menu: The menu we want to collect the @registerer.* stuff on.
+        :param menu: The menu we want to collect the @MarkForRegister.* stuff on.
         :return:
         """
         for name, method in inspect.getmembers(menu, inspect.isroutine):
-            if not hasattr(method, registerer.StoredMark.MARK):  # this might wake it up.
+            if not hasattr(method, MarkForRegister.StoredMark.MARK):  # this might wake it up.
                 method = getattr(menu, name)
             # end if
-            if hasattr(method, registerer.StoredMark.MARK):
-                mark: cls.StoredMark = getattr(method, registerer.StoredMark.MARK)
+            if hasattr(method, MarkForRegister.StoredMark.MARK):
+                mark: cls.StoredMark = getattr(method, MarkForRegister.StoredMark.MARK)
                 mark.register_name = name
                 yield mark
             # end if
@@ -184,7 +184,7 @@ class registerer(object):
     def collect_marked_functions(cls, menu: Type['Menu']) -> List['StoredMark']:
         """
         Method generating returning a list of all previously marked functions.
-        :param menu: The menu we want to collect the @registerer.* stuff on.
+        :param menu: The menu we want to collect the @MarkForRegister.* stuff on.
         :return:
         """
         return list(cls.collect_marked_functions_iter(menu))
@@ -197,7 +197,7 @@ class registerer(object):
             Like `BotCommandsMixin.on_message`, but for a static `Menu`.
             """
             def actual_wrapping_method(function:  Callable):
-                registerer._mark_function(function, register_function, *required_keywords)
+                MarkForRegister._mark_function(function, register_function, *required_keywords)
                 return function
             # end def
             if (
@@ -229,11 +229,11 @@ class registerer(object):
 
 
 # noinspection PyTypeHints
-registerer.on_message: Callable[[], Callable] = staticmethod(getattr(registerer, '_build_listener')('on_message'))
+MarkForRegister.on_message: Callable[[], Callable] = staticmethod(getattr(MarkForRegister, '_build_listener')('on_message'))
 # noinspection PyTypeHints
-registerer.on_command: Callable = staticmethod(getattr(registerer, '_build_listener')('on_command'))
+MarkForRegister.on_command: Callable = staticmethod(getattr(MarkForRegister, '_build_listener')('on_command'))
 # noinspection PyTypeHints
-registerer.on_update: Callable = staticmethod(getattr(registerer, '_build_listener')('on_update'))
+MarkForRegister.on_update: Callable = staticmethod(getattr(MarkForRegister, '_build_listener')('on_update'))
 
 
 @dataclass(init=False, repr=True)
@@ -250,7 +250,7 @@ class TeleMenuMachine(object):
         # end def
     # end def
 
-    registerer = registerer
+    mark_for_register = MarkForRegister
 
     def register(self, menu_to_register: Type['Menu']) -> Type['Menu']:
         """
@@ -275,8 +275,8 @@ class TeleMenuMachine(object):
         new_state = TeleState(name=name)
 
         # register all marked function
-        mark: registerer.StoredMark
-        for mark in registerer.collect_marked_functions_iter(menu_to_register):
+        mark: MarkForRegister.StoredMark
+        for mark in MarkForRegister.collect_marked_functions_iter(menu_to_register):
             # collect the correct telestate/tblueprint register function.
             logger.debug(f'found mark: {mark!r}')
             register_function: Callable = getattr(new_state, mark.register_function)

@@ -465,7 +465,7 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
 
-    @TeleMenuMachine.registerer.on_update('callback_query')
+    @TeleMenuMachine.mark_for_register.on_update('callback_query')
     @classmethod
     def _on_callback_query(cls, update: Update):
         """
@@ -917,7 +917,7 @@ class TextMenu(SendMenu):
 
     # noinspection PyUnusedLocal
     @classmethod
-    @TeleMenuMachine.registerer.on_message('text')
+    @TeleMenuMachine.mark_for_register.on_message('text')
     def on_message_listener(cls, update: Update, msg: Message):
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
         return cls._parse(msg.text)
@@ -1038,7 +1038,7 @@ class UploadMenu(SendMenu):
     allowed_extensions: Union[List[str], None] = None
 
     @classmethod
-    @TeleMenuMachine.registerer.on_message
+    @TeleMenuMachine.mark_for_register.on_message
     def on_message_listener(cls, update: Update, msg: Message):
         from pytgbot.api_types.receivable.media import PhotoSize
         if not hasattr(msg, cls.UPDATE_ATTRIBUTE):
