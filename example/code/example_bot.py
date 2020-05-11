@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from os import environ
-from typing import List
+from typing import List, Union, Type
 
 from flask import Flask
 from teleflask import Teleflask
-from telestate import TeleStateMachine
-from telemenu.menus import GotoMenu
-from telemenu.machine import registerer, TeleMenuMachine
+from telemenu.menus import GotoMenu, Menu
+from telemenu.machine import TeleMenuMachine
 from luckydonaldUtils.logger import logging
 from telestate.contrib.simple import SimpleDictDriver
 from pytgbot.api_types.receivable.updates import Update
@@ -41,7 +40,7 @@ class MainMenu(GotoMenu):
     title = "test"
     description = "Lorem ipsum"
 
-    def menus(self) -> List[GotoButton]:
+    def menus(self) -> List[Union[GotoButton, Type[Menu]]]:
         return [TestMenu]
     # end def
 # end class
@@ -52,7 +51,7 @@ class TestMenu(GotoMenu):
     title = "This is a sub menu"
     description = lambda x: f'SUCH WOW {x!r}'
 
-    def menus(self) -> List[GotoButton]:
+    def menus(self) -> List[Union[GotoButton, Type[Menu]]]:
         return [BackButton('back')]
     # end def
 # end class
