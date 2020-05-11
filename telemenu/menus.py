@@ -213,7 +213,7 @@ class Menu(object):
         :return:
         """
         cls.activate()
-        cls.send()
+        return cls.send()
     # end def
 
     @classmethod
@@ -707,12 +707,12 @@ class GotoMenu(ButtonMenu):
 
     @classmethod
     def process_callback_data(cls, data: CallbackData):
+        logger.debug('got callback data: {data!r}')
         if data.type == cls.MENU_TYPE:
             menu_id = data.value
             menu: Menu = cls._state_instance.machine.instances[menu_id]
             cls.refresh(done=False)
-            menu.activate()
-            menu.send()
+            menu.show()
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
