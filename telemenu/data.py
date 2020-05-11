@@ -63,7 +63,7 @@ class MenuData(object):
         self.data = data
     # end def
 
-    def to_dict(self) -> Dict[JSONType]:
+    def to_dict(self) -> Dict[str, JSONType]:
         return {
             "message_id": self.message_id,
             "page": self.page,
@@ -72,7 +72,7 @@ class MenuData(object):
     # end def
 
     @classmethod
-    def from_dict(cls, data: Dict[JSONType]) -> 'MenuData':
+    def from_dict(cls, data: Dict[str, JSONType]) -> 'MenuData':
         if isinstance(data, cls):
             return data
         # end if
