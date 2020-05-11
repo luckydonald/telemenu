@@ -38,8 +38,8 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
     # end def
 
     @classmethod
-    def serialize(cls, state_name, state_data: 'Data'):
-        data = state_data.to_dict()
+    def serialize(cls, state_name, state_data: Union['Data', None]):
+        data = None if state_data is None else state_data.to_dict()
         return super(cls, cls).serialize(state_name, data)
 
     def process_result(self, update, result):
