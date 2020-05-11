@@ -467,9 +467,10 @@ class ButtonMenu(Menu):
 
     @TeleMenuMachine.registerer.on_update('callback_query')
     @classmethod
-    def on_callback_query(cls, update: Update):
+    def _on_callback_query(cls, update: Update):
         """
-        Handles callbackdata, registered by
+        Handles callback data of the menu buttons.
+        This is an internal method, you should customize `cls.process_callback_data` instead.
         :param update:
         :return:
         """
@@ -481,14 +482,27 @@ class ButtonMenu(Menu):
 
         data = CallbackData.from_json_str(update.callback_query.data)
         try:
-            return cls.process_callback_data(data)
+            cls.process_callback_data(data)
+            raise NotImplementedError(f'The data {data!r} was not handled.')
         except AbortProcessingPlease as e:
             return e.return_value
         # end try
     # end def
 
     @classmethod
-    def process_callback_data(cls, data: CallbackData):
+    def process_callback_data(cls, data: CallbackData) -> None:
+        """
+        Processes the callback data.
+        Raises an `AbortProcessingPlease` if it did find something valid to process.
+
+        Here specifically, the callbacks with type `CALLBACK_PAGINATION_BUTTONS_TYPE` are handled.
+
+        :param data: the callback data to handle
+        :raises AbortProcessingPlease: If we have handled it.
+        :return: None
+        """
+        logger.debug('got callback data: {data!r}')
+
         # check if we need to do pagination
         if data.type == cls.CALLBACK_PAGINATION_BUTTONS_TYPE:
             assert isinstance(cls.menu_data, MenuData)
@@ -707,7 +721,18 @@ class GotoMenu(ButtonMenu):
 
     @classmethod
     def process_callback_data(cls, data: CallbackData):
+        """
+        Processes the callback data.
+        Raises an `AbortProcessingPlease` if it did find something valid to process.
+
+        Here specifically, the callbacks with type `MENU_TYPE` are handled.
+
+        :param data: the callback data to handle
+        :raises AbortProcessingPlease: If we have handled it.
+        :return: None
+        """
         logger.debug('got callback data: {data!r}')
+
         if data.type == cls.MENU_TYPE:
             menu_id = data.value
             menu: Menu = cls._state_instance.machine.instances[menu_id]
