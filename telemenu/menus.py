@@ -113,7 +113,7 @@ class Menu(object):
         return cast(TeleMenuMachine, cls._state_instance.machine)
     # end def
 
-    state_machine: ClassVar[TBlueprint]
+    state_machine: ClassVar[Union[TeleStateMachine, TeleStateMachineMenuSerialisationAdapter, None]]
     # noinspection PyMethodParameters
     @classproperty
     def state_machine(cls: Type['Menu']) -> Union[TeleStateMachine, TeleStateMachineMenuSerialisationAdapter, None]:

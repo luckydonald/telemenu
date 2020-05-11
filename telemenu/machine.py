@@ -208,6 +208,7 @@ class MarkForRegister(object):
     @staticmethod
     def _build_listener(register_function):
         logger.debug(f'building listener decorator for function {register_function!r}')
+
         def _build_listener_outer_decorator_function(*required_keywords: Tuple[Union[Callable, str]]) -> Union[Callable,  Callable[[Callable], Callable]]:
             """
             Like `BotCommandsMixin.on_message`, but for a static `Menu`.
@@ -261,12 +262,12 @@ class MarkForRegister(object):
 # end class
 
 
-# noinspection PyTypeHints
-MarkForRegister.on_message: Callable[[], Callable] = staticmethod(getattr(MarkForRegister, '_build_listener')('on_message'))
-# noinspection PyTypeHints
-MarkForRegister.on_command: Callable = staticmethod(getattr(MarkForRegister, '_build_listener')('on_command'))
-# noinspection PyTypeHints
-MarkForRegister.on_update: Callable = staticmethod(getattr(MarkForRegister, '_build_listener')('on_update'))
+# noinspection PyTypeHints,PyProtectedMember
+MarkForRegister.on_message: Callable[[], Callable] = staticmethod(MarkForRegister._build_listener('on_message'))
+# noinspection PyTypeHints,PyProtectedMember
+MarkForRegister.on_command: Callable = staticmethod(MarkForRegister._build_listener('on_command'))
+# noinspection PyTypeHints,PyProtectedMember
+MarkForRegister.on_update: Callable = staticmethod(MarkForRegister._build_listener('on_update'))
 
 
 @dataclass(init=False, repr=True)
