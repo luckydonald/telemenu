@@ -465,8 +465,8 @@ class ButtonMenu(Menu):
     Subclass for everything with inline Keyboard
     """
 
-    @classmethod
     @TeleMenuMachine.registerer.on_update('callback_query')
+    @classmethod
     def on_callback_query(cls, update: Update):
         """
         Handles callbackdata, registered by
