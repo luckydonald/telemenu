@@ -149,7 +149,7 @@ class MarkForRegister(object):
     # end class
 
     @classmethod
-    def _mark_function(cls, menu_function, register_function, *args, **kwargs):
+    def _mark_function(cls, menu_function, register_function, *args, **kwargs) -> None:
         logger.debug(f'marking function {menu_function!r} as {register_function!r}')
         editable_function = menu_function
         if isinstance(editable_function, classmethod):
@@ -208,11 +208,11 @@ class MarkForRegister(object):
     @staticmethod
     def _build_listener(register_function):
         logger.debug(f'building listener decorator for function {register_function!r}')
-        def _build_listener_outer_decorator_function(*required_keywords: Tuple[str]) -> Union[Callable,  Callable[[Callable], Callable]]:
+        def _build_listener_outer_decorator_function(*required_keywords: Tuple[Union[Callable, str]]) -> Union[Callable,  Callable[[Callable], Callable]]:
             """
             Like `BotCommandsMixin.on_message`, but for a static `Menu`.
             """
-            logger.debug('waiting for a function to mark...')
+            logger.debug(f'waiting for a function to mark, got keywords: {required_keywords!r}')
             def _build_listener_actual_wrapping_method(function:  Callable):
                 logger.debug(f'marking function {function!r}')
                 MarkForRegister._mark_function(function, register_function, *required_keywords)
@@ -220,12 +220,12 @@ class MarkForRegister(object):
             # end def
             if (
                 len(required_keywords) == 1 and  # given could be the function, or a single required_keyword.
-                not isinstance(required_keywords[0], str) # not string -> must be function
+                not isinstance(required_keywords[0], str)  # not string -> must be function
              ):
                 logger.debug('marking directly...')
                 # -> plain function, no strings
                 # @on_message
-                found_function = required_keywords[0]
+                found_function: Callable = required_keywords[0]
                 required_keywords = tuple()  # we call the wrapper ourself, but remove the function from `required_keywords`
                 return _build_listener_actual_wrapping_method(function=found_function)  # not string -> must be function
             else:
