@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import unittest
+from typing import cast
 
 from luckydonaldUtils.logger import logging
 
 __author__ = 'luckydonald'
 
 import requests
-from pytgbot.api_types.receivable.updates import Update, Message
+from pytgbot.api_types.receivable.updates import Update, Message, CallbackQuery
 from pytgbot.api_types.receivable.peer import Chat, User
 
-from example_bot import app, API_KEY
+from example_bot import app, API_KEY, bot, menus, MainMenu
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -18,17 +19,29 @@ if __name__ == '__main__':
 # end if
 
 
+user = User(2, False, 'Test User')
 
-update = Update(
+start_update = Update(
     0,
     message=Message(
         date=1,
         message_id=3,
-        chat=Chat(2, type='private'),
-        from_peer=User(2, False, 'Test User'),
+        chat=Chat(user.id, type='private'),
+        from_peer=user,
         text="/start"
     )
 )
+
+callback_update = Update(
+    4,
+    callback_query=CallbackQuery(
+        id='5',
+        from_peer=user,
+        chat_instance='what is this?',
+        data='{"type": "gotomenu", "id": null, "value": "TEST_MENU"}',
+    )
+)
+
 
 class BasicTests(unittest.TestCase):
     def setUp(self):
@@ -50,7 +63,18 @@ class BasicTests(unittest.TestCase):
     # end def
 
     def test_update_start(self):
-        response = self.app.post(f'/income/{API_KEY}', json=update.to_array())
+        response = self.app.post(f'/income/{API_KEY}', json=start_update.to_array())
+        self.assertEqual(response.status_code, 200)
+    # end def
+
+    def test_callback_query(self):
+        # inject the state after the /start command
+        from telemenu.machine import TeleStateMachineMenuSerialisationAdapter
+        cast(TeleStateMachineMenuSerialisationAdapter, menus.states).CURRENT.set_update(start_update)
+        MainMenu.activate()
+
+        # send the button press's callback update
+        response = self.app.post(f'/income/{API_KEY}', json=callback_update.to_array())
         self.assertEqual(response.status_code, 200)
     # end def
 # end def
