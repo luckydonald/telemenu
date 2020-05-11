@@ -73,6 +73,10 @@ class MenuData(object):
 
     @classmethod
     def from_dict(cls, data: Dict[JSONType]) -> 'MenuData':
+        if isinstance(data, cls):
+            return data
+        # end if
+
         return cls(
             message_id=data['message_id'],
             page=data['page'],
@@ -113,6 +117,10 @@ class Data(object):
 
     @classmethod
     def from_dict(cls, data: Dict[str, JSONType]) -> 'Data':
+        if isinstance(data, cls):
+            return data
+        # end if
+
         return cls(
             menus={k: MenuData.from_dict(v) for k, v in data['menus'].items()},
             history=data['history'],
