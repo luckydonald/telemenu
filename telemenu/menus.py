@@ -480,12 +480,18 @@ class ButtonMenu(Menu):
         #     value=data.page - 1,
         # ).to_json_str(),
         data = CallbackData.from_json_str(update.callback_query.data)
+        bot: Bot = cast(Bot, cls.bot)
         logger.debug('processing callback query with data: {data!r}.')
         try:
             cls.process_callback_data(data)
+            bot.answer_callback_query(update.callback_query.id, text='Could not find the action you have clicked.', show_alert=True)
             raise NotImplementedError(f'The data {data!r} was not handled.')
         except AbortProcessingPlease as e:
-            return e.return_value
+            assert_type_or_raise(e.return_value, str, None, parameter_name='AbortProcessingPlease.return_value')
+            if e.return_value:
+                bot.answer_callback_query(update.callback_query.id, text=e.return_value, show_alert=True)
+            else:
+                bot.answer_callback_query(update.callback_query.id, text='OK', show_alert=False)  # TODO: l18n
         # end try
     # end def
 
