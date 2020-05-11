@@ -151,6 +151,13 @@ class MarkForRegister(object):
     @classmethod
     def _mark_function(cls, menu_function, register_function, *args, **kwargs):
         logger.debug(f'marking function {menu_function!r} as {register_function!r}')
+        if isinstance(menu_function, classmethod):
+            # https://t.me/c/1111136772/117738
+            # https://stackoverflow.com/a/1677671/3423324#how-does-a-classmethod-object-work
+            menu_function = menu_function.__get__(None, classmethod).__func__
+            logger.debug(f'function is classmethod, underlying function to be marked is {menu_function!r}.')
+        # end if
+        logger.debug(f'marking function {menu_function!r} as {register_function!r}')
         setattr(
             menu_function,
             MarkForRegister.StoredMark.MARK,
@@ -160,6 +167,7 @@ class MarkForRegister(object):
                 register_args=args, register_kwargs=kwargs,
             )
         )
+        assert getattr(menu_function, MarkForRegister.StoredMark.MARK)
     # end def
 
     @classmethod
