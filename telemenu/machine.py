@@ -232,7 +232,20 @@ class MarkForRegister(object):
 
     @classmethod
     def on_update(cls, *args: str):
-        pass
+        """ This method will be overwritten below. It's just here for IDEs. """
+        raise NotImplementedError('This should be replaced by an actual method.')
+    # end def
+
+    @classmethod
+    def on_command(cls, *args: str):
+        """ This method will be overwritten below. It's just here for IDEs. """
+        raise NotImplementedError('This should be replaced by an actual method.')
+    # end def
+
+    @classmethod
+    def on_message(cls, *args: str):
+        """ This method will be overwritten below. It's just here for IDEs. """
+        raise NotImplementedError('This should be replaced by an actual method.')
     # end def
 # end class
 
