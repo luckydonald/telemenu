@@ -9,8 +9,10 @@ from dataclasses import dataclass
 from teleflask import TBlueprint, Teleflask
 from telestate import TeleState, TeleStateMachine
 from typing import Callable, Tuple, Dict, Any, Union, Type, Generator, List, TYPE_CHECKING
+
+from .data import Data
 if TYPE_CHECKING:
-    from .data import Data, MenuData
+    from .data import MenuData
     from .menus import Menu
 # end if
 
@@ -64,8 +66,6 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
         # end if
         return super().process_result(update, result)
     # end def
-
-
 # end class
 
 
