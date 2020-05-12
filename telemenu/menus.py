@@ -448,6 +448,10 @@ class Menu(object):
 
         message_id: int
         message_id = cast(MenuData, cls.menu_data).message_id
+        if not message_id:
+            _, message_id = TeleStateMachine.msg_get_reply_params(cls.current_update)
+        # end if
+        assert message_id is not None
 
         chat_id: Union[int, None]
         user_id: Union[int, None]
