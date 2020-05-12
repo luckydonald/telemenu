@@ -737,8 +737,6 @@ class ButtonMenu(Menu):
 
 @dataclass(init=False, eq=False, repr=True)
 class GotoMenu(ButtonMenu):
-    MENU_TYPE = 'gotomenu'  # used for CallbackData.type
-
     menus: ClassValueOrCallableList[Union['GotoButton', Type['Menu']]]
 
     @classmethod
@@ -755,7 +753,7 @@ class GotoMenu(ButtonMenu):
         return [
             InlineKeyboardButton(
                 text=menu.get_value_by_name('title') if inspect.isclass(menu) and issubclass(menu, Menu) else menu.label, callback_data=CallbackData(
-                    type=cls.MENU_TYPE,
+                    type=cls.MENU_TYPE if inspect.isclass(menu) and issubclass(menu, Menu) else menu.type,
                     value=menu.id,
                 ).to_json_str()
             )
