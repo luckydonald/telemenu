@@ -400,7 +400,7 @@ class Menu(object):
 
         chat_id: Union[int, None]
         user_id: Union[int, None]
-        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(cls.current_update)
+        chat_id, user_id = TeleStateMachine.update_get_chat_and_user(cls.current_update)
 
         reply_chat: Union[int, None]
         reply_msg: Union[int, None]
@@ -449,7 +449,7 @@ class Menu(object):
 
         chat_id: Union[int, None]
         user_id: Union[int, None]
-        chat_id, user_id = TeleStateMachine.msg_get_chat_and_user(cls.current_update)
+        chat_id, user_id = TeleStateMachine.update_get_chat_and_user(cls.current_update)
         assert_type_or_raise(chat_id, int, parameter_name='chat_id')
 
         # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(cls.current_update)
