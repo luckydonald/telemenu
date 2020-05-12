@@ -39,7 +39,7 @@ if __name__ == '__main__':
 # end if
 
 
-DEFAULT_PLACEHOLDER = object()
+RAISE_ERROR = object()
 
 class CallbackButtonType(str, Enum):
     DONE = 'done'
@@ -230,18 +230,19 @@ class Menu(object):
     # end def
 
     @classmethod
-    def get_value_by_name(cls, key):
+    def get_value_by_name(cls, key, default=RAISE_ERROR):
         """
         This function is able to grab any value from a menu class by property name,
         no matter if it is a string or (class-/instance-/lambda-/...) function.
         Also it will provide the `data` to that function as well.
         In case of native strings, str.format(data=data) is called as well.
 
-        :param key:
+        :param key: what attribute to access
+        :param default: if unset (default: RAISE_ERROR) it will raise an KeyError, otherwise that default parameter is returned
         :return:
         """
-        value = getattr(cls, key, DEFAULT_PLACEHOLDER)
-        if value == DEFAULT_PLACEHOLDER:
+        value = getattr(cls, key, default)
+        if value == RAISE_ERROR:
             raise KeyError(f'Key {key!r} not found.')
         # end if
         return cls.get_value(value)
