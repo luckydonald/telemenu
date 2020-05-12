@@ -546,6 +546,11 @@ class ButtonMenu(Menu):
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
+        if data.type == cls.CALLBACK_BACK_BUTTON_TYPE:
+            cls.get_last_menu(activate=True)
+            cls.refresh(done=False)
+            raise AbortProcessingPlease()
+        # end if
     # end def
 
     @classmethod
