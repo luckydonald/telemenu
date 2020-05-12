@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from html import escape
 from luckydonaldUtils.logger import logging
 logging.add_colored_handler(logger_name=None, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -48,7 +49,7 @@ class MainMenu(GotoMenu):
 @menus.register
 class TestMenu(GotoMenu):
     title = "This is a sub menu"
-    description = lambda x: f'SUCH WOW {x!r}'
+    description = lambda data: f'SUCH DATA\n{escape(repr(data))!s}'
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [BackButton('back')]
