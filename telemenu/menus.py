@@ -504,6 +504,10 @@ class ButtonMenu(Menu):
                 bot.answer_callback_query(update.callback_query.id, text=e.return_value, show_alert=True)
             else:
                 bot.answer_callback_query(update.callback_query.id, text='OK', show_alert=False)  # TODO: l18n
+            # end if
+        except Exception as e:
+            bot.answer_callback_query(update.callback_query.id, text='Something did fail. Sorry.', show_alert=True)
+            logger.exception('Processing the callback query callback failed.')
         # end try
     # end def
 
