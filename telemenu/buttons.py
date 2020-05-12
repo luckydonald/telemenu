@@ -57,9 +57,17 @@ class ChangeMenuButton(Button):
         raise NotImplementedError('Subclass must implement this.')
     # end def
 
+    @property
     @abstractmethod
-    def get_callback_data(self, data: Data) -> CallbackData:
+    def type(self) -> str:
         raise NotImplementedError('Subclass must implement this.')
+    # end def
+
+    def get_callback_data(self, data: Data) -> CallbackData:
+        return CallbackData(
+            type=self.type,
+            value=self.id,
+        )
     # end def
 
     def get_label(self, data: Data):
@@ -85,12 +93,10 @@ class GotoButton(ChangeMenuButton):
         return self.menu.id
     # end def
 
-    def get_callback_data(self, data: Data) -> CallbackData:
+    @property
+    def type(self) -> str:
         from .menus import Menu
-        return CallbackData(
-            type=Menu.CALLBACK_GOTO_BUTTON_TYPE,
-            value=self.id,
-        )
+        return Menu.CALLBACK_GOTO_BUTTON_TYPE
     # end def
 # end class
 
@@ -105,12 +111,10 @@ class DoneButton(ChangeMenuButton):
         return ''
     # end def
 
-    def get_callback_data(self, data: Data) -> CallbackData:
+    @property
+    def type(self) -> str:
         from .menus import Menu
-        return CallbackData(
-            type=Menu.CALLBACK_DONE_BUTTON_TYPE,
-            value=self.id,
-        )
+        return Menu.CALLBACK_DONE_BUTTON_TYPE
     # end def
 # end class
 
@@ -129,12 +133,10 @@ class BackButton(ChangeMenuButton):
         return ''
     # end def
 
-    def get_callback_data(self, data: Data) -> CallbackData:
+    @property
+    def type(self) -> str:
         from .menus import Menu
-        return CallbackData(
-            type=Menu.CALLBACK_BACK_BUTTON_TYPE,
-            value=self.id,
-        )
+        return Menu.CALLBACK_BACK_BUTTON_TYPE
     # end def
 # end class
 
@@ -150,12 +152,10 @@ class CancelButton(GotoButton):
         return ''
     # end def
 
-    def get_callback_data(self, data: Data) -> CallbackData:
+    @property
+    def type(self) -> str:
         from .menus import Menu
-        return CallbackData(
-            type=Menu.CALLBACK_CANCEL_BUTTON_TYPE,
-            value=self.id,
-        )
+        return Menu.CALLBACK_CANCEL_BUTTON_TYPE
     # end def
 # end class
 
