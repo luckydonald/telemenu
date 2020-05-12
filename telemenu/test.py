@@ -218,17 +218,17 @@ class TestRadioMenu(RadioMenu):
     # noinspection PyMethodMayBeStatic
     def radiobuttons(self) -> List[RadioButton]:
         return [
-            RadioButton(title="Applejack", selected=False, value='aj'),
-            RadioButton(title="Fluttershy", selected=False, value='fs'),
-            RadioButton(title="Rarity", selected=False, value='rara'),
-            RadioButton(title="Twilight", selected=False, value='ts'),
-            RadioButton(title="Pinkie Pie", selected=False, value='pp'),
-            RadioButton(title="Littlepip", selected=True, value='waifu'),
-            RadioButton(title="Your Mom", selected=False, value='mom'),
-            RadioButton(title="Changelings", selected=False, value='bug'),
-            RadioButton(title="Cheesalys", selected=False, value='BUG'),
-            RadioButton(title="Your face", selected=False, value=':('),
-            RadioButton(title="Spike", selected=False, value='just_no'),
+            RadioButton(title="Applejack", default_selected=False, value='aj'),
+            RadioButton(title="Fluttershy", default_selected=False, value='fs'),
+            RadioButton(title="Rarity", default_selected=False, value='rara'),
+            RadioButton(title="Twilight", default_selected=False, value='ts'),
+            RadioButton(title="Pinkie Pie", default_selected=False, value='pp'),
+            RadioButton(title="Littlepip", default_selected=True, value='waifu'),
+            RadioButton(title="Your Mom", default_selected=False, value='mom'),
+            RadioButton(title="Changelings", default_selected=False, value='bug'),
+            RadioButton(title="Cheesalys", default_selected=False, value='BUG'),
+            RadioButton(title="Your face", default_selected=False, value=':('),
+            RadioButton(title="Spike", default_selected=False, value='just_no'),
         ]
     # end def
 # end class
@@ -319,6 +319,7 @@ class BotMock(object):
 
 class UnitTests(unittest.TestCase):
     def test_state_change(self):
+         telemenu.states.DEFAULT.activate()
          self.assertEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
          TestMainMenu.activate()
          self.assertNotEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should not be default any longer.')
@@ -326,43 +327,46 @@ class UnitTests(unittest.TestCase):
     # end def
 
     def test_state_change_2(self):
+        telemenu.states.DEFAULT.activate()
+        self.assertEquals(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
         telemenu.instances['TEST_MAIN_MENU'].menu.activate()
         self.assertEqual(telemenu.get_current_menu(), TestMainMenu)
         self.assertEqual(telemenu.instances[TestMainMenu.id].menu, telemenu.get_current_menu())
     # end def
 
     def test_get_property(self):
+        telemenu.states.DEFAULT.activate()
+        self.assertEqual(telemenu.states.CURRENT, telemenu.states.DEFAULT, 'should start with default.')
         telemenu.instances[TestMainMenu.id].menu.activate()
         self.assertEqual(telemenu.get_current_menu().get_value_by_name('title'), "Where to go?")
     # end def
 
-    def foopr(self):
-        telemenu.states.CURRENT.data
-        telemenu.states.CURRENT
-        telemenu.get_current_menu()
-        telemenu.get_current_menu()
-        telemenu.get_current_menu().get_value_by_name('title')
-        telemenu.get_current_menu().get_value_by_name('title')
-        telemenu.get_current_menu().title
-        f = telemenu.get_current_menu().title
-        inspect.signature(f)
+    def test_menus(self):
+        TestRadioMenu.activate()
+        self.assertEqual(telemenu.states.CURRENT.name, 'TEST_RADIO_MENU')
+        self.assertEqual(telemenu.get_current_menu(), TestRadioMenu)
+        self.assertEqual(telemenu.get_current_menu().get_value_by_name('title'),  "Best Pony?")
+        self.assertEqual(telemenu.get_current_menu().title, "Best Pony?")
+    # end def
+
+    def test_history(self):
         TestCheckboxMenu.activate()
-        assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU']
-        telemenu.get_current_menu() == TestCheckboxMenu
-        assert telemenu.get_last_menu() == TestMainMenu
+        self.assertEqual(telemenu.get_current_menu().data.history, ['TEST_MAIN_MENU', 'TEST_CHECKBOX_MENU'])
+        self.assertEqual(telemenu.get_current_menu(), TestCheckboxMenu)
+        self.assertEqual(telemenu.get_last_menu(), TestMainMenu)
         telemenu.get_last_menu(activate=True)
-        assert telemenu.get_current_menu().data.history == ['TEST_MAIN_MENU']
-        assert (
-            telemenu.get_current_menu().get_value(telemenu.get_current_menu().text)
-            ==
+        self.assertEqual(telemenu.get_current_menu().data.history, ['TEST_MAIN_MENU'])
+        self.assertEqual(
+            telemenu.get_current_menu().get_value(telemenu.get_current_menu().text),
             telemenu.get_current_menu().get_value_by_name('text')
         )
+    # end def
+
+    def test_reply_markup(self):
         TestTextUrlMenu.activate()
         menu = telemenu.get_current_menu()
-        assert isinstance(menu.reply_markup(), ForceReply)
-        # ba = s.bind(telemenu.get_current_menu().menu, "!test")
-
-
+        self.assertIsInstance(menu.reply_markup(), ForceReply)
+    # end def
 # end class
 
 from telestate import TeleStateMachine
