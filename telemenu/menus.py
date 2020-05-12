@@ -54,7 +54,9 @@ class Menu(object):
     """
     MENU_TYPE = 'menu'  # used for CallbackData.type
     CALLBACK_DONE_BUTTON_TYPE = 'done'
+    CALLBACK_GOTO_BUTTON_TYPE = 'goto'
     CALLBACK_BACK_BUTTON_TYPE = 'back'
+    CALLBACK_CANCEL_BUTTON_TYPE = 'cancel'
     CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
 
     _state_instance: ClassVar[TeleMenuInstancesItem]
