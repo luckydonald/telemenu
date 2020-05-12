@@ -14,7 +14,7 @@ from telemenu.machine import TeleMenuMachine
 from telestate.contrib.simple import SimpleDictDriver
 from pytgbot.api_types.receivable.updates import Update
 
-from telemenu.buttons import ChangeMenuButton, BackButton
+from telemenu.buttons import ChangeMenuButton, BackButton, GotoButton
 
 __author__ = 'luckydonald'
 
@@ -37,18 +37,29 @@ def slash():
 @menus.register
 class MainMenu(GotoMenu):
     title = "test"
-    description = "Lorem ipsum"
+    description = "Lorem ipsum \n\nSUCH DATA\n{data!r}"
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
-        return [TestMenu]
+        return [TestMenu, AnotherTestMenu]
+    # end def
+# end class
+
+
+@menus.register
+class AnotherTestMenu(GotoMenu):
+    title = "Sub Menu 2"
+    description = lambda data: f'Something funny here.\n\nSUCH DATA\n{data!r}'
+
+    def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
+        return [GotoButton(TestMenu, label='Got to the other Sub Menu.'), BackButton('back')]
     # end def
 # end class
 
 
 @menus.register
 class TestMenu(GotoMenu):
-    title = "This is a sub menu"
-    description = lambda data: f'SUCH DATA\n{data!r}'
+    title = "Sub Menu"
+    description = lambda data: f'We don\'d do sandwiches or public transport though.\n\nSUCH DATA\n{data!r}'
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [BackButton('back')]
