@@ -14,7 +14,7 @@ from telemenu.machine import TeleMenuMachine
 from telestate.contrib.simple import SimpleDictDriver
 from pytgbot.api_types.receivable.updates import Update
 
-from telemenu.buttons import GotoButton, BackButton
+from telemenu.buttons import ChangeMenuButton, BackButton
 
 __author__ = 'luckydonald'
 
@@ -39,7 +39,7 @@ class MainMenu(GotoMenu):
     title = "test"
     description = "Lorem ipsum"
 
-    def menus(self) -> List[Union[GotoButton, Type[Menu]]]:
+    def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [TestMenu]
     # end def
 # end class
@@ -50,7 +50,7 @@ class TestMenu(GotoMenu):
     title = "This is a sub menu"
     description = lambda x: f'SUCH WOW {x!r}'
 
-    def menus(self) -> List[Union[GotoButton, Type[Menu]]]:
+    def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [BackButton('back')]
     # end def
 # end class
