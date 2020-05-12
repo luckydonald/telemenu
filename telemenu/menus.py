@@ -455,7 +455,16 @@ class Menu(object):
         assert_type_or_raise(chat_id, int, parameter_name='chat_id')
 
         # reply_chat, reply_msg = TeleStateMachine.msg_get_reply_params(cls.current_update)
-
+        logger.debug(
+            f'Editing the message... (\n'
+            f' text={text!r},\n'
+            f' chat_id={chat_id!r},\n'
+            f' message_id={message_id!r},\n'
+            f' parse_mode={"html"!r},\n'
+            f' disable_web_page_preview={True!r},\n'
+            f' reply_markup={reply_markup!r},\n'
+            ')'
+        )
         msg = bot.edit_message_text(
             text=text,
             chat_id=chat_id,
