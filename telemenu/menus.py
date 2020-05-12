@@ -135,7 +135,7 @@ class Menu(object):
         return cast(TeleStateMachine, cls.state_machine).blueprint
     # end def
 
-    update: ClassVar[Update]
+    current_update: ClassVar[Update]
 
     # noinspection PyMethodParameters
     @classproperty
