@@ -12,6 +12,7 @@ from luckydonaldUtils.typing import JSONType
 
 from . import ClassValueOrCallable
 from .data import Data, MenuData, CallbackData
+from .menus import CallbackButtonType
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -96,7 +97,7 @@ class GotoButton(ChangeMenuButton):
     @property
     def type(self) -> str:
         from .menus import Menu
-        return Menu.CALLBACK_GOTO_BUTTON_TYPE
+        return CallbackButtonType.GOTO
     # end def
 # end class
 
@@ -114,7 +115,7 @@ class DoneButton(ChangeMenuButton):
     @property
     def type(self) -> str:
         from .menus import Menu
-        return Menu.CALLBACK_DONE_BUTTON_TYPE
+        return CallbackButtonType.DONE
     # end def
 # end class
 
@@ -136,7 +137,7 @@ class BackButton(ChangeMenuButton):
     @property
     def type(self) -> str:
         from .menus import Menu
-        return Menu.CALLBACK_BACK_BUTTON_TYPE
+        return CallbackButtonType.BACK
     # end def
 # end class
 
@@ -155,7 +156,7 @@ class CancelButton(GotoButton):
     @property
     def type(self) -> str:
         from .menus import Menu
-        return Menu.CALLBACK_CANCEL_BUTTON_TYPE
+        return CallbackButtonType.CANCEL
     # end def
 # end class
 

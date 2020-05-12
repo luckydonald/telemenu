@@ -3,6 +3,7 @@
 import inspect
 from abc import abstractmethod
 from html import escape
+from enum import Enum
 from types import LambdaType, BuiltinFunctionType
 from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple
 from typeguard import check_type
@@ -40,6 +41,14 @@ if __name__ == '__main__':
 
 DEFAULT_PLACEHOLDER = object()
 
+class CallbackButtonType(str, Enum):
+    DONE = 'done'
+    GOTO = 'goto'
+    BACK = 'back'
+    CANCEL = 'cancel'
+    PAGINATION = 'pagination'
+# end class
+
 
 class Menu(object):
     """
@@ -52,13 +61,6 @@ class Menu(object):
     and everything could be handled as singleton, which a static class already is.
     (Not doing the same mistake some other libs here (Looking angrily at you, Codeigniter))
     """
-    MENU_TYPE = 'menu'  # used for CallbackData.type
-    CALLBACK_DONE_BUTTON_TYPE = 'done'
-    CALLBACK_GOTO_BUTTON_TYPE = 'goto'
-    CALLBACK_BACK_BUTTON_TYPE = 'back'
-    CALLBACK_CANCEL_BUTTON_TYPE = 'cancel'
-    CALLBACK_PAGINATION_BUTTONS_TYPE = 'pagination'
-
     _state_instance: ClassVar[TeleMenuInstancesItem]
 
     # noinspection PyMethodParameters
@@ -503,7 +505,7 @@ class ButtonMenu(Menu):
         assert isinstance(update, Update)
         # Update.callback_query
         # CallbackData(
-        #     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+        #     type=CallbackButtonType.PAGINATION,
         #     value=data.page - 1,
         # ).to_json_str(),
         data = CallbackData.from_json_str(update.callback_query.data)
@@ -532,7 +534,7 @@ class ButtonMenu(Menu):
         Processes the callback data.
         Raises an `AbortProcessingPlease` if it did find something valid to process.
 
-        Here specifically, the callbacks with type `CALLBACK_PAGINATION_BUTTONS_TYPE` are handled.
+        Here specifically, the callbacks with type `CallbackButtonType.PAGINATION` are handled.
 
         :param data: the callback data to handle
         :raises AbortProcessingPlease: If we have handled it.
@@ -541,13 +543,13 @@ class ButtonMenu(Menu):
         logger.debug('got callback data: {data!r}')
 
         # check if we need to do pagination
-        if data.type == cls.CALLBACK_PAGINATION_BUTTONS_TYPE:
+        if data.type == CallbackButtonType.PAGINATION:
             assert isinstance(cls.menu_data, MenuData)
             cls.menu_data.page += 1
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
-        if data.type == cls.CALLBACK_BACK_BUTTON_TYPE:
+        if data.type == CallbackButtonType.BACK:
             menu = cls.get_last_menu(activate=True)
             menu.refresh(done=False)
             raise AbortProcessingPlease()
@@ -615,7 +617,7 @@ class ButtonMenu(Menu):
                 InlineKeyboardButton(
                     text="<",
                     callback_data=CallbackData(
-                        type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                        type=CallbackButtonType.PAGINATION,
                         value=page - 1,
                     ).to_json_str(),
                 )
@@ -625,7 +627,7 @@ class ButtonMenu(Menu):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
                 callback_data=CallbackData(
-                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    type=CallbackButtonType.PAGINATION,
                     value=i,
                 ).to_json_str()
             ))
@@ -634,7 +636,7 @@ class ButtonMenu(Menu):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
                 callback_data=CallbackData(
-                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    type=CallbackButtonType.PAGINATION,
                     value=i,
                 ).to_json_str()
             ))
@@ -643,7 +645,7 @@ class ButtonMenu(Menu):
             pagination_buttons.append(InlineKeyboardButton(
                 text=">",
                 callback_data=CallbackData(
-                    type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
+                    type=CallbackButtonType.PAGINATION,
                     value=page - 1,
                 ).to_json_str()
             ))
@@ -668,7 +670,7 @@ class ButtonMenu(Menu):
             return InlineKeyboardButton(
                 text=done.label,
                 callback_data=CallbackData(
-                    type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                    type=CallbackButtonType.DONE,
                     value=None,
                 ).to_json_str(),
             )
@@ -676,7 +678,7 @@ class ButtonMenu(Menu):
             return InlineKeyboardButton(
                 text=done.title,
                 callback_data=CallbackData(
-                    type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                    type=CallbackButtonType.DONE,
                     value=None,
                 ).to_json_str(),
             )
@@ -693,7 +695,7 @@ class ButtonMenu(Menu):
         return InlineKeyboardButton(
             text=last_menu.label,
             callback_data=CallbackData(
-                type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                type=CallbackButtonType.DONE,
                 value=None,
             ).to_json_str(),
         )
@@ -709,7 +711,7 @@ class ButtonMenu(Menu):
         return InlineKeyboardButton(
             text=back.label,
             callback_data=CallbackData(
-                type=cls.CALLBACK_DONE_BUTTON_TYPE,
+                type=CallbackButtonType.DONE,
                 value=None,
             ).to_json_str(),
         )
@@ -767,7 +769,7 @@ class GotoMenu(ButtonMenu):
         Processes the callback data.
         Raises an `AbortProcessingPlease` if it did find something valid to process.
 
-        Here specifically, the callbacks with type `MENU_TYPE` are handled.
+        Here specifically, the callbacks with type `CallbackButtonType.GOTO` are handled.
 
         :param data: the callback data to handle
         :raises AbortProcessingPlease: If we have handled it.
@@ -775,7 +777,7 @@ class GotoMenu(ButtonMenu):
         """
         logger.debug('got callback data: {data!r}')
 
-        if data.type == cls.MENU_TYPE:
+        if data.type == CallbackButtonType.GOTO:
             menu_id = data.value
             menu: Menu = cast(TeleMenuInstancesItem, cls._state_instance.machine.instances[menu_id]).menu
             menu.activate()
