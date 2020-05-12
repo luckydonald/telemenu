@@ -448,8 +448,9 @@ class Menu(object):
         reply_markup = cls.get_value(cls.reply_markup) if not done else None
 
         message_id: int
-        message_id = cast(MenuData, cls.menu_data).message_id
-        if not message_id:
+        if cls.menu_data and cast(MenuData, cls.menu_data).message_id:
+            message_id = cast(MenuData, cls.menu_data).message_id
+        else:
             _, message_id = TeleStateMachine.msg_get_reply_params(cls.current_update)
         # end if
         assert message_id is not None
@@ -587,14 +588,16 @@ class ButtonMenu(Menu):
 
         pages = (len(buttons) // 10) + 1
         data: MenuData = cls.menu_data
-        if data.page >= pages:
-            data.page = pages - 1
+        page = data.page if data else 0
+
+        if page >= pages:
+            page = pages - 1
         # end def
-        if data.page < 0:
-            data.page = 0
+        if page < 0:
+            page = 0
         # end def
 
-        offset = data.page * 10
+        offset = page * 10
         selected_buttons = buttons[offset: offset + 10]
 
         keyboard = []
@@ -607,18 +610,18 @@ class ButtonMenu(Menu):
         # end if
 
         pagination_buttons = []
-        if data.page > 0:
+        if page > 0:
             pagination_buttons.append(
                 InlineKeyboardButton(
                     text="<",
                     callback_data=CallbackData(
                         type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
-                        value=data.page - 1,
+                        value=page - 1,
                     ).to_json_str(),
                 )
             )
         # end if
-        for i in range(max(data.page - 2, 0), data.page):
+        for i in range(max(page - 2, 0), page):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
                 callback_data=CallbackData(
@@ -627,7 +630,7 @@ class ButtonMenu(Menu):
                 ).to_json_str()
             ))
         # end def
-        for i in range(data.page + 1, min(data.page + 3, pages)):
+        for i in range(page + 1, min(page + 3, pages)):
             pagination_buttons.append(InlineKeyboardButton(
                 text=str(i),
                 callback_data=CallbackData(
@@ -636,12 +639,12 @@ class ButtonMenu(Menu):
                 ).to_json_str()
             ))
         # end def
-        if data.page < pages - 1:
+        if page < pages - 1:
             pagination_buttons.append(InlineKeyboardButton(
                 text=">",
                 callback_data=CallbackData(
                     type=cls.CALLBACK_PAGINATION_BUTTONS_TYPE,
-                    value=data.page - 1,
+                    value=page - 1,
                 ).to_json_str()
             ))
         # end if
