@@ -41,17 +41,42 @@ class Button(object):
     # end def
 # end class
 
+class ChangeMenuButton(Button):
+    """
+    Base class for switching menus.
+    """
+    label: ClassValueOrCallable[str]
 
-class GotoButton(Button):
+    def __init__(self, label: str):
+        self.label = label
+    # end def
+
+    @property
+    @abstractmethod
+    def id(self) -> str:
+        raise NotImplementedError('Subclass must implement this.')
+    # end def
+
+    @abstractmethod
+    def get_callback_data(self, data: Data) -> CallbackData:
+        raise NotImplementedError('Subclass must implement this.')
+    # end def
+
+    def get_label(self, data: Data):
+        return self.label
+    # end def
+# end class
+
+
+class GotoButton(ChangeMenuButton):
     menu: ClassValueOrCallable[Type['telemenu.menus.Menu']]
     label: ClassValueOrCallable[str]
-    id: str
 
     def __init__(self, menu: Type['telemenu.menus.Menu'], label=None):
         if label is None:
             label = menu.title
         # end if
-        self.label = label
+        super().__init__(label=label)
         self.menu = menu
     # end def
 
@@ -61,41 +86,27 @@ class GotoButton(Button):
     # end def
 
     def get_callback_data(self, data: Data) -> CallbackData:
+        from .menus import Menu
         return CallbackData(
-            type=Menu.CALLBACK_BACK_BUTTON_TYPE,
+            type=Menu.CALLBACK_GOTO_BUTTON_TYPE,
             value=self.id,
         )
-    # end def
-
-    def get_label(self, data: Data):
-        return self.label
     # end def
 # end class
 
 
-class DoneButton(GotoButton):
-    label: ClassValueOrCallable[str] = "Done"  # todo: multi-language
-    id: Union[str, None] = None
-
-    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None):
-        if label is None:
-            label = self.__class__.label
-        # end if
-        super().__init__(menu, label=label)
+class DoneButton(ChangeMenuButton):
+    def __init__(self, label: str = 'Done'):
+        super().__init__(label=label)
     # end def
-
-
-@dataclass
-class BackButton(GotoButton):
-    label: ClassValueOrCallable[str] = "Back"  # todo: multi-language
-    id: Union[str, None] = None
 
     @property
     def id(self) -> str:
-        return self.menu.id
+        return ''
     # end def
 
     def get_callback_data(self, data: Data) -> CallbackData:
+        from .menus import Menu
         return CallbackData(
             type=Menu.CALLBACK_DONE_BUTTON_TYPE,
             value=self.id,
@@ -104,10 +115,48 @@ class BackButton(GotoButton):
 # end class
 
 
-@dataclass
+@dataclass(init=False)
+class BackButton(ChangeMenuButton):
+    label: ClassValueOrCallable[str]
+
+    def __init__(self, label: str = "Back"):    # todo: multi-language for label
+        super().__init__(label=label)
+        self.label = label
+    # end def
+
+    @property
+    def id(self) -> str:
+        return ''
+    # end def
+
+    def get_callback_data(self, data: Data) -> CallbackData:
+        from .menus import Menu
+        return CallbackData(
+            type=Menu.CALLBACK_BACK_BUTTON_TYPE,
+            value=self.id,
+        )
+    # end def
+# end class
+
+
 class CancelButton(GotoButton):
-    label: ClassValueOrCallable[str] = "Cancel"  # todo: multi-language
-    id: Union[str, None] = None
+    def __init__(self, label: str = "Cancel"):    # todo: multi-language for label
+        super().__init__(menu=None, label=label)
+        self.label = label
+    # end def
+
+    @property
+    def id(self) -> str:
+        return ''
+    # end def
+
+    def get_callback_data(self, data: Data) -> CallbackData:
+        from .menus import Menu
+        return CallbackData(
+            type=Menu.CALLBACK_CANCEL_BUTTON_TYPE,
+            value=self.id,
+        )
+    # end def
 # end class
 
 

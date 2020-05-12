@@ -721,14 +721,14 @@ class GotoMenu(ButtonMenu):
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
-        from .buttons import GotoButton
-        menus: List[Union[GotoButton, Type[Menu]]] = cls.get_value_by_name('menus')
-        check_type(argname='self.menus', value=menus, expected_type=List[Union[GotoButton, Type[Menu]]])
+        from .buttons import ChangeMenuButton
+        menus: List[Union[ChangeMenuButton, Type[Menu]]] = cls.get_value_by_name('menus')
+        check_type(argname='self.menus', value=menus, expected_type=List[Union[ChangeMenuButton, Type[Menu]]])
         return [
             InlineKeyboardButton(
-                text=menu.label if isinstance(menu, GotoButton) else menu.get_value_by_name('title'), callback_data=CallbackData(
+                text=menu.get_value_by_name('title') if inspect.isclass(menu) and issubclass(menu, Menu) else menu.label, callback_data=CallbackData(
                     type=cls.MENU_TYPE,
-                    value=menu.menu.id if isinstance(menu, GotoButton) else menu.id,
+                    value=menu.id,
                 ).to_json_str()
             )
             for menu in menus
