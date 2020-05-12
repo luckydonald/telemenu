@@ -753,9 +753,9 @@ class GotoMenu(ButtonMenu):
 
         if data.type == cls.MENU_TYPE:
             menu_id = data.value
-            menu: Menu = cls._state_instance.machine.instances[menu_id]
-            cls.refresh(done=False)
-            menu.show()
+            menu: Menu = cast(TeleMenuInstancesItem, cls._state_instance.machine.instances[menu_id]).menu
+            menu.activate()
+            menu.refresh(done=False)
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
