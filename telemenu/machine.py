@@ -385,9 +385,10 @@ class TeleMenuMachine(object):
     # end def
 
     # noinspection PyMethodParameters
-    def get_last_menu(self, activate=False) -> Union[None, Type['Menu']]:
+    def get_last_menu(self, activate: bool = False) -> Union[None, Type['Menu']]:
         """
         Returns the previous menu in the history, or None if there is none.
+        :param activate: Make the last menu active, and remove it from the history.
         :return:
         """
         if not self.states.CURRENT.data.history:

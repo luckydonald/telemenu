@@ -157,9 +157,10 @@ class Menu(object):
 
     # noinspection PyMethodParameters
     @classmethod
-    def get_last_menu(cls, activate=False) -> Union[None, Type['Menu']]:
+    def get_last_menu(cls, activate: bool = False) -> Union[None, Type['Menu']]:
         """
         Returns the previous menu in the history, or None if there is none.
+        :param activate: Make the last menu active, and remove it from the history.
         :return:
         """
         return cls._state_instance.machine.get_last_menu(activate=activate)
