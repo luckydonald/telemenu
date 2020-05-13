@@ -34,12 +34,6 @@ class Button(object):
         """ returns the text for the button """
         pass
     # end def
-
-    @abstractmethod
-    def get_callback_data(self, data: Data) -> CallbackData:
-        """ returns the button data to identify the button. """
-        pass
-    # end def
 # end class
 
 class ChangeMenuButton(Button):
@@ -62,13 +56,6 @@ class ChangeMenuButton(Button):
     @abstractmethod
     def type(self) -> str:
         raise NotImplementedError('Subclass must implement this.')
-    # end def
-
-    def get_callback_data(self, data: Data) -> CallbackData:
-        return CallbackData(
-            type=self.type,
-            value=self.id,
-        )
     # end def
 
     def get_label(self, data: Data):
