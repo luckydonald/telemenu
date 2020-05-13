@@ -201,7 +201,6 @@ class RadioButton(SelectableButton):
     def get_selected(self, menu_data: MenuData) -> bool:
         if (
             menu_data.data and
-            self.value in menu_data.data and
             isinstance(menu_data.data, str)
         ):
             return menu_data.data == self.value
