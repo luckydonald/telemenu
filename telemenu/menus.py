@@ -802,7 +802,7 @@ class SelectableMenu(ButtonMenu):
 
     # noinspection PyShadowingBuiltins
     @classmethod
-    def get_our_buttons(cls, key='selectable_buttons') -> List[InlineKeyboardButton]:
+    def _get_our_buttons(cls, key='selectable_buttons') -> List[InlineKeyboardButton]:
         """
         Generate InlineKeyboardButton from the buttons.
 
@@ -852,7 +852,7 @@ class CheckboxMenu(SelectableMenu):
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
-        return cls.get_our_buttons(key='checkboxes')
+        return cls._get_our_buttons(key='checkboxes')
     # end def
 
     @classmethod
@@ -879,7 +879,7 @@ class RadioMenu(SelectableMenu):
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
-        return cls.get_our_buttons(key='radiobuttons')
+        return cls._get_our_buttons(key='radiobuttons')
     # end def
 
     @classmethod
