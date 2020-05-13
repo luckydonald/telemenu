@@ -589,9 +589,18 @@ class ButtonMenu(Menu):
 
         :return:
         """
-        buttons = cls.get_buttons()
+        content_buttons = []
+        history_buttons = []  # Back, Cancel, Done
+        for button in cls.get_buttons():
+            from .buttons import BackButton, CancelButton, DoneButton
+            if isinstance(button, (BackButton, CancelButton, DoneButton)):
+                history_buttons.append(button)
+            else:
+                content_buttons.append(button)
+            # end if
+        # end for
 
-        pages = (len(buttons) // 10) + 1
+        pages = (len(content_buttons) // 10) + 1
         data: MenuData = cls.menu_data
         page = data.page if data else 0
 
@@ -603,15 +612,15 @@ class ButtonMenu(Menu):
         # end def
 
         offset = page * 10
-        selected_buttons = buttons[offset: offset + 10]
+        content_buttons = content_buttons[offset: offset + 10]
 
         keyboard = []
-        for i in range(len(selected_buttons)):
+        for i in range(len(content_buttons)):
             # we iterate through the buttons and split them into left and right.
             if i % 2 == 0:  # left button, and first of row
                 keyboard.append([])
             # end if
-            keyboard[-1].append(selected_buttons[i])
+            keyboard[-1].append(content_buttons[i])
         # end if
 
         pagination_buttons = []
@@ -654,22 +663,29 @@ class ButtonMenu(Menu):
             ))
         # end if
 
+        # split the content buttons over two rows.
         button_rows = []
-        for i, button in enumerate(selected_buttons):
+        for i, button in enumerate(content_buttons):
             if i % 2 == 0:
                 button_rows.append([])  # add list
             # end if
             button_rows[-1].append(button)
         # end for
-        button_rows.append(pagination_buttons)  # add pagination buttons always as an extra row.
 
+        if pagination_buttons:
+            button_rows.append(pagination_buttons)  # add pagination buttons always as an extra row.
+        # end if
+
+        if history_buttons:
+            button_rows.append(history_buttons)  # add back/cancel/done as an extra row
+        # end if
         return InlineKeyboardMarkup(inline_keyboard=button_rows)
     # end def
 
     @classmethod
     def get_done_button(cls) -> Union[InlineKeyboardButton, None]:
         from .buttons import DoneButton
-        done: Union[DoneButton, Menu] = cls.get_value_by_name('done')
+        done: Union[DoneButton, Menu] = cls.get_value_by_name('done', default=None)
         if isinstance(done, DoneButton):
             return InlineKeyboardButton(
                 text=done.label,
@@ -851,7 +867,10 @@ class CheckboxMenu(SelectableMenu):
     Data storage is an dict with the checkbox values as keys, and bool as values.
     """
     MENU_TYPE = 'checkbox'  # used for CallbackData.type
-    DATA_TYPE = Dict[str, bool]  # key is
+    DATA_TYPE = Dict[str, bool]  # key is the button's id
+
+    tmp_data_access: ClassVar[Union[None, DATA_TYPE]]
+    saved_data_access: ClassVar[Union[None, DATA_TYPE]]
 
     checkboxes: ClassValueOrCallable['CheckboxButton']
 

@@ -164,6 +164,10 @@ class Menu(StartupMixin, TeleflaskMixinBase):
                         - For example under a checkbox list
                     - you can specify a menu to jump to
                     - you can overwrite the menu/state to jump to, instead of setting the state to DEFAULT
+                - Function buttons should stay at the bottom
+                    - last two rows should be
+                        - pagination (if applicable)
+                        - everything jumping between menus, currently "Back", "Done" and "Cancel" buttons.
                 - register /back, /done, /cancel
                     - command representation of the "Back", "Done" and "Cancel" buttons
                     - if not needed, i.e register with a fallback responding like "There's no going back now, sorry"
