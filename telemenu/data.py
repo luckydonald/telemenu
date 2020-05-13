@@ -100,18 +100,21 @@ class MenuData(object):
 
 # TODO: there is needed a way to add your own stuff, e.g. you have other states than only menus...
 class Data(object):
-    menus: Dict[str, MenuData]  # keys are IDs.
+    menus: Dict[str, MenuData]  # keys are (menu) IDs.
     history: List[str]  # stack of IDs.
+    saved_data: Dict[str, JSONType]  # keys are (menu) IDs.
 
-    def __init__(self, menus: Dict[str, JSONType] = None, history: List[str] = None):
+    def __init__(self, menus: Dict[str, JSONType] = None, history: List[str] = None, saved_data: Dict[str, JSONType] = None):
         self.menus = {} if menus is None else menus
         self.history = [] if history is None else history
+        self.saved_data = {} if saved_data is None else saved_data
     # end def
 
     def to_dict(self) -> Dict[str, JSONType]:
         return {
             "menus": self.menus,
             "history": self.history,
+            "saved_data": self.saved_data,
         }
         # end def
 
@@ -124,6 +127,7 @@ class Data(object):
         return cls(
             menus={k: MenuData.from_dict(v) for k, v in data['menus'].items()},
             history=data['history'],
+            saved_data=data['saved_data'],
         )
     # end def
 
@@ -132,6 +136,7 @@ class Data(object):
             f'{self.__class__.__name__}('
             f'menus={self.menus!r}, '
             f'history={self.history!r}'
+            f'saved_data={self.saved_data!r}'
             ')'
         )
     # end def

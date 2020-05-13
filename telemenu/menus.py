@@ -200,6 +200,7 @@ class Menu(object):
         # end if
         if cls.id not in data.menus:
             data.menus[cls.id] = MenuData()
+            data.saved_data[cls.id] = None
         # end if
         instance.state.activate(data, update=update)
     # end def
