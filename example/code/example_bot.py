@@ -39,15 +39,6 @@ def slash():
 # end def
 
 
-@menus.register
-class MainMenu(GotoMenu):
-    title = "test"
-    description = "Lorem ipsum \n\nSUCH DATA\n{data!r}"
-
-    def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
-        return [TestMenu, AnotherTestMenu]
-    # end def
-# end class
 
 
 @menus.register
@@ -90,12 +81,22 @@ class TestCheckboxMenu(CheckboxMenu):
 
 
 @menus.register
+class MainMenu(GotoMenu):
+    title = "Home"
+    description = "This is the main menu. Jump wherever you want."
+
+    def menus(self):
+        return [TestMenu, AnotherTestMenu, TestRadioMenu]
+    # end def
+# end class
+
+
+@menus.register
 class TestRadioMenu(RadioMenu):
     title = "Best Pony?"
-    description = None
+    description = "You selected: {data.menus[TEST_RADIO_MENU].data!r}"
 
-    # noinspection PyMethodMayBeStatic
-    def radiobuttons(self) -> List[RadioButton]:
+    def radiobuttons(self):
         return [
             RadioButton(title="Applejack", default_selected=False, value='aj'),
             RadioButton(title="Fluttershy", default_selected=False, value='fs'),
