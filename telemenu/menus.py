@@ -880,18 +880,6 @@ class CheckboxMenu(SelectableMenu):
     # end def
 
     @classmethod
-    def on_inline_query(cls, update: Update):
-        """
-        Processes the inline_query update, to do the button clicky thingy.
-
-        :param update:
-        :return:
-        """
-        button = update.callback_query.data
-        cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
-    # end def
-
-    @classmethod
     def process_callback_data(cls, data: CallbackData) -> None:
         """
         Processes the callback data.
@@ -909,6 +897,9 @@ class CheckboxMenu(SelectableMenu):
         if data.type == cls.MENU_TYPE:
             assert isinstance(cls.menu_data, MenuData)
             button = data.value
+            if not cast(MenuData, cls.menu_data).data:  # includes None
+                cast(MenuData, cls.menu_data).data = {}
+            # end def
             cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
