@@ -547,7 +547,8 @@ class ButtonMenu(Menu):
         # check if we need to do pagination
         if data.type == CallbackButtonType.PAGINATION:
             assert isinstance(cls.menu_data, MenuData)
-            cls.menu_data.page += 1
+            assert isinstance(data.value, int)
+            cls.menu_data.page = data.value
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
@@ -648,18 +649,19 @@ class ButtonMenu(Menu):
                 text=">",
                 callback_data=CallbackData(
                     type=CallbackButtonType.PAGINATION,
-                    value=page - 1,
+                    value=page + 1,
                 ).to_json_str()
             ))
         # end if
 
         button_rows = []
-        for i, button in enumerate(selected_buttons + pagination_buttons):
+        for i, button in enumerate(selected_buttons):
             if i % 2 == 0:
                 button_rows.append([])  # add list
             # end if
             button_rows[-1].append(button)
         # end for
+        button_rows.append(pagination_buttons)  # add pagination buttons always as an extra row.
 
         return InlineKeyboardMarkup(inline_keyboard=button_rows)
     # end def
