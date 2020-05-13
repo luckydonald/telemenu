@@ -11,9 +11,9 @@ from flask import Flask
 from teleflask import Teleflask
 from telestate.contrib.simple import SimpleDictDriver
 
-from telemenu.menus import GotoMenu, Menu
+from telemenu.menus import GotoMenu, Menu, RadioMenu
 from telemenu.machine import TeleMenuMachine
-from telemenu.buttons import ChangeMenuButton, BackButton, GotoButton
+from telemenu.buttons import ChangeMenuButton, BackButton, GotoButton, RadioButton
 
 from pytgbot.api_types.receivable.updates import Update
 
@@ -52,7 +52,7 @@ class AnotherTestMenu(GotoMenu):
     description = lambda data: f'Something funny here.\n\nSUCH DATA\n{data!r}'
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
-        return [GotoButton(TestMenu, label='Got to the other Sub Menu.'), BackButton('back')]
+        return [GotoButton(TestMenu, label='Got to the other Sub Menu.'), TestRadioMenu, BackButton('back')]
     # end def
 # end class
 
@@ -64,6 +64,29 @@ class TestMenu(GotoMenu):
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [BackButton('back')]
+    # end def
+# end class
+
+@menus.register
+class TestRadioMenu(RadioMenu):
+    title = "Best Pony?"
+    description = None
+
+    # noinspection PyMethodMayBeStatic
+    def radiobuttons(self) -> List[RadioButton]:
+        return [
+            RadioButton(title="Applejack", default_selected=False, value='aj'),
+            RadioButton(title="Fluttershy", default_selected=False, value='fs'),
+            RadioButton(title="Rarity", default_selected=False, value='rara'),
+            RadioButton(title="Twilight", default_selected=False, value='ts'),
+            RadioButton(title="Pinkie Pie", default_selected=False, value='pp'),
+            RadioButton(title="Littlepip", default_selected=True, value='waifu'),
+            RadioButton(title="Your Mom", default_selected=False, value='mom'),
+            RadioButton(title="Changelings", default_selected=False, value='bug'),
+            RadioButton(title="Cheesalys", default_selected=False, value='BUG'),
+            RadioButton(title="Your face", default_selected=False, value=':('),
+            RadioButton(title="Spike", default_selected=False, value='just_no'),
+        ]
     # end def
 # end class
 
