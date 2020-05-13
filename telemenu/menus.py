@@ -847,6 +847,9 @@ class SelectableMenu(ButtonMenu):
 
 @dataclass(init=False, eq=False, repr=True)
 class CheckboxMenu(SelectableMenu):
+    """
+    Data storage is an dict with the checkbox values as keys, and bool as values.
+    """
     MENU_TYPE = 'checkbox'  # used for CallbackData.type
     DATA_TYPE = Dict[str, bool]  # key is
 
@@ -868,16 +871,43 @@ class CheckboxMenu(SelectableMenu):
         button = update.callback_query.data
         cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
     # end def
+
+    @classmethod
+    def process_callback_data(cls, data: CallbackData) -> None:
+        """
+        Processes the callback data.
+        Raises an `AbortProcessingPlease` if it did find something valid to process.
+
+        Here specifically, the callbacks with type `cls.MENU_TYPE` are handled.
+
+        :param data: the callback data to handle
+        :raises AbortProcessingPlease: If we have handled it.
+        :return: None
+        """
+        logger.debug('got callback data: {data!r}')
+
+        # check if we need to do pagination
+        if data.type == cls.MENU_TYPE:
+            assert isinstance(cls.menu_data, MenuData)
+            button = data.value
+            cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
+            cls.refresh(done=False)
+            raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
+        # end if
+        super().process_callback_data(data)
+    # end def
 # end class
 
 
 @dataclass(init=False, eq=False, repr=True)
 class RadioMenu(SelectableMenu):
+    """
+    Data storage is just the string of the selected value.
+    """
     MENU_TYPE = 'radiobutton'  # used for CallbackData.type
     DATA_TYPE = str
 
     radiobuttons: ClassValueOrCallable['RadioButton']
-    data: str
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
@@ -885,15 +915,28 @@ class RadioMenu(SelectableMenu):
     # end def
 
     @classmethod
-    def on_inline_query(cls, update: Update):
+    def process_callback_data(cls, data: CallbackData) -> None:
         """
-        Processes the inline_query update, to do the button clicky thingy.
+        Processes the callback data.
+        Raises an `AbortProcessingPlease` if it did find something valid to process.
 
-        :param update:
-        :return:
+        Here specifically, the callbacks with type `cls.MENU_TYPE` are handled.
+
+        :param data: the callback data to handle
+        :raises AbortProcessingPlease: If we have handled it.
+        :return: None
         """
-        button = update.callback_query.data
-        cls.data = button
+        logger.debug('got callback data: {data!r}')
+
+        # check if we need to do pagination
+        if data.type == cls.MENU_TYPE:
+            assert isinstance(cls.menu_data, MenuData)
+            button = data.value
+            cls.menu_data.data = button
+            cls.refresh(done=False)
+            raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
+        # end if
+        super().process_callback_data(data)
     # end def
 # end class
 
