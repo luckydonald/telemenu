@@ -199,7 +199,9 @@ class Menu(object):
             data.history.append(cls.id)
         # end if
         if cls.id not in data.menus:
-            data.menus[cls.id] = MenuData()
+            logger.debug('first time load of that menu, initializing data.')
+            tmp_data = cls.prepare_tmp_data()
+            data.menus[cls.id] = MenuData(data=tmp_data)
             data.saved_data[cls.id] = None
         # end if
         instance.state.activate(data, update=update)
@@ -512,6 +514,12 @@ class Menu(object):
     def saved_data_access_setter(cls, data):
         cast(Data, cls.data).saved_data[cls.id] = data
     # end def
+
+    @classmethod
+    @abstractmethod
+    def prepare_tmp_data(cls):
+        raise NotImplementedError('Subclasses should implement this.')
+    # end def
 # end class
 
 
@@ -811,6 +819,15 @@ class GotoMenu(ButtonMenu):
     # end def
 
     @classmethod
+    def prepare_tmp_data(cls):
+        """
+        Prepares the data to initialize with on the first load.
+        :return:
+        """
+        return None
+    # end def
+
+    @classmethod
     def process_callback_data(cls, data: CallbackData):
         """
         Processes the callback data.
@@ -907,6 +924,21 @@ class CheckboxMenu(SelectableMenu):
     # end def
 
     @classmethod
+    def prepare_tmp_data(cls):
+        """
+        Prepares the data to initialize with on the first load.
+        :return:
+        """
+        from telemenu.buttons import CheckboxButton
+        button: CheckboxButton
+        data = {}
+        for button in cls.get_value(cls.checkboxes):
+            data[button.value] = button.default_selected
+        # end def
+        return data
+    # end def
+
+    @classmethod
     def process_callback_data(cls, data: CallbackData) -> None:
         """
         Processes the callback data.
@@ -944,11 +976,34 @@ class RadioMenu(SelectableMenu):
     MENU_TYPE = 'radiobutton'  # used for CallbackData.type
     DATA_TYPE = str
 
+    tmp_data_access: ClassVar[Union[None, DATA_TYPE]]
+    saved_data_access: ClassVar[Union[None, DATA_TYPE]]
+
     radiobuttons: ClassValueOrCallable['RadioButton']
 
     @classmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
         return cls._get_our_buttons(key='radiobuttons')
+    # end def
+
+
+    @classmethod
+    def prepare_tmp_data(cls):
+        """
+        Prepares the data to initialize with on the first load.
+        :return:
+        """
+        from telemenu.buttons import RadioButton
+        button: RadioButton
+        data = None
+        for button in cls.get_value(cls.radiobuttons):
+            if button.default_selected:
+                if data is not None:
+                    raise ValueError('More than one RadioButton has a True default_selected attribute.')
+                data = button.value
+            # end for
+        # end def
+        return data
     # end def
 
     @classmethod
