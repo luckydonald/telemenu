@@ -201,10 +201,10 @@ class TestCheckboxMenu(CheckboxMenu):
         n: str = cls.id
         s.data = Data(menus={n: MenuData(message_id=123, page=0, )})
         return [
-            CheckboxButton(title='Eggs', selected=True, value='eggs'),
-            CheckboxButton(title='Milk', selected=False, value='milk'),
-            CheckboxButton(title='Flux compensator', selected=False, value='flux'),
-            CheckboxButton(title='LOVE', selected=False, value=None),
+            CheckboxButton(title='Eggs', default_selected=True, value='eggs'),
+            CheckboxButton(title='Milk', default_selected=False, value='milk'),
+            CheckboxButton(title='Flux compensator', default_selected=False, value='flux'),
+            CheckboxButton(title='LOVE', default_selected=False, value=None),
         ]
     # end def
 # end class

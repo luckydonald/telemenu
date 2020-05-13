@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from luckydonaldUtils.logger import logging
+
+from telemenu.data import Data, MenuData
+from telestate import TeleState
+
 logging.add_colored_handler(logger_name=None, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -11,9 +15,9 @@ from flask import Flask
 from teleflask import Teleflask
 from telestate.contrib.simple import SimpleDictDriver
 
-from telemenu.menus import GotoMenu, Menu, RadioMenu
+from telemenu.menus import GotoMenu, Menu, RadioMenu, CheckboxMenu
 from telemenu.machine import TeleMenuMachine
-from telemenu.buttons import ChangeMenuButton, BackButton, GotoButton, RadioButton
+from telemenu.buttons import ChangeMenuButton, BackButton, GotoButton, RadioButton, CheckboxButton
 
 from pytgbot.api_types.receivable.updates import Update
 
@@ -52,7 +56,7 @@ class AnotherTestMenu(GotoMenu):
     description = lambda data: f'Something funny here.\n\nSUCH DATA\n{data!r}'
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
-        return [GotoButton(TestMenu, label='Got to the other Sub Menu.'), TestRadioMenu, BackButton('back')]
+        return [BackButton('back'), GotoButton(TestMenu, label='Got to the other Sub Menu.'), TestRadioMenu, TestCheckboxMenu]
     # end def
 # end class
 
@@ -66,6 +70,24 @@ class TestMenu(GotoMenu):
         return [BackButton('back')]
     # end def
 # end class
+
+
+@menus.register
+class TestCheckboxMenu(CheckboxMenu):
+    title = "Shopping list"
+    description = "The shopping list for today."
+
+    @staticmethod
+    def checkboxes(cls: CheckboxMenu) -> List[CheckboxButton]:
+        return [
+            CheckboxButton(title='Eggs', default_selected=True, value='eggs'),
+            CheckboxButton(title='Milk', default_selected=False, value='milk'),
+            CheckboxButton(title='Flux compensator', default_selected=False, value='flux'),
+            CheckboxButton(title='LOVE', default_selected=False, value=None),
+        ]
+    # end def
+# end class
+
 
 @menus.register
 class TestRadioMenu(RadioMenu):
