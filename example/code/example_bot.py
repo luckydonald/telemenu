@@ -9,12 +9,13 @@ from typing import List, Union, Type
 
 from flask import Flask
 from teleflask import Teleflask
+from telestate.contrib.simple import SimpleDictDriver
+
 from telemenu.menus import GotoMenu, Menu
 from telemenu.machine import TeleMenuMachine
-from telestate.contrib.simple import SimpleDictDriver
-from pytgbot.api_types.receivable.updates import Update
-
 from telemenu.buttons import ChangeMenuButton, BackButton, GotoButton
+
+from pytgbot.api_types.receivable.updates import Update
 
 __author__ = 'luckydonald'
 
