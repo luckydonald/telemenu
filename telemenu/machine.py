@@ -65,7 +65,7 @@ class TeleStateMachineMenuSerialisationAdapter(TeleStateMachine):
         """
         from telemenu.menus import Menu
         logger.debug(f'Processing result: {result!r}')
-        if result and issubclass(result, Menu):
+        if result and inspect.isclass(result) and issubclass(result, Menu):
             return result.send()
         # end if
         return super().process_result(update, result)
