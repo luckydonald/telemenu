@@ -635,6 +635,19 @@ class ButtonMenu(Menu):
             # end if
         # end for
 
+        extra_button = cls.get_cancel_button()
+        if extra_button:
+            history_buttons.append(extra_button)
+        # end if
+        extra_button = cls.get_back_button()
+        if extra_button:
+            history_buttons.append(extra_button)
+        # end if
+        extra_button = cls.get_done_button()
+        if extra_button:
+            history_buttons.append(extra_button)
+        # end if
+
         pages = (len(content_buttons) // 10) + 1
         data: MenuData = cls.menu_data
         page = data.page if data else 0
@@ -719,63 +732,71 @@ class ButtonMenu(Menu):
 
     @classmethod
     def get_done_button(cls) -> Union[InlineKeyboardButton, None]:
-        from .buttons import DoneButton
-        done: Union[DoneButton, Menu] = cls.get_value_by_name('done', default=None)
-        if isinstance(done, DoneButton):
-            return InlineKeyboardButton(
-                text=done.label,
-                callback_data=CallbackData(
-                    type=CallbackButtonType.DONE,
-                    value=None,
-                ).to_json_str(),
-            )
-        elif isinstance(done, Menu):
-            return InlineKeyboardButton(
-                text=done.title,
-                callback_data=CallbackData(
-                    type=CallbackButtonType.DONE,
-                    value=None,
-                ).to_json_str(),
-            )
+        from .buttons import DoneButton, GotoButton, ChangeMenuButton
+        DONE_BUTTON_TYPE = Union[None, str, Type[Menu], DoneButton, GotoButton, ]
+        done: DONE_BUTTON_TYPE = cls.get_value(cls.done) if hasattr(cls, 'done') else None
+        check_type('done', done, DONE_BUTTON_TYPE)
+
+        if done is None:
+            return None  # no button
         # end if
+        if isinstance(done, str):
+            done = DoneButton(label=done)
+        # end if
+        if inspect.isclass(done) and issubclass(done, Menu):
+            done = GotoButton(menu=done, save=True)
+        # end if
+        if isinstance(done, ChangeMenuButton):
+            assert done.save == True
+        # end if
+        check_type('done', done, Union[GotoButton, DoneButton])
+        return done
     # end def
 
     @classmethod
     def get_back_button(cls) -> Union[InlineKeyboardButton, None]:
-        # TODO implement
-        from .buttons import GotoButton, BackButton
+        from .buttons import GotoButton, BackButton, CancelButton, ChangeMenuButton
+        BACK_BUTTON_TYPE = Union[None, str, Type[Menu], BackButton, GotoButton]
 
-        last_menu = cls.get_last_menu()
-        assert isinstance(last_menu, BackButton)
-        return InlineKeyboardButton(
-            text=last_menu.label,
-            callback_data=CallbackData(
-                type=CallbackButtonType.DONE,
-                value=None,
-            ).to_json_str(),
-        )
+        back: BACK_BUTTON_TYPE = cls.get_value(cls.back) if hasattr(cls, 'back') else None
+        check_type('back', back, BACK_BUTTON_TYPE)
+        if back is None:
+            return None  # no button
+        # end if
+        if isinstance(back, str):
+            back = BackButton(label=back)
+        # end if
+        if inspect.isclass(back) and issubclass(back, Menu):
+            back = GotoButton(menu=back, save=True)
+        # end if
+        if isinstance(back, ChangeMenuButton):
+            assert back.save is None
+        # end if
+        check_type('back', back, Union[BackButton, GotoButton, CancelButton])
+        return back
     # end def
 
     @classmethod
     def get_cancel_button(cls) -> Union[InlineKeyboardButton, None]:
-        # TODO implement
-        from .buttons import GotoButton, BackButton, CancelButton
+        from .buttons import GotoButton, BackButton, CancelButton, ChangeMenuButton
+        CANCEL_BUTTON_TYPE = Union[None, str, Type[Menu], BackButton, GotoButton, CancelButton]
 
-        back: Union[BackButton, Type[Menu]] = cls.get_value_by_name('back')
-        assert isinstance(back, CancelButton)
-        return InlineKeyboardButton(
-            text=back.label,
-            callback_data=CallbackData(
-                type=CallbackButtonType.DONE,
-                value=None,
-            ).to_json_str(),
-        )
-
-    # end def
-
-    @classmethod
-    def get_own_buttons(cls) -> List[InlineKeyboardButton]:
-        return []
+        cancel: CANCEL_BUTTON_TYPE = cls.get_value(cls.cancel) if hasattr(cls, 'cancel') else None
+        check_type('cancel', cancel, CANCEL_BUTTON_TYPE)
+        if cancel is None:
+            return None  # no button
+        # end if
+        if isinstance(cancel, str):
+            cancel = CancelButton(label=cancel)
+        # end if
+        if inspect.isclass(cancel) and issubclass(cancel, Menu):
+            cancel = GotoButton(menu=cancel, save=True)
+        # end if
+        if isinstance(cancel, ChangeMenuButton):
+            assert cancel.save == True
+        # end if
+        check_type('cancel', cancel, Union[BackButton, GotoButton, CancelButton])
+        return cancel
     # end def
 
     @classmethod
@@ -985,7 +1006,6 @@ class RadioMenu(SelectableMenu):
     def get_buttons(cls) -> List[InlineKeyboardButton]:
         return cls._get_our_buttons(key='radiobuttons')
     # end def
-
 
     @classmethod
     def prepare_tmp_data(cls):
