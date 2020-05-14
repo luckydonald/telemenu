@@ -585,7 +585,7 @@ class ButtonMenu(Menu):
         :raises AbortProcessingPlease: If we have handled it.
         :return: None
         """
-        logger.debug('got callback data: {data!r}')
+        logger.debug(f'{cls.__name__} got callback data: {data!r}')
 
         # check if we need to do pagination
         if data.type == CallbackButtonType.PAGINATION:
@@ -905,7 +905,7 @@ class GotoMenu(ButtonMenu):
         :raises AbortProcessingPlease: If we have handled it.
         :return: None
         """
-        logger.debug('got callback data: {data!r}')
+        logger.debug(f'{cls.__name__} got callback data: {data!r}')
 
         if data.type == CallbackButtonType.GOTO:
             menu_id = data.value
@@ -1004,7 +1004,7 @@ class CheckboxMenu(SelectableMenu):
         :raises AbortProcessingPlease: If we have handled it.
         :return: None
         """
-        logger.debug('got callback data: {data!r}')
+        logger.debug(f'{cls.__name__} got callback data: {data!r}')
 
         # check if we need to do pagination
         if data.type == cls.MENU_TYPE:
@@ -1071,7 +1071,7 @@ class RadioMenu(SelectableMenu):
         :raises AbortProcessingPlease: If we have handled it.
         :return: None
         """
-        logger.debug('got callback data: {data!r}')
+        logger.debug(f'{cls.__name__} got callback data: {data!r}')
 
         # check if we need to do pagination
         if data.type == cls.MENU_TYPE:
