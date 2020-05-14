@@ -35,7 +35,7 @@ from telestate.constants import KEEP_PREVIOUS
 
 IS_TYPE_CHECKING = False
 if IS_TYPE_CHECKING:
-    from .buttons import Button
+    from .buttons import Button, GotoButton, HistoryButton
 # end if
 
 __author__ = 'luckydonald'
@@ -527,6 +527,47 @@ class Menu(object, metaclass=ABCMeta):
         # end if
     # end def
 
+
+    @classmethod
+    def switch_history(cls, delta: int, save: Union[None, bool]):
+        """
+        Moves in the history.
+
+        Currently only going backwards is supported (negative delta).
+        """
+        assert delta < 0
+        delta = abs(delta)
+        menu: Union[None, Type[Menu]] = None
+        for i in range(delta):
+            menu = menu if menu else cls
+            # BACK: do nothing, CANCEL: delete, DONE: keep & copy
+            if isinstance(save, bool) and not save:
+                # delete old data
+                menu.delete_data()
+            if isinstance(save, bool) and save:
+                # store old data
+                menu.save_data()
+            # end if
+            menu = cls.get_last_menu(activate=True)
+        # end for
+        if menu:
+            cls.switch_to_menu(menu)
+        # end if
+    # end def
+
+
+    @classmethod
+    def save_data(cls):
+        """ Saves the current state's data, for example used on 'Done'. """
+        cast(Data, cls.data).saved_data[cls.id] = cast(Data, cls.data).menus[cls.id].data
+    # end def
+
+    @classmethod
+    def delete_data(cls):
+        """ Deletes the current state's data, for example used on 'Cancel'. """
+        del cast(Data, cls.data).menus[cls.id]
+    # end def
+
     @classproperty
     @abstractmethod
     def tmp_data_access(cls):
@@ -627,23 +668,12 @@ class ButtonMenu(Menu):
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
         if data.type in (CallbackButtonType.BACK, CallbackButtonType.DONE, CallbackButtonType.CANCEL):
-            assert data.value < 0
-            menu = None
-            for i in range(abs(data.value)):
-                menu: Type[Menu] = menu if menu else cls
-                # BACK: do nothing, CANCEL: delete, DONE: keep & copy
-                if data.type == CallbackButtonType.CANCEL:
-                    # delete old data
-                    del cast(Data, menu.data).menus[menu.id]
-                elif data.type == CallbackButtonType.DONE:
-                    # store old data
-                    cast(Data, menu.data).saved_data[menu.id] = cast(Data, menu.data).menus[menu.id].data
-                # end if
-                menu = cls.get_last_menu(activate=True)
-            # end for
-            if menu:
-                cls.switch_to_menu(menu)
-            # end if
+            save = {
+                CallbackButtonType.BACK: None,
+                CallbackButtonType.DONE: True,
+                CallbackButtonType.CANCEL: False,
+            }[data.type]
+            cls.switch_history(delta=data.value, save=save)
             raise AbortProcessingPlease()
         # end if
     # end def
@@ -1206,6 +1236,8 @@ class TextMenu(SendMenu):
     @TeleMenuMachine.mark_for_register.on_message('text')
     @classmethod
     def on_message_listener(cls, update: Update, msg: Message):
+        from .buttons import GotoButton, HistoryButton
+
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
         try:
             value = cls._parse(msg.text)
