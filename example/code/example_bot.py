@@ -12,7 +12,7 @@ from os import environ
 from typing import List, Union, Type, cast
 
 from flask import Flask
-from teleflask import Teleflask
+from teleflask import Teleflask, abort_processing
 from telestate.contrib.simple import SimpleDictDriver
 
 from telemenu.menus import GotoMenu, Menu, RadioMenu, CheckboxMenu, TextStrMenu
@@ -36,6 +36,31 @@ menus = TeleMenuMachine(database_driver=SimpleDictDriver(), teleflask_or_tbluepr
 def slash():
     logger.debug('aaaa!')
     return "bbbb!"
+# end def
+
+
+
+@menus.states.teleflask.on_command('start')
+@abort_processing
+def cmd_start(update: Update, data: str = None):
+    MainMenu.show()
+# end def
+
+
+@menus.states.teleflask.on_command('debug')
+@abort_processing
+def cmd_start(update: Update, data: str = None):
+    DebugMenu.show()
+# end def
+
+
+@bot.on_update
+def debug(update: Update):
+    logger.info(f'Current state: {menus.states.CURRENT!r}')
+    logger.info(f'Current messages listeners: {menus.states.CURRENT.update_handler.message_listeners!r}')
+    logger.info(f'Current update listeners: {menus.states.CURRENT.update_handler.update_listeners!r}')
+    logger.info(f'Global messages listeners: {menus.states.CURRENT.update_handler.teleflask.message_listeners!r}')
+    logger.info(f'Global update listeners: {menus.states.CURRENT.update_handler.teleflask.update_listeners!r}')
 # end def
 
 
@@ -210,24 +235,3 @@ class NewChannelContentType(CheckboxMenu):
     done = MainMenu
 # end class
 
-
-@menus.states.ALL.on_command('start')
-def cmd_start(update: Update, data: str = None):
-    MainMenu.show()
-# end def
-
-
-@menus.states.ALL.on_command('debug')
-def cmd_start(update: Update, data: str = None):
-    DebugMenu.show()
-# end def
-
-
-@bot.on_update
-def debug(update: Update):
-    logger.info(f'Current state: {menus.states.CURRENT!r}')
-    logger.info(f'Current messages listeners: {menus.states.CURRENT.update_handler.message_listeners!r}')
-    logger.info(f'Current update listeners: {menus.states.CURRENT.update_handler.update_listeners!r}')
-    logger.info(f'Global messages listeners: {menus.states.CURRENT.update_handler.teleflask.message_listeners!r}')
-    logger.info(f'Global update listeners: {menus.states.CURRENT.update_handler.teleflask.update_listeners!r}')
-# end def
