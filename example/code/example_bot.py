@@ -44,7 +44,7 @@ def slash():
 @menus.register
 class AnotherTestMenu(GotoMenu):
     title = "Sub Menu 2"
-    description = lambda data: f'Something funny here.\n\nSUCH DATA\n{data!r}'
+    description = 'Something funny would be here?'
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [BackButton('back'), GotoButton(TestMenu, label='Got to the other Sub Menu.'), TestRadioMenu, TestCheckboxMenu]
@@ -54,8 +54,13 @@ class AnotherTestMenu(GotoMenu):
 
 @menus.register
 class TestMenu(GotoMenu):
-    title = "Sub Menu"
-    description = lambda data: f'We don\'d do sandwiches or public transport though.\n\nSUCH DATA\n{data!r}'
+    title = "Debug Menu"
+
+    @classmethod
+    def description(cls, data):
+        from pprint import pformat
+        return 'We don\'d do sandwiches or public transport though.\n\nSUCH DATA\n{}'.format(pformat(data))
+    # end def
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
         return [BackButton('back')]
@@ -97,6 +102,8 @@ class TestRadioMenu(RadioMenu):
     title = "Best Pony?"
     description = "You selected: {data.menus[TEST_RADIO_MENU].data!r}"
     back = "Back"
+    cancel = "Nope"
+    done = "Done"
 
     def radiobuttons(self):
         return [
