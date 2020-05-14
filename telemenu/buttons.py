@@ -225,7 +225,7 @@ class SelectableButton(Button):
             text=self.get_label(menu.menu_data),
             callback_data=CallbackData(
                 type=self.type,
-                value=cls.id,
+                value=menu.id,
             ).to_json_str()
         )
     # end def
