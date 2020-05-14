@@ -526,7 +526,7 @@ class Menu(object, metaclass=ABCMeta):
     @classmethod
     @abstractmethod
     def prepare_tmp_data(cls):
-        raise NotImplementedError('Subclasses should implement this.')
+        raise NotImplementedError(f'Subclasses {cls.__name__} should implement this.')
     # end def
 # end class
 
