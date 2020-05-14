@@ -17,8 +17,8 @@ from luckydonaldUtils.logger import logging
 
 from pytgbot import Bot
 from pytgbot.api_types.receivable.updates import Message, Update
-from pytgbot.api_types.sendable.reply_markup import ReplyMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
-from pytgbot.api_types.sendable.reply_markup import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from pytgbot.api_types.sendable.reply_markup import InlineKeyboardButton, ReplyMarkup, ForceReply
+from pytgbot.api_types.sendable.reply_markup import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup
 from teleflask import TBlueprint
 from teleflask.exceptions import AbortProcessingPlease
 
@@ -640,7 +640,7 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
-    def get_keyboard(cls) -> Union[InlineKeyboardMarkup, ReplyMarkup, None]:
+    def get_keyboard(cls) -> Union[ReplyMarkup, None]:
         """
         This is the method which is responsible for returning a ReplyMarkup (e.g. InlineKeyboardMarkup) or None.
         Basically we need to return something which can be used in the `bot.send_message(..., reply_markup=...)` parameter.
@@ -1109,7 +1109,7 @@ class SendMenu(Menu):
     # end def
 
     @classmethod
-    def get_keyboard(cls) -> ForceReply:
+    def get_keyboard(cls) -> Union[ReplyMarkup, None]:
         """
         We always return a force reply, as we don't do menu now, but just wanna have text/files/media/...
         :return:
@@ -1137,7 +1137,7 @@ class SendMenu(Menu):
 
     @classmethod
     def reply_markup(cls) -> Union[None, ReplyMarkup]:
-        return ForceReply(selective=True)
+        return cls.get_keyboard()
     # end def
 # end class
 
