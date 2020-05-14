@@ -37,7 +37,7 @@ class Button(object):
     # end def
 
     @abstractmethod
-    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+    def get_inline_keyboard_button(self, menu: Type[Menu]) -> InlineKeyboardButton:
         assert issubclass(menu, Menu)
         raise NotImplementedError('Subclass must implement this.')
     # end def
@@ -98,7 +98,7 @@ class GotoButton(ChangeMenuButton):
         return CallbackButtonType.GOTO
     # end def
 
-    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+    def get_inline_keyboard_button(self, menu: Type[Menu]) -> InlineKeyboardButton:
         assert issubclass(menu, Menu)
         return InlineKeyboardButton(
             text=self.get_label(menu.menu_data),
@@ -120,7 +120,7 @@ class HistoryButton(ChangeMenuButton):
         self.delta = delta
     # end def
 
-    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+    def get_inline_keyboard_button(self, menu: Type[Menu]) -> InlineKeyboardButton:
         assert issubclass(menu, Menu)
         assert isinstance(self.delta, int)
         return InlineKeyboardButton(
@@ -219,7 +219,7 @@ class SelectableButton(Button):
         return self.STATE_EMOJIS[self.get_selected(menu_data)] + " " + self.title
     # end def
 
-    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+    def get_inline_keyboard_button(self, menu: Type[Menu]) -> InlineKeyboardButton:
         assert issubclass(menu, Menu)
         return InlineKeyboardButton(
             text=self.get_label(menu.menu_data),
