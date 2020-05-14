@@ -43,11 +43,11 @@ class ChangeMenuButton(Button):
     Base class for switching menus.
     """
     label: ClassValueOrCallable[str]
-    does_cancel: ClassValueOrCallable[bool]
+    save: ClassValueOrCallable[Union[None, bool]]
 
-    def __init__(self, label: str, does_cancel: bool):
+    def __init__(self, label: str, save: Union[None, bool]):
         self.label = label
-        self.does_cancel = does_cancel
+        self.save = save
     # end def
 
     @property
@@ -73,11 +73,11 @@ class GotoButton(ChangeMenuButton):
     menu: ClassValueOrCallable[Type['telemenu.menus.Menu']]
     label: ClassValueOrCallable[str]
 
-    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None, does_cancel: bool = False):
+    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None, save: Union[bool, None] = False):
         if label is None:
             label = menu.title
         # end if
-        super().__init__(label=label, does_cancel=does_cancel)
+        super().__init__(label=label, save=save)
         self.menu = menu
     # end def
 
@@ -96,7 +96,7 @@ class GotoButton(ChangeMenuButton):
 
 class DoneButton(ChangeMenuButton):
     def __init__(self, label: str = 'Done'):
-        super().__init__(label=label, does_cancel=False)
+        super().__init__(label=label, save=True)
     # end def
 
     @property
@@ -116,8 +116,8 @@ class DoneButton(ChangeMenuButton):
 class BackButton(ChangeMenuButton):
     label: ClassValueOrCallable[str]
 
-    def __init__(self, label: str = "Back", does_cancel=True):    # todo: multi-language for label
-        super().__init__(label=label, does_cancel=does_cancel)
+    def __init__(self, label: str = "Back", save: Union[None, bool] = None):    # todo: multi-language for label
+        super().__init__(label=label, save=save)
         self.label = label
     # end def
 
@@ -136,7 +136,7 @@ class BackButton(ChangeMenuButton):
 
 class CancelButton(ChangeMenuButton):
     def __init__(self, label: str = "Cancel"):    # todo: multi-language for label
-        super().__init__(label=label, does_cancel=True)
+        super().__init__(label=label, save=False)
         self.label = label
     # end def
 
