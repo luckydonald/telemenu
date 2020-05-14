@@ -47,13 +47,13 @@ class AnotherTestMenu(GotoMenu):
     description = 'Something funny would be here?'
 
     def menus(self) -> List[Union[ChangeMenuButton, Type[Menu]]]:
-        return [BackButton('back'), GotoButton(TestMenu, label='Got to the other Sub Menu.'), TestRadioMenu, TestCheckboxMenu]
+        return [BackButton('back'), GotoButton(DebugMenu, label='Got to the other Sub Menu.'), TestRadioMenu, TestCheckboxMenu]
     # end def
 # end class
 
 
 @menus.register
-class TestMenu(GotoMenu):
+class DebugMenu(GotoMenu):
     title = "Debug Menu"
 
     @classmethod
@@ -92,7 +92,7 @@ class TheMainMenu(GotoMenu):
     description = "This is the main menu. Jump wherever you want."
 
     def menus(self):
-        return [TestMenu, MainMenu, AnotherTestMenu, TestRadioMenu]
+        return [DebugMenu, MainMenu, AnotherTestMenu, TestRadioMenu]
     # end def
 # end class
 
@@ -214,6 +214,12 @@ class NewChannelContentType(CheckboxMenu):
 @menus.states.ALL.on_command('start')
 def cmd_start(update: Update, data: str = None):
     MainMenu.show()
+# end def
+
+
+@menus.states.ALL.on_command('debug')
+def cmd_start(update: Update, data: str = None):
+    DebugMenu.show()
 # end def
 
 
