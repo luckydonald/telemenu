@@ -67,6 +67,7 @@ class TestMenu(GotoMenu):
 class TestCheckboxMenu(CheckboxMenu):
     title = "Shopping list"
     description = "The shopping list for today."
+    back = 'Back to the last one.'
 
     @staticmethod
     def checkboxes(cls: CheckboxMenu) -> List[CheckboxButton]:
@@ -95,6 +96,7 @@ class MainMenu(GotoMenu):
 class TestRadioMenu(RadioMenu):
     title = "Best Pony?"
     description = "You selected: {data.menus[TEST_RADIO_MENU].data!r}"
+    back = "Back"
 
     def radiobuttons(self):
         return [

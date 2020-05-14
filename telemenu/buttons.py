@@ -9,6 +9,7 @@ from luckydonaldUtils.logger import logging
 __author__ = 'luckydonald'
 
 from luckydonaldUtils.typing import JSONType
+from pytgbot.api_types.sendable.reply_markup import InlineKeyboardButton
 
 from . import ClassValueOrCallable
 from .data import Data, MenuData, CallbackData
@@ -65,6 +66,11 @@ class ChangeMenuButton(Button):
     def get_label(self, data: Data):
         return self.label
     # end def
+
+    @abstractmethod
+    def get_inline_keyboard_button(self, data: Data) -> InlineKeyboardButton:
+        raise NotImplementedError('Subclass must implement this.')
+    # end def
 # end class
 
 
@@ -91,12 +97,44 @@ class GotoButton(ChangeMenuButton):
         from .menus import Menu
         return CallbackButtonType.GOTO
     # end def
+
+    def get_inline_keyboard_button(self, data: Data) -> InlineKeyboardButton:
+        return InlineKeyboardButton(
+            text=self.get_label(data),
+            callback_data=CallbackData(
+                type=self.type,
+                value=self.menu.id,
+            ).to_json_str(),
+        )
+    # end def
 # end class
 
 
-class DoneButton(ChangeMenuButton):
-    def __init__(self, label: str = 'Done'):
+class HistoryButton(ChangeMenuButton):
+    delta: ClassValueOrCallable[str]
+
+    def __init__(self, label: str = "Back", delta: int = -1, save: Union[None, bool] = None):  # todo: multi-language for label
+        super().__init__(label=label, save=save)
+        self.label = label
+        self.delta = delta
+    # end def
+
+    def get_inline_keyboard_button(self, data: Data) -> InlineKeyboardButton:
+        return InlineKeyboardButton(
+            text=self.get_label(data),
+            callback_data=CallbackData(
+                type=self.type,
+                value=self.delta,
+            ).to_json_str(),
+        )
+    # end def
+# end def
+
+
+class DoneButton(HistoryButton):
+    def __init__(self, label: str = "Cancel", delta: int = -1):    # todo: multi-language for label
         super().__init__(label=label, save=True)
+        self.delta = delta
     # end def
 
     @property
@@ -113,12 +151,10 @@ class DoneButton(ChangeMenuButton):
 
 
 @dataclass(init=False)
-class BackButton(ChangeMenuButton):
-    label: ClassValueOrCallable[str]
-
-    def __init__(self, label: str = "Back", save: Union[None, bool] = None):    # todo: multi-language for label
-        super().__init__(label=label, save=save)
-        self.label = label
+class BackButton(HistoryButton):
+    def __init__(self, label: str = "Back", delta: int = -1):    # todo: multi-language for label
+        super().__init__(label=label, save=None)
+        self.delta = delta
     # end def
 
     @property
@@ -134,10 +170,12 @@ class BackButton(ChangeMenuButton):
 # end class
 
 
-class CancelButton(ChangeMenuButton):
-    def __init__(self, label: str = "Cancel"):    # todo: multi-language for label
+class CancelButton(HistoryButton):
+    delta: ClassValueOrCallable[str]
+
+    def __init__(self, label: str = "Cancel", delta: int = -1):    # todo: multi-language for label
         super().__init__(label=label, save=False)
-        self.label = label
+        self.delta = delta
     # end def
 
     @property

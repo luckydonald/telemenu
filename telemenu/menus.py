@@ -624,11 +624,12 @@ class ButtonMenu(Menu):
 
         :return:
         """
+        from .buttons import BackButton, CancelButton, DoneButton, HistoryButton
+
         content_buttons = []
         history_buttons = []  # Back, Cancel, Done
         for button in cls.get_buttons():
-            from .buttons import BackButton, CancelButton, DoneButton
-            if isinstance(button, (BackButton, CancelButton, DoneButton)):
+            if isinstance(button, HistoryButton):
                 history_buttons.append(button)
             else:
                 content_buttons.append(button)
@@ -725,7 +726,7 @@ class ButtonMenu(Menu):
         # end if
 
         if history_buttons:
-            button_rows.append(history_buttons)  # add back/cancel/done as an extra row
+            button_rows.append([butt.get_inline_keyboard_button(cast(Union[Data, None], cls.data)) for butt in history_buttons])  # add back/cancel/done as an extra row
         # end if
         return InlineKeyboardMarkup(inline_keyboard=button_rows)
     # end def
@@ -793,8 +794,9 @@ class ButtonMenu(Menu):
             cancel = GotoButton(menu=cancel, save=True)
         # end if
         if isinstance(cancel, ChangeMenuButton):
-            assert cancel.save == True
+            assert cancel.save == False
         # end if
+        cancel: Union[BackButton, GotoMenu, CancelButton]
         check_type('cancel', cancel, Union[BackButton, GotoButton, CancelButton])
         return cancel
     # end def
