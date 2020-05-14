@@ -983,12 +983,14 @@ class CheckboxMenu(SelectableMenu):
         Prepares the data to initialize with on the first load.
         :return:
         """
-        from telemenu.buttons import CheckboxButton
+        from .buttons import CheckboxButton
+        logger.debug(f'preparing tmp data for class {cls.__name__}.')
         button: CheckboxButton
         data = {}
         for button in cls.get_value(cls.checkboxes):
             data[button.value] = button.default_selected
         # end def
+        logger.debug(f'prepared tmp data for class {cls.__name__}: {data!r}')
         return data
     # end def
 
@@ -1011,8 +1013,10 @@ class CheckboxMenu(SelectableMenu):
             assert isinstance(cls.menu_data, MenuData)
             button = data.value
             if not cast(MenuData, cls.menu_data).data:  # includes None
-                cast(MenuData, cls.menu_data).data = {}
+                logger.warn(f'{cls.__name__} has empty data for update!')
+                cast(MenuData, cls.menu_data).data = cls.prepare_tmp_data()
             # end def
+            logger.debug(f'Toggling checkbox {button!r} of menu {cls.__name__}, currently having the data {cast(MenuData, cls.menu_data).data}.')
             cast(MenuData, cls.menu_data).data[button] = not cast(MenuData, cls.menu_data).data[button]  # toggle the button.
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
@@ -1047,6 +1051,7 @@ class RadioMenu(SelectableMenu):
         :return:
         """
         from telemenu.buttons import RadioButton
+        logger.debug(f'preparing tmp data for class {cls.__name__}.')
         button: RadioButton
         data = None
         for button in cls.get_value(cls.radiobuttons):
