@@ -910,8 +910,24 @@ class GotoMenu(ButtonMenu):
         if data.type == CallbackButtonType.GOTO:
             menu_id = data.value
             menu: Menu = cast(TeleMenuInstancesItem, cls._state_instance.machine.instances[menu_id]).menu
-            menu.activate()
-            menu.refresh(done=False)
+            can_edit = False
+            if issubclass(cls, ButtonMenu):
+                if issubclass(menu, ButtonMenu):
+                    can_edit = True
+                # end if
+            else:
+                if not issubclass(menu, ButtonMenu):
+                    can_edit = True
+                # end if
+            # end if
+            if can_edit:
+                menu.activate()
+                menu.refresh(done=False)
+            else:
+                cls.refresh(done=True)
+                menu.activate()
+                menu.send()
+            # end if
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
@@ -1138,6 +1154,11 @@ class SendMenu(Menu):
     @classmethod
     def reply_markup(cls) -> Union[None, ReplyMarkup]:
         return cls.get_keyboard()
+    # end def
+
+    @classmethod
+    def prepare_tmp_data(cls):
+        return None
     # end def
 # end class
 
