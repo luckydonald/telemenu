@@ -4,8 +4,9 @@ import inspect
 from abc import abstractmethod
 from html import escape
 from enum import Enum
+from pprint import pformat
 from types import LambdaType, BuiltinFunctionType
-from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple
+from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple, Generator
 from typeguard import check_type
 from dataclasses import dataclass, field as dataclass_field
 
@@ -30,6 +31,11 @@ from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_
 from telestate import TeleStateMachine, TeleState
 from telestate.constants import KEEP_PREVIOUS
 
+IS_TYPE_CHECKING = False
+if IS_TYPE_CHECKING:
+    from .buttons import Button
+# end if
+
 __author__ = 'luckydonald'
 
 
@@ -47,6 +53,8 @@ class CallbackButtonType(str, Enum):
     BACK = 'back'
     CANCEL = 'cancel'
     PAGINATION = 'pagination'
+    CHECKBOX = 'checkbox'
+    RADIOBUTTON = 'radiobutton'
 # end class
 
 
@@ -620,7 +628,7 @@ class ButtonMenu(Menu):
 
     @classmethod
     @abstractmethod
-    def get_buttons(cls) -> List[InlineKeyboardButton]:
+    def get_buttons(cls) -> List['Button']:
         """
         Retrieval of menu specific buttons.
         This is just a single list of buttons, which will be formatted later.
@@ -639,17 +647,20 @@ class ButtonMenu(Menu):
 
         :return:
         """
-        from .buttons import BackButton, CancelButton, DoneButton, HistoryButton
+        from .buttons import BackButton, CancelButton, DoneButton, HistoryButton, Button
 
         content_buttons = []
         history_buttons = []  # Back, Cancel, Done
-        for button in cls.get_buttons():
+        buttons = cls.get_buttons()
+        for i, button in enumerate(buttons):
+            assert_type_or_raise(button, Button, parameter_name=f'buttons[{i}]')
             if isinstance(button, HistoryButton):
                 history_buttons.append(button)
             else:
                 content_buttons.append(button)
             # end if
         # end for
+        del button, buttons
 
         extra_button = cls.get_cancel_button()
         if extra_button:
@@ -678,15 +689,6 @@ class ButtonMenu(Menu):
         offset = page * 10
         content_buttons = content_buttons[offset: offset + 10]
 
-        keyboard = []
-        for i in range(len(content_buttons)):
-            # we iterate through the buttons and split them into left and right.
-            if i % 2 == 0:  # left button, and first of row
-                keyboard.append([])
-            # end if
-            keyboard[-1].append(content_buttons[i])
-        # end if
-
         pagination_buttons = []
         if page > 0:
             pagination_buttons.append(
@@ -700,31 +702,37 @@ class ButtonMenu(Menu):
             )
         # end if
         for i in range(max(page - 2, 0), page):
-            pagination_buttons.append(InlineKeyboardButton(
-                text=str(i),
-                callback_data=CallbackData(
-                    type=CallbackButtonType.PAGINATION,
-                    value=i,
-                ).to_json_str()
-            ))
+            pagination_buttons.append(
+                    InlineKeyboardButton(
+                    text=str(i),
+                    callback_data=CallbackData(
+                        type=CallbackButtonType.PAGINATION,
+                        value=i,
+                    ).to_json_str()
+                )
+            )
         # end def
         for i in range(page + 1, min(page + 3, pages)):
-            pagination_buttons.append(InlineKeyboardButton(
-                text=str(i),
-                callback_data=CallbackData(
-                    type=CallbackButtonType.PAGINATION,
-                    value=i,
-                ).to_json_str()
-            ))
+            pagination_buttons.append(
+                InlineKeyboardButton(
+                    text=str(i),
+                    callback_data=CallbackData(
+                        type=CallbackButtonType.PAGINATION,
+                        value=i,
+                    ).to_json_str()
+                )
+            )
         # end def
         if page < pages - 1:
-            pagination_buttons.append(InlineKeyboardButton(
-                text=">",
-                callback_data=CallbackData(
-                    type=CallbackButtonType.PAGINATION,
-                    value=page + 1,
-                ).to_json_str()
-            ))
+            pagination_buttons.append(
+                InlineKeyboardButton(
+                    text=">",
+                    callback_data=CallbackData(
+                        type=CallbackButtonType.PAGINATION,
+                        value=page + 1,
+                    ).to_json_str()
+                )
+            )
         # end if
 
         # split the content buttons over two rows.
@@ -733,16 +741,37 @@ class ButtonMenu(Menu):
             if i % 2 == 0:
                 button_rows.append([])  # add list
             # end if
+            if isinstance(button, Button):
+                button = button.get_inline_keyboard_button(cls)
+            # end if
             button_rows[-1].append(button)
         # end for
 
         if pagination_buttons:
-            button_rows.append(pagination_buttons)  # add pagination buttons always as an extra row.
-        # end if
+            row = []
+            check_type('pagination_buttons', pagination_buttons, List[InlineKeyboardButton])
+            for button in pagination_buttons:
+                if isinstance(button, Button):
+                    button = button.get_inline_keyboard_button(cls)
+                # end if
+                assert isinstance(button, InlineKeyboardButton)
+                row.append(button)
+            # end for
+            button_rows.append(row)
+        # end def
 
+        # add back/cancel/done as an extra row
         if history_buttons:
-            button_rows.append([butt.get_inline_keyboard_button(cast(Union[Data, None], cls.data)) for butt in history_buttons])  # add back/cancel/done as an extra row
+            row = []
+            check_type('history_buttons', history_buttons, List[Button])
+            for button in history_buttons:
+                assert isinstance(button, Button)
+                row.append(button.get_inline_keyboard_button(cls))
+            # end for
+            button_rows.append(row)
         # end if
+        logger.debug('got the button rows: {}'.format(pformat(button_rows)))
+        check_type('button_rows', button_rows, List[List[InlineKeyboardButton]])
         return InlineKeyboardMarkup(inline_keyboard=button_rows)
     # end def
 
@@ -770,7 +799,7 @@ class ButtonMenu(Menu):
     # end def
 
     @classmethod
-    def get_back_button(cls) -> Union[InlineKeyboardButton, None]:
+    def get_back_button(cls) -> Union['HistoryButton', None]:
         from .buttons import GotoButton, BackButton, CancelButton, ChangeMenuButton
         BACK_BUTTON_TYPE = Union[None, str, Type[Menu], BackButton, GotoButton]
 
@@ -841,19 +870,18 @@ class GotoMenu(ButtonMenu):
     # end def
 
     @classmethod
-    def get_buttons(cls) -> List[InlineKeyboardButton]:
-        from .buttons import ChangeMenuButton
-        menus: List[Union[ChangeMenuButton, Type[Menu]]] = cls.get_value_by_name('menus')
-        check_type(argname='self.menus', value=menus, expected_type=List[Union[ChangeMenuButton, Type[Menu]]])
-        return [
-            InlineKeyboardButton(
-                text=menu.get_value_by_name('title') if inspect.isclass(menu) and issubclass(menu, Menu) else menu.label, callback_data=CallbackData(
-                    type=CallbackButtonType.GOTO if inspect.isclass(menu) and issubclass(menu, Menu) else menu.type,
-                    value=menu.id,
-                ).to_json_str()
-            )
-            for menu in menus
-        ]
+    def get_buttons(cls) -> Generator['Button', None, None]:
+        from .buttons import ChangeMenuButton, GotoButton
+        menus: List[Union[ChangeMenuButton, Type[Menu]]] = cls.get_value(cls.menus) if hasattr(cls, 'menus') else []
+        check_type(argname='cls.menus', value=menus, expected_type=List[Union[ChangeMenuButton, Type[Menu]]])
+        for menu in menus:
+            if inspect.isclass(menu) and issubclass(menu, Menu):
+                yield GotoButton(menu=menu)
+                continue
+            # end if
+            assert isinstance(menu, ChangeMenuButton)
+            yield menu
+        # end for
     # end def
 
     @classmethod
@@ -902,7 +930,7 @@ class SelectableMenu(ButtonMenu):
 
     # noinspection PyShadowingBuiltins
     @classmethod
-    def _get_our_buttons(cls, key='selectable_buttons') -> List[InlineKeyboardButton]:
+    def _get_our_buttons(cls, key='selectable_buttons') -> List['Button']:
         """
         Generate InlineKeyboardButton from the buttons.
 
@@ -913,25 +941,13 @@ class SelectableMenu(ButtonMenu):
         """
         from .buttons import GotoButton, SelectableButton, CheckboxButton, RadioButton
 
-        selectable_buttons: List[
+        buttons: List[
             Union[
                 SelectableButton,
                 CheckboxButton,
                 RadioButton
             ]
         ] = cls.get_value_by_name(key)
-
-        buttons: List[InlineKeyboardButton] = []
-        for selectable_button in selectable_buttons:
-            box = InlineKeyboardButton(
-                text=selectable_button.get_label(menu_data=cls.menu_data),
-                callback_data=CallbackData(
-                    type=cls.MENU_TYPE,
-                    value=selectable_button.value,
-                ).to_json_str()
-            )
-            buttons.append(box)
-        # end for
         return buttons
     # end def
 
@@ -957,7 +973,7 @@ class CheckboxMenu(SelectableMenu):
     checkboxes: ClassValueOrCallable['CheckboxButton']
 
     @classmethod
-    def get_buttons(cls) -> List[InlineKeyboardButton]:
+    def get_buttons(cls) -> List['Button']:
         return cls._get_our_buttons(key='checkboxes')
     # end def
 

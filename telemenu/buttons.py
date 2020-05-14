@@ -5,15 +5,15 @@ from dataclasses import dataclass
 from typing import Union, Type
 
 from luckydonaldUtils.logger import logging
-
-__author__ = 'luckydonald'
-
 from luckydonaldUtils.typing import JSONType
 from pytgbot.api_types.sendable.reply_markup import InlineKeyboardButton
+from typeguard import typechecked
 
 from . import ClassValueOrCallable
 from .data import Data, MenuData, CallbackData
-from .menus import CallbackButtonType
+from .menus import CallbackButtonType, Menu
+
+__author__ = 'luckydonald'
 
 logger = logging.getLogger(__name__)
 if __name__ == '__main__':
@@ -31,9 +31,15 @@ class Button(object):
     id: Union[str, None] = None  # None means automatic
 
     @abstractmethod
-    def get_label(self, data: Data):
+    def get_label(self, menu_data: MenuData):
         """ returns the text for the button """
         pass
+    # end def
+
+    @abstractmethod
+    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+        assert issubclass(menu, Menu)
+        raise NotImplementedError('Subclass must implement this.')
     # end def
 # end class
 
@@ -63,13 +69,8 @@ class ChangeMenuButton(Button):
         raise NotImplementedError('Subclass must implement this.')
     # end def
 
-    def get_label(self, data: Data):
+    def get_label(self, menu_data: MenuData):
         return self.label
-    # end def
-
-    @abstractmethod
-    def get_inline_keyboard_button(self, data: Data) -> InlineKeyboardButton:
-        raise NotImplementedError('Subclass must implement this.')
     # end def
 # end class
 
@@ -79,7 +80,7 @@ class GotoButton(ChangeMenuButton):
     menu: ClassValueOrCallable[Type['telemenu.menus.Menu']]
     label: ClassValueOrCallable[str]
 
-    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None, save: Union[bool, None] = False):
+    def __init__(self, menu: Type['telemenu.menus.Menu'], label=None, save: Union[bool, None] = None):
         if label is None:
             label = menu.title
         # end if
@@ -94,13 +95,13 @@ class GotoButton(ChangeMenuButton):
 
     @property
     def type(self) -> str:
-        from .menus import Menu
         return CallbackButtonType.GOTO
     # end def
 
-    def get_inline_keyboard_button(self, data: Data) -> InlineKeyboardButton:
+    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+        assert issubclass(menu, Menu)
         return InlineKeyboardButton(
-            text=self.get_label(data),
+            text=self.get_label(menu.menu_data),
             callback_data=CallbackData(
                 type=self.type,
                 value=self.menu.id,
@@ -113,15 +114,17 @@ class GotoButton(ChangeMenuButton):
 class HistoryButton(ChangeMenuButton):
     delta: ClassValueOrCallable[str]
 
-    def __init__(self, label: str = "Back", delta: int = -1, save: Union[None, bool] = None):  # todo: multi-language for label
+    @typechecked()
+    def __init__(self, label: str = "Unnamed Button", delta: int = -1, save: Union[None, bool] = None):  # todo: multi-language for label
         super().__init__(label=label, save=save)
-        self.label = label
         self.delta = delta
     # end def
 
-    def get_inline_keyboard_button(self, data: Data) -> InlineKeyboardButton:
+    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+        assert issubclass(menu, Menu)
+        assert isinstance(self.delta, int)
         return InlineKeyboardButton(
-            text=self.get_label(data),
+            text=self.get_label(menu.menu_data),
             callback_data=CallbackData(
                 type=self.type,
                 value=self.delta,
@@ -144,7 +147,6 @@ class DoneButton(HistoryButton):
 
     @property
     def type(self) -> str:
-        from .menus import Menu
         return CallbackButtonType.DONE
     # end def
 # end class
@@ -152,9 +154,9 @@ class DoneButton(HistoryButton):
 
 @dataclass(init=False)
 class BackButton(HistoryButton):
+    @typechecked
     def __init__(self, label: str = "Back", delta: int = -1):    # todo: multi-language for label
-        super().__init__(label=label, save=None)
-        self.delta = delta
+        super().__init__(label=label, delta=delta, save=None)
     # end def
 
     @property
@@ -164,7 +166,6 @@ class BackButton(HistoryButton):
 
     @property
     def type(self) -> str:
-        from .menus import Menu
         return CallbackButtonType.BACK
     # end def
 # end class
@@ -185,7 +186,6 @@ class CancelButton(HistoryButton):
 
     @property
     def type(self) -> str:
-        from .menus import Menu
         return CallbackButtonType.CANCEL
     # end def
 # end class
@@ -218,6 +218,23 @@ class SelectableButton(Button):
         """ returns the text for the button """
         return self.STATE_EMOJIS[self.get_selected(menu_data)] + " " + self.title
     # end def
+
+    def get_inline_keyboard_button(self, menu: Menu) -> InlineKeyboardButton:
+        assert issubclass(menu, Menu)
+        return InlineKeyboardButton(
+            text=self.get_label(menu.menu_data),
+            callback_data=CallbackData(
+                type=self.type,
+                value=cls.id,
+            ).to_json_str()
+        )
+    # end def
+
+    @property
+    @abstractmethod
+    def type(self) -> str:
+        raise NotADirectoryError('Subclasses must implement this')
+    # end def
 # end class
 
 
@@ -235,6 +252,11 @@ class CheckboxButton(SelectableButton):
         # end if
         return self.default_selected
     # end def
+
+    @property
+    def type(self) -> str:
+        return CallbackButtonType.CHECKBOX
+    # end def
 # end class
 
 
@@ -249,5 +271,10 @@ class RadioButton(SelectableButton):
             return menu_data.data == self.value
         # end if
         return self.default_selected
+    # end def
+
+    @property
+    def type(self) -> str:
+        return CallbackButtonType.RADIOBUTTON
     # end def
 # end class
