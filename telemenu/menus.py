@@ -587,9 +587,24 @@ class ButtonMenu(Menu):
             cls.refresh(done=False)
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
-        if data.type == CallbackButtonType.BACK:
-            menu = cls.get_last_menu(activate=True)
-            menu.refresh(done=False)
+        if data.type in (CallbackButtonType.BACK, CallbackButtonType.DONE, CallbackButtonType.CANCEL):
+            assert data.value < 0
+            menu = None
+            for i in range(abs(data.value)):
+                menu: Type[Menu] = menu if menu else cls
+                # BACK: do nothing, CANCEL: delete, DONE: keep & copy
+                if data.type == CallbackButtonType.CANCEL:
+                    # delete old data
+                    del cast(Data, menu.data).menus[menu.id]
+                elif data.type == CallbackButtonType.DONE:
+                    # store old data
+                    cast(Data, menu.data).saved_data[menu.id] = cast(Data, menu.data).menus[menu.id].data
+                # end if
+                menu = cls.get_last_menu(activate=True)
+            # end for
+            if menu:
+                menu.refresh(done=False)
+            # end if
             raise AbortProcessingPlease()
         # end if
     # end def
