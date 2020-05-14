@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import inspect
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from html import escape
 from enum import Enum
 from pprint import pformat
@@ -58,7 +58,7 @@ class CallbackButtonType(str, Enum):
 # end class
 
 
-class Menu(object):
+class Menu(object, metaclass=ABCMeta):
     """
     A menu is a static construct holding all the information.
     It is static, so any method should work without having any instance.
