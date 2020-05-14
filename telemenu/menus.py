@@ -572,21 +572,18 @@ class Menu(object, metaclass=ABCMeta):
     @abstractmethod
     def tmp_data_access(cls):
         return cast(MenuData, cls.menu_data).data
-
     # end def
 
     @tmp_data_access.setter
     @abstractmethod
     def tmp_data_access_setter(cls, data):
         cast(MenuData, cls.menu_data).data = data
-
     # end def
 
     @classproperty
     @abstractmethod
     def saved_data_access(cls):
         return cast(Data, cls.data).saved_data[cls.id]
-
     # end def
 
     @saved_data_access.setter
