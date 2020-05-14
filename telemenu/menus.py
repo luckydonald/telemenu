@@ -1248,6 +1248,31 @@ class TextMenu(SendMenu):
             return SendableMessageBase
         # end if
         cls.menu_data.data = value
+        cls.save_data()
+        logger.debug(f'TextMenu ({cls.__name__}) stored data: {cls.menu_data.data!r}: {cls.menu_data!r}')
+        button = cls.get_value(cls.done) and hasattr(cls, 'done')
+        if button:
+            cls.save_data()
+        # end def
+        if not button:
+            button = cls.get_value(cls.back) and hasattr(cls, 'back')
+        # end if
+        if not button:
+            button = cls.get_value(cls.cancel) and hasattr(cls, 'cancel')
+            if button:
+                cls.delete_data()
+            # end def
+        # end if
+        if not button:
+            logger.warning('No button to go found, generating a back button')
+        if isinstance(button, GotoButton):
+            button = button.menu
+        # end if
+        if inspect.isclass(button) and issubclass(button, Menu):
+            cls.switch_to_menu(button)
+        elif isinstance(button, HistoryButton):
+            cls.switch_history(delta=button.delta, save=button.save)
+        # end if
     # end def
 # end class
 
