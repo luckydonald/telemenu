@@ -7,6 +7,8 @@ from enum import Enum
 from pprint import pformat
 from types import LambdaType, BuiltinFunctionType
 from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple, Generator
+
+from teleflask.new_messages import SendableMessageBase
 from typeguard import check_type
 from dataclasses import dataclass, field as dataclass_field
 
@@ -1186,6 +1188,17 @@ class TextMenu(SendMenu):
     @classmethod
     @abstractmethod
     def _parse(cls, text: str) -> JSONType:
+        """
+        Throw an ValueError or TypeError if you couldn't have that.
+        Otherwise return the value to store.
+        You can also return a `SendableMessageBase` to send that instead of storing the value, e.g. to reply a error message..
+
+        :param text: The user input.
+        :type  text: str
+
+        :return: the value to store.
+        :rtype: JSONType|SendableMessageBase
+        """
         raise NotImplementedError('Subclasses must implement that.')
     # end def
 
@@ -1194,7 +1207,15 @@ class TextMenu(SendMenu):
     @classmethod
     def on_message_listener(cls, update: Update, msg: Message):
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
-        return cls._parse(msg.text)
+        try:
+            value = cls._parse(msg.text)
+        except (ValueError, TypeError):
+            return "Could not parse your answer."
+        # end try
+        if isinstance(value, SendableMessageBase):
+            return SendableMessageBase
+        # end if
+        cls.menu_data.data = value
     # end def
 # end class
 
@@ -1208,6 +1229,17 @@ class TextStrMenu(TextMenu):
 
     @classmethod
     def _parse(cls, text: str) -> JSONType:
+        """
+        Throw an ValueError or TypeError if you couldn't have that.
+        Otherwise return the value to store.
+        You can also return a `SendableMessageBase` to send that instead of storing the value, e.g. to reply a error message..
+
+        :param text: The user input.
+        :type  text: str
+
+        :return: the value to store.
+        :rtype: JSONType|SendableMessageBase
+        """
         return text
     # end def
 # end class
@@ -1222,6 +1254,17 @@ class TextIntMenu(TextMenu):
 
     @classmethod
     def _parse(cls, text: str) -> JSONType:
+        """
+        Throw an ValueError or TypeError if you couldn't have that.
+        Otherwise return the value to store.
+        You can also return a `SendableMessageBase` to send that instead of storing the value, e.g. to reply a error message..
+
+        :param text: The user input.
+        :type  text: str
+
+        :return: the value to store.
+        :rtype: JSONType|SendableMessageBase
+        """
         return int(text)
     # end def
 # end class
