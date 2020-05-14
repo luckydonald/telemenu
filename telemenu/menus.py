@@ -496,6 +496,35 @@ class Menu(object, metaclass=ABCMeta):
         return msg
     # end def
 
+    @classmethod
+    def switch_to_menu(cls, menu):
+        """
+        Loads a new menu,
+        making sure it does edit where possible,
+        or close the current message and reopen a new one if not.
+        :param menu:
+        :return:
+        """
+        can_edit = False
+        if issubclass(cls, ButtonMenu):
+            if issubclass(menu, ButtonMenu):
+                can_edit = True
+            # end if
+        else:
+            if not issubclass(menu, ButtonMenu):
+                can_edit = True
+            # end if
+        # end if
+        if can_edit:
+            menu.activate()
+            menu.refresh(done=False)
+        else:
+            cls.refresh(done=True)
+            menu.activate()
+            menu.send()
+        # end if
+    # end def
+
     @classproperty
     @abstractmethod
     def tmp_data_access(cls):
@@ -611,7 +640,7 @@ class ButtonMenu(Menu):
                 menu = cls.get_last_menu(activate=True)
             # end for
             if menu:
-                menu.refresh(done=False)
+                cls.switch_to_menu(menu)
             # end if
             raise AbortProcessingPlease()
         # end if
@@ -910,24 +939,7 @@ class GotoMenu(ButtonMenu):
         if data.type == CallbackButtonType.GOTO:
             menu_id = data.value
             menu: Menu = cast(TeleMenuInstancesItem, cls._state_instance.machine.instances[menu_id]).menu
-            can_edit = False
-            if issubclass(cls, ButtonMenu):
-                if issubclass(menu, ButtonMenu):
-                    can_edit = True
-                # end if
-            else:
-                if not issubclass(menu, ButtonMenu):
-                    can_edit = True
-                # end if
-            # end if
-            if can_edit:
-                menu.activate()
-                menu.refresh(done=False)
-            else:
-                cls.refresh(done=True)
-                menu.activate()
-                menu.send()
-            # end if
+            cls.switch_to_menu(menu)
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
