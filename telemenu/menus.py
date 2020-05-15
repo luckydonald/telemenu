@@ -1266,19 +1266,7 @@ class SendMenu(Menu):
         logger.debug(f'Got a /cancel command, regiered button is {button!r}.')
         save = button.save if button and isinstance(button, HistoryButton) else False
         assert not button or not isinstance(button, HistoryButton) or (isinstance(button.save, bool) and not button.save)
-        if button:
-            if isinstance(button, HistoryButton):
-                cls.switch_history(button.delta, save=save)
-            elif isinstance(button, GotoButton):
-                button: GotoButton
-                cls.switch_to_menu(button.menu)
-            elif inspect.isclass(button) and issubclass(button, Menu):
-                cls.switch_to_menu(button)
-            # end if
-        else:
-            cls.switch_history(button.delta, save=save)
-        # end if
-        raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
+        cls._menu_cmd_process(save=save, button=button)
     # end def
 
     @TeleMenuMachine.mark_for_register.on_command('back')
@@ -1289,19 +1277,7 @@ class SendMenu(Menu):
         logger.debug(f'Got a /back command, regiered button is {button!r}.')
         save = button.save if button and isinstance(button, HistoryButton) else None
         assert not button or not isinstance(button, HistoryButton) or (button.save is None)
-        if button:
-            if isinstance(button, HistoryButton):
-                cls.switch_history(button.delta, save=save)
-            elif isinstance(button, GotoButton):
-                button: GotoButton
-                cls.switch_to_menu(button.menu)
-            elif inspect.isclass(button) and issubclass(button, Menu):
-                cls.switch_to_menu(button)
-            # end if
-        else:
-            cls.switch_history(-1, save=save)
-        # end if
-        raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
+        cls._menu_cmd_process(save=save, button=button)
     # end def
 
     @TeleMenuMachine.mark_for_register.on_command('done')
@@ -1312,12 +1288,27 @@ class SendMenu(Menu):
         logger.debug(f'Got a /done command, regiered button is {button!r}.')
         save = button.save if button and isinstance(button, HistoryButton) else True
         assert not button or not isinstance(button, HistoryButton) or (isinstance(button.save, bool) and button.save)
+        cls._menu_cmd_process(save=save, button=button)
+    # end def
+
+    @classmethod
+    def _menu_cmd_process(cls, save: Union[bool, None], button: Union['Button', Type['Menu']]):
+        if isinstance(save, bool):
+            if save:
+                cls.save_data()
+            else:
+                cls.delete_data()
+            # end if
+        # end def
+        assert not button or not isinstance(button, HistoryButton) or (isinstance(button.save, bool) and button.save)
         if button:
-            if isinstance(button, HistoryButton):
-                cls.switch_history(button.delta, save=save)
-            elif isinstance(button, GotoButton):
+            if isinstance(button, GotoButton):
                 button: GotoButton
                 cls.switch_to_menu(button.menu)
+            # end if
+            if isinstance(button, HistoryButton):
+                cls.switch_history(button.delta, save=save)
+                raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
             elif inspect.isclass(button) and issubclass(button, Menu):
                 cls.switch_to_menu(button)
             # end if
