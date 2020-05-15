@@ -197,6 +197,12 @@ class NewBotSort(RadioMenu):
         )
     # end def
 
+    radiobuttons = lambda: [
+        RadioButton(title='Hot', value='hot', default_selected=True),
+        RadioButton(title='Top', value='top', default_selected=False),
+        RadioButton(title='New', value='new', default_selected=False),
+    ]
+
     @classmethod
     def done(cls):
         """
