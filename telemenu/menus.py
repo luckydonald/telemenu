@@ -996,7 +996,7 @@ class GotoMenu(ButtonMenu):
 # end class
 
 
-@dataclass(init=False, eq=False, repr=True)
+# @dataclass(init=False, eq=False, repr=True)
 class SelectableMenu(ButtonMenu):
     """
     Menu for the option to choose one from many.
@@ -1016,7 +1016,7 @@ class SelectableMenu(ButtonMenu):
         :param key: the name of the class variable containing the list of selectable buttons.
         :return: list of inline buttons
         """
-        from .buttons import GotoButton, SelectableButton, CheckboxButton, RadioButton
+        from .buttons import SelectableButton, CheckboxButton, RadioButton
 
         buttons: List[
             Union[
@@ -1032,6 +1032,12 @@ class SelectableMenu(ButtonMenu):
     @abstractmethod
     def get_buttons(cls) -> List[InlineKeyboardButton]:
         pass
+    # end def
+
+    @classproperty
+    @abstractmethod
+    def value(cls) -> Union[str, None]:
+        return f'Subclass {cls.__name__} must implement `@classproperty` `value(cls)`.'
     # end def
 # end class
 
