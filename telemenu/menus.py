@@ -1416,6 +1416,7 @@ class TextMenu(SendMenu):
         # end if
         if not button:
             logger.warning('No button to go found, generating a back button')
+            button = BackButton()
         if isinstance(button, GotoButton):
             button = button.menu
         # end if
