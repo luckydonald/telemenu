@@ -1072,7 +1072,7 @@ class CheckboxMenu(SelectableMenu):
         data = {}
         for button in cls.get_value(cls.checkboxes):
             data[button.value] = button.default_selected
-        # end def
+        # end for
         logger.debug(f'prepared tmp data for class {cls.__name__}: {data!r}')
         return data
     # end def
