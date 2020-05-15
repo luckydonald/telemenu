@@ -40,19 +40,33 @@ def slash():
 
 
 
-@menus.states.teleflask.on_command('start')
+@menus.states.ALL.on_command('start')
 @abort_processing
 def cmd_start(update: Update, data: str = None):
     MainMenu.show()
 # end def
 
 
-@menus.states.teleflask.on_command('debug')
+@bot.on_command('debug')
 @abort_processing
 def cmd_start(update: Update, data: str = None):
     DebugMenu.show()
 # end def
 
+@bot.on_command('cancel')
+@abort_processing
+def cmd_start(update: Update, data: str = None):
+    state = menus.states.CURRENT
+    menu = menus.get_current_menu()
+    if menu:
+        try:
+            menu.refresh(done=True)
+        except:
+            logger.warning('marking menu as done failed.', exc_info=True)
+    # end if
+    menus.states.CURRENT.activate()
+    return f"All actions aborted. No longer in state {state.name}."
+# end def
 
 @bot.on_update
 def debug(update: Update):
