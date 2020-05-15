@@ -34,11 +34,6 @@ from .inspect_mate_keyless import is_class_method, is_regular_method, is_static_
 from telestate import TeleStateMachine, TeleState
 from telestate.constants import KEEP_PREVIOUS
 
-IS_TYPE_CHECKING = False
-if IS_TYPE_CHECKING:
-    from .buttons import Button, GotoButton, HistoryButton
-# end if
-
 __author__ = 'luckydonald'
 
 
@@ -1287,6 +1282,7 @@ class SendMenu(Menu):
 
     @classmethod
     def _menu_cmd_process(cls, save: Union[bool, None], button: Union['Button', Type['Menu']]):
+        from .buttons import GotoButton, HistoryButton
         if isinstance(save, bool):
             if save:
                 cls.save_data()
