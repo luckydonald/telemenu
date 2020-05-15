@@ -29,7 +29,7 @@ class CallbackData(object):
     def to_json_str(self):
         s = json.dumps([self.type, self.id, self.value])
         if len(s) > 64:
-            raise ValueError(f'Length of data to serialize is more than 64 character long: {s!r}')  # you can try setting a different menu id or similar
+            raise ValueError(f'Length of serialized data is more than 64 character long: {s!r}')  # you can try setting a different menu id or similar
         # end if
         return s
     # end def
