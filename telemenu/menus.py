@@ -1387,6 +1387,8 @@ class TextMenu(SendMenu):
         cls.menu_data.data = value
         cls.save_data()
         logger.debug(f'TextMenu ({cls.__name__}) stored data: {cls.menu_data.data!r}: {cls.menu_data!r}')
+        cls.refresh(done=False)
+        """
         button = cls.get_value(cls.done) and hasattr(cls, 'done')
         if button:
             cls.save_data()
@@ -1411,6 +1413,7 @@ class TextMenu(SendMenu):
         elif isinstance(button, HistoryButton):
             cls.switch_history(delta=button.delta, save=button.save)
         # end if
+        """
     # end def
 
     @classproperty
