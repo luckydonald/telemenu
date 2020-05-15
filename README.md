@@ -46,10 +46,17 @@ Have a look at that [example](example/code/example_bot.py), if you like to see a
     Goes to a different menu, saving the data. Provide a `str` which will be automatically be converted automatically to a `BackButton`.    
     If you provide a `GotoButton` you have to set `does_cancel` to `False`.
 
+Internal variables you usually don't have to replace as they already have a sane default:
+
 - `_id` (type `str`):    
     This allows you to overwrite the automaticly genereated name of the underlying state.    
     You should probably not change this.
-
+- `text` (type `str`):
+    Returns a HTML string for the final rendered message.
+    This is basically `<b>{title}</b>\n{description}\n<i>{value}</i>`.
+- `value` (type `str`): basically does a user representation of what the current menu is storing.
+    So for example `CheckboxMenu` puts the labels of the selected strings (instead of the stored keys) as a comma separated list.
+ 
 ### `GotoMenu`    
 - `menus` (list containing any `ChangeMenuButton` button subclass (including `GotoButton` and `BackButton`) or simply some other `Menu`s. You can mix those.):    
     This is a list of menus you can jump to.

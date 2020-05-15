@@ -378,15 +378,19 @@ class Menu(object, metaclass=ABCMeta):
         :return:
         """
         text = ""
-        title = cls.get_value_by_name('title')
+        title = cls.get_value(cls.title) if hasattr(cls, 'title') else None
         if title:
             text += f"<b>{escape(title)}</b>\n"
         # end if
-        description = cls.get_value_by_name('description')
+        description = cls.get_value(cls.description) if hasattr(cls, 'description') else None
         if description:
             text += f"{escape(description)}\n"
         # end if
-        # text += f"<i>Selected: {escape(description)}</i>\n"
+
+        value = cls.get_value(cls.value) if hasattr(cls, 'value') else None
+        if value:
+            text += f"<i>{escape(value)}</i>\n"
+        # end if
         return text
     # end def
 
@@ -914,6 +918,12 @@ class ButtonMenu(Menu):
         """
         pass
     # end def
+
+    @classproperty
+    @abstractmethod
+    def value(cls) -> Union[str, None]:
+        raise NotImplementedError(f'Subclass {cls.__name__} must implement this.')
+    # end def
 # end class
 
 
@@ -972,6 +982,11 @@ class GotoMenu(ButtonMenu):
             raise AbortProcessingPlease()
         # end if
         super().process_callback_data(data)
+    # end def
+
+    @classproperty
+    def value(cls) -> Union[str, None]:
+        return None
     # end def
 # end class
 
@@ -1080,6 +1095,23 @@ class CheckboxMenu(SelectableMenu):
         # end if
         super().process_callback_data(data)
     # end def
+
+    @classproperty
+    def value(cls) -> Union[str, None]:
+        from .buttons import CheckboxButton
+        logger.debug(f'preparing display data for class {cls.__name__}.')
+        button: CheckboxButton
+        data = []
+        if not cls.menu_data:
+            return None
+        # end if
+        for button in cls.get_value(cls.checkboxes):
+            if button.id in cls.menu_data and cls.menu_data[id]:
+                data.append(button.title)
+            # end if
+        # end for
+        return ", ".join(data)
+    # end def
 # end class
 
 
@@ -1115,9 +1147,10 @@ class RadioMenu(SelectableMenu):
             if button.default_selected:
                 if data is not None:
                     raise ValueError('More than one RadioButton has a True default_selected attribute.')
+                # end if
                 data = button.value
-            # end for
-        # end def
+            # end if
+        # end for
         return data
     # end def
 
@@ -1144,6 +1177,23 @@ class RadioMenu(SelectableMenu):
             raise AbortProcessingPlease()  # basically a subclass callstack safe "return None"
         # end if
         super().process_callback_data(data)
+    # end def
+
+    @classproperty
+    def value(cls) -> Union[str, None]:
+        from .buttons import RadioButton
+        logger.debug(f'preparing display data for class {cls.__name__}.')
+        button: RadioButton
+        data = []
+        if not cls.menu_data:
+            return None
+        # end if
+        for button in cls.get_value(cls.radiobuttons):
+            if button.id == cls.menu_data:
+                return button.title
+            # end if
+        # end for
+        return None
     # end def
 # end class
 
@@ -1270,6 +1320,12 @@ class TextMenu(SendMenu):
         elif isinstance(button, HistoryButton):
             cls.switch_history(delta=button.delta, save=button.save)
         # end if
+    # end def
+
+    @classproperty
+    def value(cls) -> Union[str, None]:
+        logger.debug(f'preparing display data for class {cls.__name__}.')
+        return repr(cls.menu_data)
     # end def
 # end class
 
