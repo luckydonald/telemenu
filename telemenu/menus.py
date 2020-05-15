@@ -468,12 +468,7 @@ class Menu(object, metaclass=ABCMeta):
         reply_markup: Union[None, ReplyMarkup, ReplyKeyboardMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply]
         reply_markup = cls.get_value(cls.reply_markup) if not done else None
 
-        message_id: int
-        if cls.menu_data and cast(MenuData, cls.menu_data).message_id:
-            message_id = cast(MenuData, cls.menu_data).message_id
-        else:
-            _, message_id = TeleStateMachine.msg_get_reply_params(cls.current_update)
-        # end if
+        message_id: int = cast(MenuData, cls.menu_data).message_id
         assert message_id is not None
 
         chat_id: Union[int, None]
