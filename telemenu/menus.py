@@ -493,7 +493,7 @@ class Menu(object, metaclass=ABCMeta):
             message_id=message_id,
             parse_mode='html',
             disable_web_page_preview=True,
-            reply_markup=reply_markup,
+            reply_markup=reply_markup if isinstance(reply_markup, InlineKeyboardMarkup) else None,
         )
         return msg
     # end def
