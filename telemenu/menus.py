@@ -1287,8 +1287,11 @@ class TextMenu(SendMenu):
 
         logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
         try:
-            value = cls._parse(msg.text)
+            logger.debug(f'calling {cls.__name__}._parse({text!r}).')
+            value = cls._parse(text)
+            logger.debug(f'{cls.__name__}._parse({text!r}) returned {value!r}.')
         except (ValueError, TypeError):
+            logger.debug(f'{cls.__name__}._parse({text!r}) could not be parsed.')
             return "Could not parse your answer."
         # end try
         if isinstance(value, SendableMessageBase):

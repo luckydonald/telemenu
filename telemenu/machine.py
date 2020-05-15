@@ -337,6 +337,7 @@ class TeleMenuMachine(object):
             if mark.is_classmethod:
                 @wraps(mark.marked_function)
                 def wrapper_to_add_the_cls_parameter(*args, **kwargs):
+                    logger.debug(f'wrapped marked function is called: {mark}')
                     return mark.marked_function(menu_to_register, *args, **kwargs)
                 # end def
                 marked_function = wrapper_to_add_the_cls_parameter
