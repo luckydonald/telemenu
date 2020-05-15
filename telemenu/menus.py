@@ -493,7 +493,7 @@ class Menu(object, metaclass=ABCMeta):
             message_id=message_id,
             parse_mode='html',
             disable_web_page_preview=True,
-            reply_markup=reply_markup if isinstance(reply_markup, InlineKeyboardMarkup) else None,
+            reply_markup=reply_markup,
         )
         return msg
     # end def
@@ -1310,7 +1310,7 @@ class SendMenu(Menu):
             cls.switch_history(-1, save=save)
         # end if
         raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
-    # end def
+    # end if
 # end class
 
 
@@ -1381,7 +1381,6 @@ class TextMenu(SendMenu):
         cls.menu_data.data = value
         cls.save_data()
         logger.debug(f'TextMenu ({cls.__name__}) stored data: {cls.menu_data.data!r}: {cls.menu_data!r}')
-        cls.refresh(done=False)
         """
         button = cls.get_value(cls.done) and hasattr(cls, 'done')
         if button:
