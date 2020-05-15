@@ -8,6 +8,7 @@ from pprint import pformat
 from types import LambdaType, BuiltinFunctionType
 from typing import ClassVar, Union, Type, cast, Callable, Any, List, Dict, Pattern, Tuple, Generator
 
+from pytgbot.exceptions import TgApiServerException
 from teleflask.new_messages import SendableMessageBase
 from typeguard import check_type
 from dataclasses import dataclass, field as dataclass_field
@@ -525,7 +526,11 @@ class Menu(object, metaclass=ABCMeta):
             menu.activate()
             menu.refresh(done=False)
         else:
-            cls.refresh(done=True)
+            try:
+                cls.refresh(done=True)
+            except TgApiServerException as e:
+                logger.debug('Could not refresh menu.', exc_info=True)
+            # end if
             menu.activate()
             menu.send()
         # end if
