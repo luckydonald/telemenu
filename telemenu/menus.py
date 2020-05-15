@@ -1262,6 +1262,75 @@ class SendMenu(Menu):
     def prepare_tmp_data(cls):
         return None
     # end def
+
+    @TeleMenuMachine.mark_for_register.on_command('cancel')
+    @classmethod
+    def _menu_on_cmd_cancel(cls, update: Update, text: Union[str, None]):
+        from .buttons import HistoryButton, GotoButton
+        button = cls.get_value(cls.cancel) if getattr(cls, 'cancel') else None
+        logger.debug(f'Got a /cancel command, regiered button is {button!r}.')
+        save = button.save if button and isinstance(button, HistoryButton) else False
+        assert not button or not isinstance(button, HistoryButton) or (isinstance(button.save, bool) and not button.save)
+        if button:
+            if isinstance(button, HistoryButton):
+                cls.switch_history(button.delta, save=save)
+            elif isinstance(button, GotoButton):
+                button: GotoButton
+                cls.switch_to_menu(button.menu)
+            elif inspect.isclass(button) and issubclass(button, Menu):
+                cls.switch_to_menu(button)
+            # end if
+        else:
+            cls.switch_history(button.delta, save=save)
+        # end if
+        raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
+    # end def
+
+    @TeleMenuMachine.mark_for_register.on_command('back')
+    @classmethod
+    def _menu_on_cmd_back(cls, update: Update, text: Union[str, None]):
+        from .buttons import HistoryButton, GotoButton
+        button = cls.get_value(cls.cancel) if getattr(cls, 'back') else None
+        logger.debug(f'Got a /back command, regiered button is {button!r}.')
+        save = button.save if button and isinstance(button, HistoryButton) else None
+        assert not button or not isinstance(button, HistoryButton) or (button.save is None)
+        if button:
+            if isinstance(button, HistoryButton):
+                cls.switch_history(button.delta, save=save)
+            elif isinstance(button, GotoButton):
+                button: GotoButton
+                cls.switch_to_menu(button.menu)
+            elif inspect.isclass(button) and issubclass(button, Menu):
+                cls.switch_to_menu(button)
+            # end if
+        else:
+            cls.switch_history(-1, save=save)
+        # end if
+        raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
+    # end def
+
+    @TeleMenuMachine.mark_for_register.on_command('done')
+    @classmethod
+    def _menu_on_cmd_done(cls, update: Update, text: Union[str, None]):
+        from .buttons import HistoryButton, GotoButton
+        button = cls.get_value(cls.done) if getattr(cls, 'done') else None
+        logger.debug(f'Got a /done command, regiered button is {button!r}.')
+        save = button.save if button and isinstance(button, HistoryButton) else True
+        assert not button or not isinstance(button, HistoryButton) or (isinstance(button.save, bool) and button.save)
+        if button:
+            if isinstance(button, HistoryButton):
+                cls.switch_history(button.delta, save=save)
+            elif isinstance(button, GotoButton):
+                button: GotoButton
+                cls.switch_to_menu(button.menu)
+            elif inspect.isclass(button) and issubclass(button, Menu):
+                cls.switch_to_menu(button)
+            # end if
+        else:
+            cls.switch_history(-1, save=save)
+        # end if
+        raise AbortProcessingPlease(return_value='Okey, all done.')  # TODO l18n
+    # end def
 # end class
 
 
