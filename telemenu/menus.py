@@ -507,15 +507,9 @@ class Menu(object, metaclass=ABCMeta):
         :param menu:
         :return:
         """
-        can_edit = False
-        if issubclass(cls, ButtonMenu):
-            if issubclass(menu, ButtonMenu):
-                can_edit = True
-            # end if
-        else:
-            if not issubclass(menu, ButtonMenu):
-                can_edit = True
-            # end if
+        # it can't edit from an existing SendMenu and can't edit to it SendMenu either,
+        # because you can't remove or add a ForceReply.
+        can_edit = not issubclass(cls, SendMenu) and not issubclass(menu, SendMenu)
         # end if
         if can_edit:
             menu.activate()
