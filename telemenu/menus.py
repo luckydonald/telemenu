@@ -1363,9 +1363,30 @@ class TextMenu(SendMenu):
     @TeleMenuMachine.mark_for_register.on_message('text')
     @classmethod
     def on_message_listener(cls, update: Update, msg: Message):
-        from .buttons import GotoButton, HistoryButton
+        from .buttons import GotoButton, HistoryButton, BackButton
 
-        logger.debug(f'TextMenu ({cls.__name__}) got text update: {msg.text!r}')
+        logger.debug(f'TextMenu ({cls.__name__}) got text update: {update!r} | {msg!r}')
+        text = update.message.text.strip()
+
+        if text.startswith('/'):
+            logger.debug('Checking if command is command.')
+            for command, listener in (('done', cls._menu_on_cmd_done), ('cancel', cls._menu_on_cmd_cancel), ('back', cls._menu_on_cmd_back)):
+                # noinspection PyProtectedMember
+                for prefix in cast(TeleStateMachineMenuSerialisationAdapter, cls.state_machine).teleflask._yield_commands(command):
+                    logger.debug('Checking if command /{prefix}...')
+
+                    if text == prefix:
+                        raise AbortProcessingPlease(return_value=listener(update=update, text=None))
+                    elif text.startswith(prefix + ' '):
+                        cmd, text = tuple(text.split(" ", maxsplit=1))
+                        raise AbortProcessingPlease(return_value=listener(update=update, text=None))
+                    # end if
+                # end for
+            # end for
+            logger.debug('No fitting command listener.')
+        else:
+            logger.debug('Not starting with a slash, so can\'t be a commend')
+        # end if
         try:
             logger.debug(f'calling {cls.__name__}._parse({text!r}).')
             value = cls._parse(text)
