@@ -1419,7 +1419,7 @@ class TextMenu(SendMenu):
     @classproperty
     def value(cls) -> Union[str, None]:
         logger.debug(f'preparing display data for class {cls.__name__}.')
-        return repr(cls.menu_data)
+        return repr(cls.menu_data.data)
     # end def
 # end class
 
