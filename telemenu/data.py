@@ -27,12 +27,17 @@ class CallbackData(object):
     # end def
 
     def to_json_str(self):
-        return json.dumps({'type': self.type, 'id': self.id, 'value': self.value})
+        s = json.dumps([self.type, self.id, self.value])
+        if len(s) > 64:
+            raise ValueError(f'Length of data to serialize is more than 64 character long: {s!r}')  # you can try setting a different menu id or similar
+        # end if
+        return s
     # end def
 
     @classmethod
     def from_json_str(cls, string):
-        return cls(**json.loads(string))
+        type, id, value = json.loads(string)
+        return cls(type, id, value)
     # end def
 
     def __repr__(self):
