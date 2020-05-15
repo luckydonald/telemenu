@@ -68,3 +68,9 @@ Internal variables you usually don't have to replace as they already have a sane
 ### `CheckboxMenu`    
 - `checkboxes`: (list of `CheckboxMenu` elements):    
     A list of values to choose a single entry from.
+
+### `TextStrMenu`
+Make sure that all commands you want handled regardless of this menu are registered before this menu.
+Note, the `ALL` state is always processed only after all other states, including the menus. Therefore you must use a regular register.
+Instead you should use `@bot.on_command` and be sure to abort the processing of any other listeners. 
+This can be done by either using the `@abort_processing` decorator (`from teleflask import abort_processing`) or by raising `raise AbortProcessingPlease()` (`from teleflask.exceptions import AbortProcessingPlease`) directly. 
