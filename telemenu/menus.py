@@ -1387,15 +1387,15 @@ class TextMenu(SendMenu):
             logger.debug(f'{cls.__name__}._parse({text!r}) returned {value!r}.')
         except (ValueError, TypeError):
             logger.debug(f'{cls.__name__}._parse({text!r}) could not be parsed.')
-            return "Could not parse your answer."
+            return cls.get_value(cls.parsing_failure) if hasattr(cls, 'parsing_failure') else 'Could not parse.'
         # end try
-        if isinstance(value, SendableMessageBase):
-            return SendableMessageBase
-        # end if
         cls.menu_data.data = value
         cls.save_data()
         logger.debug(f'TextMenu ({cls.__name__}) stored data: {cls.menu_data.data!r}: {cls.menu_data!r}')
-        """
+        success_message = cls.get_value(cls.parsing_success) if hasattr(cls, 'parsing_success') else None
+        if success_message:
+            return success_message
+        # end if
         button = cls.get_value(cls.done) and hasattr(cls, 'done')
         if button:
             cls.save_data()
@@ -1420,7 +1420,6 @@ class TextMenu(SendMenu):
         elif isinstance(button, HistoryButton):
             cls.switch_history(delta=button.delta, save=button.save)
         # end if
-        """
     # end def
 
     @classproperty

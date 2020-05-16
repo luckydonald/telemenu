@@ -176,6 +176,9 @@ class NewBotSubreddit(TextStrMenu):
     description = "Heya, so you wanna create a new channel for all the reddit goodness?\nGreat! Let's get started! If you need to, you can abort at any time by sending /cancel.\n\nPlease send me the name of the reddit you wanna have in telegram."
     done = lambda: NewBotSort
     cancel = 'Cancel'
+
+    parsing_success = lambda cls: f"Okey, set to {cls.get_value(cls.value)}.\nIf you want to edit this, reply again, otherwise send /done. You can also send /back to get to the previous menu or /cancel to abort completely."
+    parsing_failure = lambda cls: f"Input validation of {cls.menu_data.value} failed."
     # todo: Validate the subreddit for an valid and existing one.
 # end class
 
