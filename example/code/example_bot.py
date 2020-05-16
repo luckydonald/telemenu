@@ -173,7 +173,12 @@ class MainMenu(GotoMenu):
 @menus.register
 class NewBotSubreddit(TextStrMenu):
     title = "Subreddit"
-    description = "Heya, so you wanna create a new channel for all the reddit goodness?\nGreat! Let's get started! If you need to, you can abort at any time by sending /cancel.\n\nPlease send me the name of the reddit you wanna have in telegram."
+    description = (
+        "Heya, so you wanna create a new channel for all the reddit goodness?\n"
+        "Great! Let's get started! If you need to, you can abort this whole process any time by sending /cancel.\n"
+        "\n"
+        "Please send me the name of the reddit you wanna have in telegram.\n"
+    )
     done = lambda: NewBotSort
     cancel = 'Cancel'
 
@@ -190,7 +195,7 @@ class NewBotSort(RadioMenu):
 
     @classmethod
     def description(cls):
-        reddit_name = cls.data.menus[NewBotSubreddit.id]
+        reddit_name = cast(Data, cls.data).saved_data[NewBotSubreddit.id]
         reddit_link = f"https://reddit.com/r/{reddit_name}/"
         return (
             f'Got that. The <a href="{reddit_link}">{reddit_name}</a> subreddit it is.\n'
