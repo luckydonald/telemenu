@@ -196,6 +196,7 @@ class NewBotSort(RadioMenu):
             'We recommend choosing <code>hot</code>.'
         )
     # end def
+    description_escape = False
 
     radiobuttons = lambda: [
         RadioButton(title='Hot', value='hot', default_selected=True),

@@ -32,9 +32,13 @@ Have a look at that [example](example/code/example_bot.py), if you like to see a
 
 - `title` (type `str`):    
     The bold headline of the menu.
+- `title_escape` (type `bool`):     
+    Set to `False` to turn off the automatic HTML escaping.
 
 - `description` (type `str`):    
     The message part with user instructions.
+- `description_escape` (type `bool`):     
+    Set to `False` to turn off the automatic HTML escaping.
 
 - `cancel` (type `str`, `CancelButton`, `BackButton`, `GotoButton`, `Menu`):    
     Goes to a different menu, deleting the data. Provide a `str` which will be automatically be converted automatically to a `CancelButton`.    
@@ -56,7 +60,9 @@ Internal variables you usually don't have to replace as they already have a sane
     This is basically `<b>{title}</b>\n{description}\n<i>{value}</i>`.
 - `value` (type `str`): basically does a user representation of what the current menu is storing.
     So for example `CheckboxMenu` puts the labels of the selected strings (instead of the stored keys) as a comma separated list.
- 
+- `value_escape` (type `bool`):     
+    Set to `False` to turn off the automatic HTML escaping.
+
 ### `GotoMenu`    
 - `menus` (list containing any `ChangeMenuButton` button subclass (including `GotoButton` and `BackButton`) or simply some other `Menu`s. You can mix those.):    
     This is a list of menus you can jump to.

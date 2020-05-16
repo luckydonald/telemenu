@@ -376,16 +376,34 @@ class Menu(object, metaclass=ABCMeta):
         text = ""
         title = cls.get_value(cls.title) if hasattr(cls, 'title') else None
         if title:
-            text += f"<b>{escape(title)}</b>\n"
+            do_escape: bool = bool(cls.get_value(cls.title_escape)) if hasattr(cls, 'title_escape') else True
+            logger.debug('title has escape: {}'.format(do_escape))
+            if do_escape:
+                text += f"<b>{escape(title)}</b>\n"
+            else:
+                text += str(title) + "\n"
+            # end if
         # end if
-        description = cls.get_value(cls.description) if hasattr(cls, 'description') else None
+        description = cls.get_value(cls.description) if hasattr(cls, 'description') else False
         if description:
-            text += f"{escape(description)}\n"
+            do_escape: bool = bool(cls.get_value(cls.description_escape)) if hasattr(cls, 'description_escape') else True
+            logger.debug('description has escape: {}'.format(do_escape))
+            if do_escape:
+                text += f"{escape(description)}\n"
+            else:
+                text += str(description) + "\n"
+            # end if
         # end if
 
         value = cls.get_value(cls.value) if hasattr(cls, 'value') else None
         if value:
-            text += f"<i>{escape(value)}</i>\n"
+            do_escape: bool = bool(cls.get_value(cls.value_escape)) if hasattr(cls, 'value_escape') else True
+            logger.debug('value has escape: {}'.format(do_escape))
+            if do_escape:
+                text += f"<i>{escape(value)}</i>\n"
+            else:
+                text += str(value) + "\n"
+            # end if
         # end if
         return text
     # end def
