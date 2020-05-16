@@ -80,3 +80,8 @@ Make sure that all commands you want handled regardless of this menu are registe
 Note, the `ALL` state is always processed only after all other states, including the menus. Therefore you must use a regular register.
 Instead you should use `@bot.on_command` and be sure to abort the processing of any other listeners. 
 This can be done by either using the `@abort_processing` decorator (`from teleflask import abort_processing`) or by raising `raise AbortProcessingPlease()` (`from teleflask.exceptions import AbortProcessingPlease`) directly. 
+
+- `parsing_success` (type `str`):    
+    A text to send when the parsing succeed. Useful to hint users of `/done`, etc. 
+- `parsing_failure` (type `str`):    
+    A text to send when the parsing failed. Useful to hint users of `/done`, etc.
