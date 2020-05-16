@@ -1244,6 +1244,7 @@ class SendMenu(Menu):
         :return:
         """
         text = cls.get_value(super().text)
+        return text
         return (
             text + "\n\n" +
             cls.TEXTUAL_BUTTON_TEXT_ALTERNATIVE[cls.get_back_button() is not None]
