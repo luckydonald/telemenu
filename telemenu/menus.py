@@ -554,7 +554,7 @@ class Menu(object, metaclass=ABCMeta):
             # BACK: do nothing, CANCEL: delete, DONE: keep & copy
             if isinstance(save, bool) and not save:
                 # delete old data
-                menu.delete_data()
+                menu.delete_tmp_data()
             if isinstance(save, bool) and save:
                 # store old data
                 menu.save_data()
@@ -574,7 +574,7 @@ class Menu(object, metaclass=ABCMeta):
     # end def
 
     @classmethod
-    def delete_data(cls):
+    def delete_tmp_data(cls):
         """ Deletes the current state's data, for example used on 'Cancel'. """
         del cast(Data, cls.data).menus[cls.id]
     # end def
@@ -1305,8 +1305,9 @@ class SendMenu(Menu):
         if isinstance(save, bool):
             if save:
                 cls.save_data()
+                cls.delete_tmp_data()
             else:
-                cls.delete_data()
+                cls.delete_tmp_data()
             # end if
         # end def
         assert not button or not isinstance(button, HistoryButton) or (isinstance(button.save, bool) and button.save)
@@ -1407,7 +1408,7 @@ class TextMenu(SendMenu):
         if not button:
             button = cls.get_value(cls.cancel) and hasattr(cls, 'cancel')
             if button:
-                cls.delete_data()
+                cls.delete_tmp_data()
             # end def
         # end if
         if not button:
