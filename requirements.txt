@@ -11,7 +11,7 @@ flask
 -e git://github.com/luckydonald/telestate@df6e1cfe84275b58b61e3d99fbfc908393f04feb#egg=telestate_df6e1c
 
 # pytgbot
--e git://github.com/luckydonald/pytgbot.git@870eb9fa00cf52d6cadb29374c9771d08512db75#egg=pytgbot_870eb9
+-e git://github.com/luckydonald/pytgbot.git@034ff5137bb06e5b897419a289b3ef679a80647a#egg=pytgbot_034ff5
 
 # luckydonald-utils
 -e git://github.com/luckydonald/python-utils.git@c6a43bad0a790187a044de976c38e4fcac13cf58#egg=luckydonald-utils
