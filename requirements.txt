@@ -2,7 +2,7 @@
 uwsgi
 
 # flask
-flask
+flask==1.1.2
 
 # teleflask
 -e git://github.com/luckydonald/teleflask.git@652cd1008f4b335b905599c4b4dd577d6e8f6a94#egg=teleflask_652cd1
