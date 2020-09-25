@@ -14,7 +14,7 @@ flask==1.1.2
 pytgbot==4.9.1
 
 # luckydonald-utils
-luckydonald-utils==0.79
+luckydonald-utils==0.80
 
 # typeguard
 typeguard==2.7.1
