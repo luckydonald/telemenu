@@ -14,7 +14,7 @@ flask==1.1.2
 pytgbot==4.9.1
 
 # luckydonald-utils
--e git://github.com/luckydonald/python-utils.git@8b6586498b6fa77112d9559a7cf3e294466b5a71#egg=luckydonald-utils
+luckydonald-utils==0.83
 
 # typeguard
 typeguard==2.7.1
