@@ -5,10 +5,10 @@ uwsgi
 flask==1.1.2
 
 # teleflask
--e git://github.com/luckydonald/teleflask.git@ea5f1925c58f42ad83d417660ba6665c7af0d9a2#egg=teleflask
+git+https://github.com/luckydonald/teleflask.git@ea5f1925c58f42ad83d417660ba6665c7af0d9a2#egg=teleflask
 
 # telestate
--e git://github.com/luckydonald/telestate@df6e1cfe84275b58b61e3d99fbfc908393f04feb#egg=telestate_df6e1c
+git+https://github.com/luckydonald/telestate@df6e1cfe84275b58b61e3d99fbfc908393f04feb#egg=telestate_df6e1c
 
 # pytgbot
 pytgbot==5.0b4
